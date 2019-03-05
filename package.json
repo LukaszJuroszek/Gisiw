@@ -1,0 +1,25 @@
+{
+  "name": "gisiw",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LukaszJuroszek/Gisiw.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LukaszJuroszek/Gisiw/issues"
+  },
+  "homepage": "https://github.com/LukaszJuroszek/Gisiw#readme",
+  "dependencies": {
+    "bootstrap": "^4.3.1",
+    "canvasjs": "^1.8.1",
+    "jquery": "^3.3.1",
+    "vis": "^4.21.0"
+  }
+}

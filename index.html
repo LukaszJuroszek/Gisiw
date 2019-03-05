@@ -1,0 +1,77 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>,
+
+    <script type="text/javascript" src="node_modules/vis/dist/vis.js"></script>
+
+    <script type="text/javascript" src="node_modules/canvasjs/dist/canvasjs.min.js"></script>
+    <script type="text/javascript" src="node_modules/canvasjs/dist/jquery.canvasjs.min.js"></script>
+
+    <script type="text/javascript" src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <link type="text/css" rel="stylesheet" href="node_modules/vis/dist/vis.css" />
+
+    <link type="text/css" rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css" />
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <style type="text/css">
+        #graphNetwork {
+            width: 50%;
+            height: 40%;
+        }
+
+        #paretoChart {
+            width: 50%
+        }
+
+        #sumChart {
+            height: 370px;
+            width: 50%;
+        }
+
+        h3,
+        h2 {
+            text-align: center;
+        }
+
+        #adjMatrix,
+        #dfsResult,
+        #probability,
+        #nodeCount,
+        #colorCount {
+            width: 50%;
+        }
+
+        #tableAdj {
+            width: 100%;
+        }
+
+        #s1 {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div calss="col" id="graphNetwork">
+            </div>
+            <div id="paretoChart" calss="col"></div>
+        </div>
+        <div class="row">
+            <div id="sumChart"></div>
+            <div id="sumChart2"></div>
+            <button class="btn btn-info col-md-12" id="s1">Generate</button>
+        </div>
+    </div>
+</body>
+</body>
+
+</html>
+<script src="js/grapscript.js"></script>
+<script src="js/chartscript.js"></script>
