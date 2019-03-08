@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "outDir": "./built",
+        "target": "es5",
+        "lib": ["es6","dom"],
+        "moduleResolution": "node",
+        "rootDir": "src",
+        "isolatedModules" : true 
+    },
+    "compileOnSave": true,
+    "exclude": [
+        "node_modules"
+    ]
+}
