@@ -1,4 +1,3 @@
-// import CanvasJS from 'canvasjs';
 import * as CanvasJS from 'canvasjs';
 
 window.onload = function () {

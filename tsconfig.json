@@ -1,11 +1,9 @@
 {
     "compilerOptions": {
-        "outDir": "./built",
-        "target": "es5",
         "lib": ["es6","dom"],
-        "moduleResolution": "node",
-        "rootDir": "src",
-        "isolatedModules" : true 
+        "outDir": "build",
+		"moduleResolution": "node",
+		"target": "es6"
     },
     "compileOnSave": true,
     "exclude": [
