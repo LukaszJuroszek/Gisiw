@@ -3,7 +3,8 @@
         "lib": ["es6","dom"],
         "outDir": "build",
 		"moduleResolution": "node",
-		"target": "es6"
+        "target": "es6",
+        "sourceMap": true
     },
     "compileOnSave": true,
     "exclude": [
