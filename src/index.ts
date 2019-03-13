@@ -4,11 +4,12 @@ import * as CanvasJS from 'canvasjs';
 
 function ToEdges(adjensceMatrix: Matrix) {
     var nodeNeighbors = adjensceMatrix.GetNodeNeighbors();
-    var edges = [];
+    var edges = new Array();
     for (var i = 0; i < nodeNeighbors.length; i++) {
         for (var j = 0; j < nodeNeighbors[i].neighbors.length; j++) {
-            edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j] })
-            edges.push({ from: nodeNeighbors[i].neighbors[j], to: nodeNeighbors[i].id })
+            console.log(nodeNeighbors[i].neighbors[j].edgeValue );
+            edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j].num, width: nodeNeighbors[i].neighbors[j].edgeValue })
+            edges.push({ from: nodeNeighbors[i].neighbors[j].num, to: nodeNeighbors[i].id, width: nodeNeighbors[i].neighbors[j].edgeValue })
         }
     }
     var result = new vis.DataSet(edges);
@@ -89,7 +90,7 @@ function Graph(adjensceMatrix: Matrix) {
 
 //init
 $(document).ready(function () {
-    var probability = 0.2;
+    var probability = 0.4;
     var nodeCount = 6;
     var adjensceMatrix = new Matrix(nodeCount, probability);
     var network = Graph(adjensceMatrix);
@@ -101,7 +102,6 @@ $(document).ready(function () {
         adjensceMatrix = new Matrix(nodeCount, probability);
         network = Graph(adjensceMatrix);
         adjensceMatrix.DepthFirstSearch();
-        console.log("Generate!");
     });
 });
 window.onload = function () {

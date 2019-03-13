@@ -73829,31 +73829,37 @@ class Matrix {
         }
         for (var i = 0; i < node; i++) {
             for (var j = (i + 1); j < node; j++) {
-                var hasEdge = Math.random() < probabilityForEdge ? 1 : 0;
-                this.elements[i][j] = new MatrixElement_1.MatrixElement(hasEdge, j, i);
+                var hasEdge = Math.random() < probabilityForEdge ? true : false;
+                var weigthIfHasEdge = 1;
+                if (hasEdge) {
+                    weigthIfHasEdge = Math.floor((Math.random() * 10) + 1);
+                    this.elements[i][j] = new MatrixElement_1.MatrixElement(weigthIfHasEdge, j, i);
+                }
+                else {
+                    this.elements[i][j] = new MatrixElement_1.MatrixElement(0, j, i);
+                }
                 this.elements[j][i] = new MatrixElement_1.MatrixElement(0, i, j);
             }
         }
     }
     GetNodeNeighbors() {
-        var result = [];
-        console.log(this.elements);
+        var result = new Array();
         for (var i = 0; i < this.elements.length; i++) {
-            var tmp = [];
+            var tmp = new Array();
             for (var j = (i + 1); j < this.elements.length; j++) {
                 this.elements[j][i].value = this.elements[i][j].value;
             }
         }
         for (var i = 0; i < this.elements.length; i++) {
-            var tmp = [];
+            var tmp = new Array();
             for (var j = 0; j < this.elements[i].length; j++) {
-                if (this.elements[i][j].value == 1) {
-                    tmp.push(j);
+                if (this.elements[i][j].value >= 1) {
+                    tmp.push({ num: j, edgeValue: this.elements[i][j].value });
                 }
             }
-            tmp.sort((function (a, b) { return b - a; }));
+            tmp.sort((function (a, b) { return b.num - a.num; }));
             result.push({ id: i, neighbors: tmp });
-            tmp = [];
+            tmp = new Array();
         }
         return result;
     }
@@ -73870,8 +73876,8 @@ class Matrix {
                 return n.id === vertex;
             });
             node.neighbors.forEach(function (neighbor) {
-                if (!visited.has(neighbor)) {
-                    stack.push(neighbor);
+                if (!visited.has(neighbor.num)) {
+                    stack.push(neighbor.num);
                 }
             }, this);
         }
@@ -73898,128 +73904,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Matrix_1 = require("./Matrix");
 const vis = require("vis");
 const CanvasJS = require("canvasjs");
-// function CreateSplitedGraphChromononeFromRow(array, maximumDiffrentBetweenSplitCount) {
-//     // var numberOfNodes = array.length;
-//     // var tempArray = new Array(numberOfNodes);
-//     // for (let i = 0; i < numberOfNodes; i++) {
-//     //     tempArray[i] = Math.floor(Math.random() * 2);
-//     // }
-//     // var sum = tempArray.reduce((x, a) => x + a);
-//     // if (Math.abs(numberOfNodes - sum) >= maximumDiffrentBetweenSplitCount) {
-//     //     console.log("Incosistent number of chromosome values");
-//     //     console.log(Math.abs(numberOfNodes - sum));
-//     // } else {
-//     //     console.log("ok");
-//     // }
-//     // console.log("firsst part " + sum);
-//     // console.log("second  part " + Math.abs(numberOfNodes - sum));
-//     // return new Chromosome(tempArray);
-// }
-function GetNodeNeighborsDFS(adjacencyMatrix) {
-    var result = [];
-    // fix for function (this will simulate two way graph...)
-    for (var i = 0; i < adjacencyMatrix.elements.length; i++) {
-        var tmp = [];
-        for (var j = (i + 1); j < adjacencyMatrix.elements.length; j++) {
-            adjacencyMatrix.elements[j][i].value = adjacencyMatrix.elements[i][j].value;
-        }
-    }
-    for (var i = 0; i < adjacencyMatrix.elements.length; i++) {
-        var tmp = [];
-        for (var j = (i + 1); j < adjacencyMatrix.elements[i].length; j++) {
-            if (adjacencyMatrix.elements[i][j].value == 1) {
-                tmp.push(j);
-            }
-        }
-        tmp.sort((function (a, b) { return b - a; }));
-        result.push({ id: i, neighbors: tmp });
-        tmp = [];
-    }
-    return result;
-}
-// function GetNodesDegree(network) {
-//     var nodesDegree = [];
-//     var tempArray = [];
-//     network.body.data.edges.forEach(function (edge) {
-//         tempArray.push(edge);
-//     }, this);
-//     for (var index = 0; index < network.body.data.nodes.length; index++) {
-//         nodesDegree[index] = tempArray.filter(function (e) {
-//             return e.from == index;
-//         }).length;
-//     }
-//     return nodesDegree
-// }
 function ToEdges(adjensceMatrix) {
     var nodeNeighbors = adjensceMatrix.GetNodeNeighbors();
-    var edges = [];
+    var edges = new Array();
     for (var i = 0; i < nodeNeighbors.length; i++) {
         for (var j = 0; j < nodeNeighbors[i].neighbors.length; j++) {
-            edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j] });
-            edges.push({ from: nodeNeighbors[i].neighbors[j], to: nodeNeighbors[i].id });
+            console.log(nodeNeighbors[i].neighbors[j].edgeValue);
+            edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j].num, width: nodeNeighbors[i].neighbors[j].edgeValue });
+            edges.push({ from: nodeNeighbors[i].neighbors[j].num, to: nodeNeighbors[i].id, width: nodeNeighbors[i].neighbors[j].edgeValue });
         }
     }
     var result = new vis.DataSet(edges);
     return result;
 }
-// function ToAdjensceMatrix(network) {
-//     // //init matrix
-//     // var tempArray = [];
-//     // for (var index = 0; index < network.body.data.nodes.length; index++) {
-//     //     tempArray[index] = [];
-//     //     for (var j = 0; j < network.body.data.nodes.length; j++) {
-//     //         tempArray[index][j] = 0;
-//     //     }
-//     // }
-//     // network.body.data.edges.forEach(function (edge) {
-//     //     tempArray[edge.from][edge.to] = 1;
-//     //     tempArray[edge.to][edge.from] = 1;
-//     // }, this);
-//     // var result = new Array();
-//     // for (var s = 0; s < network.body.data.nodes.length; s++) {
-//     //     result.push(new MatrixRow(tempArray[s], s));
-//     // }
-//     // return result
-// }
-// function GreedyNodeColoring(network) {
-//     //this function take only two way directed graph
-//     var result = [];
-//     result[0] = { node: 0, color: 0 };
-//     for (var u = 1; u < network.body.data.nodes.length; u++)
-//         result[u] = { node: u, color: -1 };  // no color is assigned to u
-//     var available = [];
-//     for (var p = 0; p < network.body.data.nodes.length; p++)
-//         available[p] = false;
-//     // Assign colors to remaining V-1 vertices
-//     for (var u = 1; u < network.body.data.nodes.length; u++) {
-//         // convert edges data set to array and filter current node, u = numer of node
-//         var filtered = [];
-//         network.body.data.edges.forEach(function (edge) {
-//             if (edge.from == u) {
-//                 filtered.push(edge);
-//             }
-//         }, this);
-//         for (var p = 0; p < filtered.length; p++) {
-//             if (result[filtered[p].to].color != -1) {
-//                 available[result[filtered[p].to].color] = true;
-//             }
-//         }
-//         // Find the first available color
-//         var cr;
-//         for (cr = 0; cr < network.body.data.nodes.length; cr++) {
-//             if (available[cr] == false)
-//                 break;
-//         }
-//         result[u].color = cr; // Assign the found color
-//         // Reset the values back to false for the next iteration
-//         for (var p = 0; p < filtered.length; p++) {
-//             if (result[filtered[p].to].color != -1) {
-//                 available[result[filtered[p].to].color] = false;
-//             }
-//         }
-//     }
-//     return result;
-// }
 function ToNode(adjacencyMatrix) {
     var nodes = [];
     for (var i = 0; i < adjacencyMatrix.elements.length; i++) {
@@ -74029,15 +73926,13 @@ function ToNode(adjacencyMatrix) {
     return result;
 }
 function Graph(adjensceMatrix) {
-    //generate edges and nodes
-    var edges = ToEdges(adjensceMatrix);
-    var nodes = ToNode(adjensceMatrix);
     // create a network
     var container = document.getElementById("graphNetwork");
+    //generate edges and nodes
     // provide the data in the vis format
     var data = {
-        nodes: nodes,
-        edges: edges
+        nodes: ToNode(adjensceMatrix),
+        edges: ToEdges(adjensceMatrix)
     };
     //todo Basic network display
     var o = {
@@ -74089,38 +73984,25 @@ function Graph(adjensceMatrix) {
             }
         }
     };
-    // initialize your network!
+    // initialize network!
     var network = new vis.Network(container, data, o);
     // network.setOptions(o);
     return network;
 }
-function GetRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
 //init
-var probability = 0.2;
-var range = 0.1;
-var nodeCount = 6;
-var maximumDiffrentBetweenSplitCount = 6;
-var adjensceMatrix = new Matrix_1.Matrix(nodeCount, probability);
-var network = Graph(adjensceMatrix);
-adjensceMatrix.DepthFirstSearch();
-console.log("Start!");
-document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
-document.getElementById("nodeCount").textContent = ("Node Count: ") + nodeCount;
-// CreateSplitedGraphChromononeFromRow(adjensceMatrix, maximumDiffrentBetweenSplitCount);
 $(document).ready(function () {
+    var probability = 0.4;
+    var nodeCount = 6;
+    var adjensceMatrix = new Matrix_1.Matrix(nodeCount, probability);
+    var network = Graph(adjensceMatrix);
+    adjensceMatrix.DepthFirstSearch();
+    document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
+    document.getElementById("nodeCount").textContent = ("Node Count: ") + nodeCount;
     $('#generate').click(function (e) {
         e.preventDefault();
         adjensceMatrix = new Matrix_1.Matrix(nodeCount, probability);
         network = Graph(adjensceMatrix);
         adjensceMatrix.DepthFirstSearch();
-        console.log("Generate!");
     });
 });
 window.onload = function () {

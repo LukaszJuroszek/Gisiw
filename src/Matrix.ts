@@ -22,31 +22,37 @@ export class Matrix implements IMatrix {
 
         for (var i = 0; i < node; i++) {
             for (var j = (i + 1); j < node; j++) {
-                var hasEdge = Math.random() < probabilityForEdge ? 1 : 0;
-                this.elements[i][j] = new MatrixElement(hasEdge, j, i);
+                var hasEdge = Math.random() < probabilityForEdge ? true : false;
+                var weigthIfHasEdge = 1;
+                if (hasEdge) {
+                    weigthIfHasEdge = Math.floor((Math.random() * 10) + 1);
+                    this.elements[i][j] = new MatrixElement(weigthIfHasEdge, j, i);
+                } else {
+                    this.elements[i][j] = new MatrixElement(0, j, i);
+                }
                 this.elements[j][i] = new MatrixElement(0, i, j);
             }
         }
     }
 
     public GetNodeNeighbors() {
-        var result = [];
+        var result = new Array();
         for (var i = 0; i < this.elements.length; i++) {
-            var tmp = [];
+            var tmp = new Array();
             for (var j = (i + 1); j < this.elements.length; j++) {
                 this.elements[j][i].value = this.elements[i][j].value;
             }
         }
         for (var i = 0; i < this.elements.length; i++) {
-            var tmp = [];
+            var tmp = new Array();
             for (var j = 0; j < this.elements[i].length; j++) {
-                if (this.elements[i][j].value == 1) {
-                    tmp.push(j);
+                if (this.elements[i][j].value >= 1) {
+                    tmp.push({ num: j, edgeValue: this.elements[i][j].value });
                 }
             }
-            tmp.sort((function (a, b) { return b - a }));
+            tmp.sort((function (a, b) { return b.num - a.num }));
             result.push({ id: i, neighbors: tmp });
-            tmp = [];
+            tmp = new Array();
         }
         return result;
     }
@@ -64,8 +70,8 @@ export class Matrix implements IMatrix {
                 return n.id === vertex;
             });
             node.neighbors.forEach(function (neighbor) {
-                if (!visited.has(neighbor)) {
-                    stack.push(neighbor);
+                if (!visited.has(neighbor.num)) {
+                    stack.push(neighbor.num);
                 }
             }, this);
         }
