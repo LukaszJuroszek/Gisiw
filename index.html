@@ -1,56 +1,33 @@
 <html>
 
 <head>
-    <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>,
-
+    <script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="node_modules/vis/dist/vis.js"></script>
-
     <script type="text/javascript" src="node_modules/canvasjs/dist/canvasjs.min.js"></script>
     <script type="text/javascript" src="node_modules/canvasjs/dist/jquery.canvasjs.min.js"></script>
-
     <script type="text/javascript" src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
-
     <link type="text/css" rel="stylesheet" href="node_modules/vis/dist/vis.css" />
-
     <link type="text/css" rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css" />
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
     <style type="text/css">
+        #paretoChart,
         #graphNetwork {
             width: 50%;
+            height: 45%;
+        }
+
+        #sumChart,
+        #sumChart2 {
             height: 40%;
-        }
-
-        #paretoChart {
-            width: 50%
-        }
-
-        #sumChart,#sumChart2 {
-            height: 370px;
             width: 50%;
         }
 
         h3,
+        #s1,
         h2 {
-            text-align: center;
-        }
-
-        #adjMatrix,
-        #dfsResult,
-        #probability,
-        #nodeCount,
-        #colorCount {
-            width: 50%;
-        }
-
-        #tableAdj {
-            width: 100%;
-        }
-
-        #s1 {
             text-align: center;
         }
     </style>
@@ -59,24 +36,25 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div calss="col" id="graphNetwork">
-            </div>
-            <div id="paretoChart" calss="col"></div>
+            <div class="col-md-6 p-0" id="graphNetwork"></div>
+            <div class="col-md-6 p-0" id="paretoChart"></div>
         </div>
         <div class="row">
-            <div calss="col-md-6" id="sumChart"></div>
-            <div calss="col-md-6" id="sumChart2"></div>
+            <div class="col-md-6 p-0" id="sumChart"></div>
+            <div class="col-md-6 p-0" id="sumChart2"></div>
         </div>
         <div class="row">
-            <h2 calss="col-md-6" id="dfsResult">dfsResult</h2>
-            <button class="btn btn-info col-md-6" id="generate">Generate</button>
+            <h4 class="col-md-3" id="dfsResult">Is consistent: none</h2>
+                <h4 class="col-md-3" id="nodeCount">Node Count: 0</h2>
+                    <button class="btn btn-info col-md-6" id="generate">Generate</button>
         </div>
-        <div class="row">
-            <h2 calss="col-md-6" id="probability">Probability: 0</h2>
-            <h2 calss="col-md-6" id="nodeCount">Node Count: 0</h2>
+       <div class="row">
+            <div class="col-md-6 row">
+                <h4 class="col-md-6" id="probability">Probability: 0</h2>
+                    <button class="btn btn-success col-md-3" id="increaseProbability">-</button>
+                    <button class="btn btn-danger col-md-3" id="decreaseProbability"> +</button>
         </div>
     </div>
-</body>
 </body>
 
 </html>

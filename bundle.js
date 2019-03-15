@@ -73814,6 +73814,101 @@ exports["default"] = FloydWarshall;
 },{}],42:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const vis = require("vis");
+class GraphService {
+    constructor(adjensceMatrix) {
+        this._adjensceMatrix = adjensceMatrix;
+        this.CreateGraph();
+    }
+    ToEdges(adjensceMatrix) {
+        var nodeNeighbors = adjensceMatrix.GetNodeNeighbors();
+        var edges = new Array();
+        for (var i = 0; i < nodeNeighbors.length; i++) {
+            for (var j = 0; j < nodeNeighbors[i].neighbors.length; j++) {
+                edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j].num, width: nodeNeighbors[i].neighbors[j].edgeValue / 5.0 });
+                edges.push({ from: nodeNeighbors[i].neighbors[j].num, to: nodeNeighbors[i].id, width: nodeNeighbors[i].neighbors[j].edgeValue / 5.0 });
+            }
+        }
+        var result = new vis.DataSet(edges);
+        return result;
+    }
+    ToNode(adjacencyMatrix) {
+        var nodes = [];
+        for (var i = 0; i < adjacencyMatrix.elements.length; i++) {
+            nodes.push({ id: i, label: "" + i });
+        }
+        var result = new vis.DataSet(nodes);
+        return result;
+    }
+    CreateGraph() {
+        // create a network
+        var container = document.getElementById("graphNetwork");
+        //generate edges and nodes
+        // provide the data in the vis format
+        var data = {
+            nodes: this.ToNode(this._adjensceMatrix),
+            edges: this.ToEdges(this._adjensceMatrix)
+        };
+        //todo Basic network display
+        var o = {
+            autoResize: true,
+            height: '100%',
+            width: '100%',
+            clickToUse: false,
+            edges: {
+                color: {
+                    color: 'blue'
+                },
+                shadow: false,
+                smooth: {
+                    type: "vertical",
+                    forceDirection: "none",
+                    roundness: 0.0,
+                    enabled: true
+                }
+            },
+            physics: {
+                hierarchicalRepulsion: {
+                    centralGravity: 0,
+                    springLength: 70,
+                    springConstant: 0.005,
+                    nodeDistance: 125,
+                    damping: 0.35
+                },
+                maxVelocity: 40,
+                minVelocity: 0.01,
+                solver: "hierarchicalRepulsion",
+                timestep: 1
+            },
+            nodes: {
+                borderWidth: 1,
+                borderWidthSelected: 2,
+                chosen: true,
+                color: {
+                    border: 'green',
+                    background: 'white',
+                    highlight: {
+                        border: '#2B7CE9',
+                        background: '#D2E5FF'
+                    },
+                    hover: {
+                        border: '#2B7CE9',
+                        background: '#D2E5FF'
+                    }
+                }
+            }
+        };
+        // initialize network!
+        var network = new vis.Network(container, data, o);
+        // network.setOptions(o);
+        return network;
+    }
+}
+exports.GraphService = GraphService;
+
+},{"vis":41}],43:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const MatrixElement_1 = require("./MatrixElement");
 class Matrix {
     constructor(node, probabilityForEdge) {
@@ -73886,7 +73981,7 @@ class Matrix {
 }
 exports.Matrix = Matrix;
 
-},{"./MatrixElement":43}],43:[function(require,module,exports){
+},{"./MatrixElement":44}],44:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class MatrixElement {
@@ -73898,110 +73993,25 @@ class MatrixElement {
 }
 exports.MatrixElement = MatrixElement;
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Matrix_1 = require("./Matrix");
-const vis = require("vis");
 const CanvasJS = require("canvasjs");
-function ToEdges(adjensceMatrix) {
-    var nodeNeighbors = adjensceMatrix.GetNodeNeighbors();
-    var edges = new Array();
-    for (var i = 0; i < nodeNeighbors.length; i++) {
-        for (var j = 0; j < nodeNeighbors[i].neighbors.length; j++) {
-            console.log(nodeNeighbors[i].neighbors[j].edgeValue);
-            edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j].num, width: nodeNeighbors[i].neighbors[j].edgeValue });
-            edges.push({ from: nodeNeighbors[i].neighbors[j].num, to: nodeNeighbors[i].id, width: nodeNeighbors[i].neighbors[j].edgeValue });
-        }
-    }
-    var result = new vis.DataSet(edges);
-    return result;
-}
-function ToNode(adjacencyMatrix) {
-    var nodes = [];
-    for (var i = 0; i < adjacencyMatrix.elements.length; i++) {
-        nodes.push({ id: i, label: "" + i });
-    }
-    var result = new vis.DataSet(nodes);
-    return result;
-}
-function Graph(adjensceMatrix) {
-    // create a network
-    var container = document.getElementById("graphNetwork");
-    //generate edges and nodes
-    // provide the data in the vis format
-    var data = {
-        nodes: ToNode(adjensceMatrix),
-        edges: ToEdges(adjensceMatrix)
-    };
-    //todo Basic network display
-    var o = {
-        autoResize: true,
-        height: '100%',
-        width: '100%',
-        clickToUse: false,
-        // edges: {
-        //     
-        // },
-        edges: {
-            color: {
-                color: 'black'
-            },
-            font: '12px arial #ff0000',
-            scaling: {
-                label: true,
-            },
-            shadow: false,
-            smooth: {
-                type: "vertical",
-                forceDirection: "none",
-                roundness: 0.0,
-                enabled: true
-            }
-        },
-        physics: {
-            hierarchicalRepulsion: {
-                centralGravity: 0
-            },
-            minVelocity: .001,
-            solver: "hierarchicalRepulsion"
-        },
-        nodes: {
-            borderWidth: 1,
-            borderWidthSelected: 2,
-            chosen: true,
-            color: {
-                border: 'green',
-                background: 'white',
-                highlight: {
-                    border: '#2B7CE9',
-                    background: '#D2E5FF'
-                },
-                hover: {
-                    border: '#2B7CE9',
-                    background: '#D2E5FF'
-                }
-            }
-        }
-    };
-    // initialize network!
-    var network = new vis.Network(container, data, o);
-    // network.setOptions(o);
-    return network;
-}
+const GraphService_1 = require("./GraphService");
 //init
 $(document).ready(function () {
     var probability = 0.4;
-    var nodeCount = 6;
+    var nodeCount = 30;
     var adjensceMatrix = new Matrix_1.Matrix(nodeCount, probability);
-    var network = Graph(adjensceMatrix);
+    new GraphService_1.GraphService(adjensceMatrix);
     adjensceMatrix.DepthFirstSearch();
     document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
     document.getElementById("nodeCount").textContent = ("Node Count: ") + nodeCount;
     $('#generate').click(function (e) {
         e.preventDefault();
         adjensceMatrix = new Matrix_1.Matrix(nodeCount, probability);
-        network = Graph(adjensceMatrix);
+        new GraphService_1.GraphService(adjensceMatrix);
         adjensceMatrix.DepthFirstSearch();
     });
 });
@@ -74083,4 +74093,4 @@ window.onload = function () {
     paretoChart.render();
 };
 
-},{"./Matrix":42,"canvasjs":40,"vis":41}]},{},[44]);
+},{"./GraphService":42,"./Matrix":43,"canvasjs":40}]},{},[45]);
