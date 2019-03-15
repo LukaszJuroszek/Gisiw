@@ -73814,6 +73814,73 @@ exports["default"] = FloydWarshall;
 },{}],42:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+class EvolutionModel {
+    constructor() {
+        this.chromosome = new Array();
+    }
+}
+exports.EvolutionModel = EvolutionModel;
+class ChromosomeElement {
+    constructor(nodeNumber, isFirstPart) {
+        this.nodeNumber = nodeNumber;
+        this.isFirstPart = isFirstPart;
+    }
+}
+exports.ChromosomeElement = ChromosomeElement;
+
+},{}],43:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const EvolutionModel_1 = require("./EvolutionModel");
+class EvolutionService {
+    constructor(_matrix) {
+        this._matrix = _matrix;
+        this.maxDiffBeetweanEdges = 6;
+        this.probability = 0.4;
+    }
+    CreateEvolutionModelFromMatrix() {
+        var result = new EvolutionModel_1.EvolutionModel();
+        do {
+            var result = this.GenerateEvolutionModel(this._matrix);
+            console.log("GeneratingEvM!");
+        } while (Math.abs(this.GetConnectedEdgesCount(result)) <= this.maxDiffBeetweanEdges);
+        return result;
+    }
+    GenerateEvolutionModel(matrix) {
+        var result = new EvolutionModel_1.EvolutionModel();
+        for (let i = 0; i < matrix.elements.length; i++) {
+            var isFirstPart = Math.random() < this.probability ? true : false;
+            result.chromosome.push(new EvolutionModel_1.ChromosomeElement(i, isFirstPart));
+        }
+        return result;
+    }
+    GetConnectedEdgesCount(evolutionModel) {
+        var edgeSum = 0;
+        for (let i = 0; i < this._matrix.elements.length; i++) {
+            //first part is selected by user, second is not present, via row
+            var rowElem = evolutionModel.chromosome.find(n => {
+                return n.isFirstPart === false && n.nodeNumber === i;
+            });
+            if (rowElem == undefined) {
+                for (let j = 0; j < this._matrix.elements[i].length; j++) {
+                    //check if column is in first present
+                    var element = evolutionModel.chromosome.find(n => {
+                        return n.isFirstPart === true && n.nodeNumber === j;
+                    });
+                    if (element !== undefined && this._matrix.elements[i][j].value >= 1) {
+                        edgeSum++;
+                    }
+                }
+            }
+        }
+        return edgeSum;
+    }
+}
+exports.EvolutionService = EvolutionService;
+
+},{"./EvolutionModel":42}],44:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const vis = require("vis");
 class GraphService {
     constructor(adjensceMatrix) {
@@ -73906,7 +73973,7 @@ class GraphService {
 }
 exports.GraphService = GraphService;
 
-},{"vis":41}],43:[function(require,module,exports){
+},{"vis":41}],45:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const MatrixElement_1 = require("./MatrixElement");
@@ -73976,12 +74043,12 @@ class Matrix {
                 }
             }, this);
         }
-        document.getElementById("dfsResult").textContent = ("Is consistent: ") + (visited.size === this.elements.length);
+        document.getElementById("dfsResult").textContent = ("Consistent: ") + (visited.size === this.elements.length);
     }
 }
 exports.Matrix = Matrix;
 
-},{"./MatrixElement":44}],44:[function(require,module,exports){
+},{"./MatrixElement":46}],46:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class MatrixElement {
@@ -73993,27 +74060,43 @@ class MatrixElement {
 }
 exports.MatrixElement = MatrixElement;
 
-},{}],45:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Matrix_1 = require("./Matrix");
 const CanvasJS = require("canvasjs");
 const GraphService_1 = require("./GraphService");
+const EvolutionService_1 = require("./EvolutionService");
 //init
 $(document).ready(function () {
-    var probability = 0.4;
+    var probability = 0.150;
     var nodeCount = 30;
+    var range = 0.05;
     var adjensceMatrix = new Matrix_1.Matrix(nodeCount, probability);
     new GraphService_1.GraphService(adjensceMatrix);
+    var p = new EvolutionService_1.EvolutionService(adjensceMatrix).CreateEvolutionModelFromMatrix();
+    console.log(p);
     adjensceMatrix.DepthFirstSearch();
     document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
-    document.getElementById("nodeCount").textContent = ("Node Count: ") + nodeCount;
+    document.getElementById("nodeCount").textContent = ("Nodes: ") + nodeCount;
     $('#generate').click(function (e) {
         e.preventDefault();
         adjensceMatrix = new Matrix_1.Matrix(nodeCount, probability);
         new GraphService_1.GraphService(adjensceMatrix);
         adjensceMatrix.DepthFirstSearch();
     });
+    document.getElementById("increaseProbability").addEventListener("click", function (e) {
+        if (probability + range <= 1) {
+            probability += range;
+            document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
+        }
+    }, false);
+    document.getElementById("decreaseProbability").addEventListener("click", function (e) {
+        if (probability - range >= 0) {
+            probability -= range;
+            document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(2);
+        }
+    }, false);
 });
 window.onload = function () {
     var sumChart = new CanvasJS.Chart("sumChart", {
@@ -74093,4 +74176,4 @@ window.onload = function () {
     paretoChart.render();
 };
 
-},{"./GraphService":42,"./Matrix":43,"canvasjs":40}]},{},[45]);
+},{"./EvolutionService":43,"./GraphService":44,"./Matrix":45,"canvasjs":40}]},{},[47]);

@@ -1,22 +1,38 @@
 import { Matrix } from './Matrix';
 import * as CanvasJS from 'canvasjs';
 import { GraphService } from './GraphService';
+import { EvolutionService } from './EvolutionService';
 
 //init
 $(document).ready(function () {
-    var probability = 0.4;
+    var probability = 0.150;
     var nodeCount = 30;
+    var range = 0.05;
     var adjensceMatrix = new Matrix(nodeCount, probability);
     new GraphService(adjensceMatrix);
+    var p = new EvolutionService(adjensceMatrix).CreateEvolutionModelFromMatrix();
+    console.log(p);
     adjensceMatrix.DepthFirstSearch();
     document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
-    document.getElementById("nodeCount").textContent = ("Node Count: ") + nodeCount;
+    document.getElementById("nodeCount").textContent = ("Nodes: ") + nodeCount;
     $('#generate').click(function (e) {
         e.preventDefault();
         adjensceMatrix = new Matrix(nodeCount, probability);
         new GraphService(adjensceMatrix);
         adjensceMatrix.DepthFirstSearch();
     });
+    document.getElementById("increaseProbability").addEventListener("click", function (e) {
+        if (probability + range <= 1) {
+            probability += range;
+            document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
+        }
+    }, false);
+    document.getElementById("decreaseProbability").addEventListener("click", function (e) {
+        if (probability - range >= 0) {
+            probability -= range;
+            document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(2);
+        }
+    }, false);
 });
 window.onload = function () {
 

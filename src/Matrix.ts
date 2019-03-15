@@ -75,6 +75,6 @@ export class Matrix implements IMatrix {
                 }
             }, this);
         }
-        document.getElementById("dfsResult").textContent = ("Is consistent: ") + (visited.size === this.elements.length);
+        document.getElementById("dfsResult").textContent = ("Consistent: ") + (visited.size === this.elements.length);
     }
 }
