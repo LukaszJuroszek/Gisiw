@@ -60,16 +60,16 @@ export class GraphService implements IGraphService {
                 }
             },
             physics: {
-                hierarchicalRepulsion: {
-                    centralGravity: 0,
-                    springLength: 70,
-                    springConstant: 0.005,
-                    nodeDistance: 125,
-                    damping: 0.35
-                },
+                forceAtlas2Based: {
+                    gravitationalConstant: -30,
+                    centralGravity: 0.005,
+                    springLength: 135,
+                    springConstant: 0,
+                    damping: 1
+                  },
                 maxVelocity: 40,
-                minVelocity: 0.01,
-                solver: "hierarchicalRepulsion",
+                minVelocity: 0.3,
+                solver: "forceAtlas2Based",
                 timestep: 1
             },
             nodes: {
