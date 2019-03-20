@@ -20,15 +20,29 @@ window.onload = function () {
     var maxDiffBetweenEdges: number = 6;
     var maxDiffBetweenNode: number = 4;
     var probability: number = 0.4;
-    var populationSize: number = 100;
+    var populationSize: number = 1;
 
     var adjensceMatrix = new Matrix(nodeCount, probability);
     new GraphService(adjensceMatrix);
     var population = new PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode);
+
     console.log(population);
+
+    dataPointsOfF1Sum.push({
+        x: iteractionCounter,
+        y: population.GetF1Sum(adjensceMatrix)
+    });
+
+    dataPointsOfF2Sum.push({
+        x: iteractionCounter,
+        y: population.GetF2Sum(adjensceMatrix)
+    });
+
     adjensceMatrix.DepthFirstSearch();
+
     document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
     document.getElementById("nodeCount").textContent = ("Nodes: ") + nodeCount;
+
     $('#generate').click(function (e) {
         e.preventDefault();
         adjensceMatrix = new Matrix(nodeCount, probability);
@@ -36,6 +50,16 @@ window.onload = function () {
         adjensceMatrix.DepthFirstSearch();
         updateChart();
     });
+    function updateChart() {
+        var number = Math.floor((Math.random() * 10) + 1);
+        dataPointsOfF1Sum.push({
+            x: iteractionCounter,
+            y: number
+        });
+        iteractionCounter++;
+        // updating legend text with  updated with y Value 
+        sumChart.render();
+    }
     document.getElementById("increaseProbability").addEventListener("click", function (e) {
         if (probability + probabilityStep <= 1) {
             probability += probabilityStep;
@@ -48,17 +72,6 @@ window.onload = function () {
             document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(2);
         }
     }, false);
-
-    function updateChart() {
-        var number = Math.floor((Math.random() * 10) + 1);
-        dataPointsOfF1Sum.push({
-            x: iteractionCounter,
-            y: number
-        });
-        iteractionCounter++;
-        // updating legend text with  updated with y Value 
-        sumChart.render();
-    }
 
     var sumChart = new CanvasJS.Chart("sumChart", {
         animationEnabled: false,
@@ -86,13 +99,7 @@ window.onload = function () {
             type: "spline",
             showInLegend: true,
             name: "Sum F2(x)",
-            dataPoints: [
-                { y: 5 },
-                { y: 1 },
-                { y: 2 },
-                { y: 3 },
-                { y: 1 }
-            ]
+            dataPoints: dataPointsOfF2Sum
         }]
     });
     sumChart.render();
