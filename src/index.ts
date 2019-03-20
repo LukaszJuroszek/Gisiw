@@ -1,25 +1,31 @@
 import { Matrix } from './Matrix';
-import {Chart } from 'canvasjs'
+import { Chart } from 'canvasjs'
 import { GraphService } from './GraphService';
 import { EvolutionService } from './EvolutionService';
-declare var CanvasJS:any
+import { PopulationModel } from './PopulationModel';
+declare var CanvasJS: any
 
 //init
 window.onload = function () {
-    var dataPoints1 = [];
-    var cunter = 1;
+    var dataPointsOfF1Sum = [];
+    var dataPointsOfF2Sum = [];
+    var iteractionCounter = 1;
 
-    var probability = 0.150;
-    var nodeCount = 30;
-    var range = 0.05;
+    //graph settings
+    var probability: number = 0.150;
+    var probabilityStep: number = 0.05;
+    var nodeCount: number = 30;
+
+    //population settings
+    var maxDiffBetweenEdges: number = 6;
+    var maxDiffBetweenNode: number = 4;
+    var probability: number = 0.4;
+    var populationSize: number = 100;
+
     var adjensceMatrix = new Matrix(nodeCount, probability);
     new GraphService(adjensceMatrix);
-    var evModel = new EvolutionService(adjensceMatrix);
-    for (let index = 0; index < 10; index++) {
-        var p = evModel.CreateEvolutionModelFromMatrix();
-        console.log(p);
-    }
-    console.log(CanvasJS);
+    var population = new PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode);
+    console.log(population);
     adjensceMatrix.DepthFirstSearch();
     document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
     document.getElementById("nodeCount").textContent = ("Nodes: ") + nodeCount;
@@ -31,25 +37,25 @@ window.onload = function () {
         updateChart();
     });
     document.getElementById("increaseProbability").addEventListener("click", function (e) {
-        if (probability + range <= 1) {
-            probability += range;
+        if (probability + probabilityStep <= 1) {
+            probability += probabilityStep;
             document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(2);
         }
     }, false);
     document.getElementById("decreaseProbability").addEventListener("click", function (e) {
-        if (probability - range >= 0) {
-            probability -= range;
+        if (probability - probabilityStep >= 0) {
+            probability -= probabilityStep;
             document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(2);
         }
     }, false);
 
     function updateChart() {
         var number = Math.floor((Math.random() * 10) + 1);
-        dataPoints1.push({
-            x: cunter,
+        dataPointsOfF1Sum.push({
+            x: iteractionCounter,
             y: number
         });
-        cunter++;
+        iteractionCounter++;
         // updating legend text with  updated with y Value 
         sumChart.render();
     }
@@ -74,7 +80,7 @@ window.onload = function () {
             type: "spline",
             showInLegend: true,
             name: "Sum F1(x)",
-            dataPoints: dataPoints1
+            dataPoints: dataPointsOfF1Sum
         },
         {
             type: "spline",
