@@ -1,10 +1,4 @@
-export interface IMatrixElement {
-    value: number;
-    row: number;
-    col: number;
-}
-
-export class MatrixElement implements IMatrixElement {
+export class MatrixElement {
     value: number;
     row: number;
     col: number;

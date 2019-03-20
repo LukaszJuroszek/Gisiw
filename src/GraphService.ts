@@ -1,10 +1,7 @@
 import { Matrix } from "./Matrix";
 import * as vis from "vis";
 
-export interface IGraphService {
-}
-
-export class GraphService implements IGraphService {
+export class GraphService {
     private _adjensceMatrix: Matrix;
     constructor(adjensceMatrix: Matrix) {
         this._adjensceMatrix = adjensceMatrix;

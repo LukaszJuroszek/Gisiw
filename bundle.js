@@ -59959,7 +59959,8 @@ const EvolutionModel_1 = require("./EvolutionModel");
 class EvolutionService {
     constructor(_matrix) {
         this._matrix = _matrix;
-        this.maxDiffBeetweanEdges = 6;
+        this.maxDiffBetweenEdges = 6;
+        this.maxDiffBetweenNode = 4;
         this.probability = 0.4;
     }
     CreateEvolutionModelFromMatrix() {
@@ -59967,8 +59968,13 @@ class EvolutionService {
         do {
             var result = this.GenerateEvolutionModel(this._matrix);
             console.log("GeneratingEvM!");
-        } while (Math.abs(this.GetConnectedEdgesCount(result)) <= this.maxDiffBeetweanEdges);
+        } while (this.GetConnectedEdgesCount(result) <= this.maxDiffBetweenEdges &&
+            this.GetNodeDiff(result) <= this.maxDiffBetweenNode);
         return result;
+    }
+    GetNodeDiff(evolutionModel) {
+        var firstPartOfGraph = evolutionModel.chromosome.filter(node => node.isFirstPart === true).length;
+        return Math.abs(firstPartOfGraph - evolutionModel.chromosome.length);
     }
     GenerateEvolutionModel(matrix) {
         var result = new EvolutionModel_1.EvolutionModel();
@@ -59997,7 +60003,7 @@ class EvolutionService {
                 }
             }
         }
-        return edgeSum;
+        return Math.abs(edgeSum);
     }
 }
 exports.EvolutionService = EvolutionService;

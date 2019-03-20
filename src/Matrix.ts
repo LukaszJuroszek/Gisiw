@@ -1,11 +1,7 @@
-import { IMatrixElement, MatrixElement } from './MatrixElement';
+import { MatrixElement } from './MatrixElement';
 
-export interface IMatrix {
-    elements: Array<Array<IMatrixElement>>;
-}
-
-export class Matrix implements IMatrix {
-    elements: Array<Array<IMatrixElement>>;
+export class Matrix {
+    elements: Array<Array<MatrixElement>>;
 
     constructor(node: number, probabilityForEdge: number) {
         this.GenerateAdjensceMatrix(node, probabilityForEdge);

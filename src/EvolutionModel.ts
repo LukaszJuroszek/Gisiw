@@ -1,9 +1,4 @@
-export interface IEvolutionModel {
-    sumOfF1: number;
-    sumOfF2: number;
-    chromosome: Array<ChromosomeElement>;
-}
-export class EvolutionModel implements IEvolutionModel {
+export class EvolutionModel {
     public sumOfF1: number;
     public sumOfF2: number;
     public chromosome: Array<ChromosomeElement>;
@@ -13,12 +8,7 @@ export class EvolutionModel implements IEvolutionModel {
     }
 }
 
-export interface IChromosomeElement {
-    nodeNumber: number;
-    isFirstPart: boolean;
-}
-
-export class ChromosomeElement implements IChromosomeElement {
+export class ChromosomeElement {
     nodeNumber: number;
     isFirstPart: boolean;
     constructor(nodeNumber: number, isFirstPart: boolean) {
