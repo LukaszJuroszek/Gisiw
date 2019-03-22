@@ -4,20 +4,20 @@ import { Matrix } from './Matrix';
 
 export class EvolutionService {
     private _numberOfTournamentRounds: number;
-    private _iterations: number;
-    constructor(private _populationModel: PopulationModel, private _matrix: Matrix, numberOfTournamentRounds: number, iterations: number) {
+    constructor(private _populationModel: PopulationModel, private _matrix: Matrix, numberOfTournamentRounds: number, private logDebug: boolean) {
         this._numberOfTournamentRounds = numberOfTournamentRounds;
-        this._iterations = iterations;
     }
 
-    public iterate(): void {
+    public runIteration(): PopulationModel {
         var bestCollectionByF1 = new Array<ChromosomeModel>();
         var bestCollectionByF2 = new Array<ChromosomeModel>();
 
-        // for (let i = 0; i < this._iterations; i++) {
-        // }
         bestCollectionByF1 = this.getBestChromosomeModelsBy(true);
         bestCollectionByF2 = this.getBestChromosomeModelsBy(false);
+        //copy new population to model
+        this._populationModel.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
+
+        return this._populationModel;
     }
 
     public getBestChromosomeModelsBy(by: boolean): Array<ChromosomeModel> {
@@ -26,29 +26,34 @@ export class EvolutionService {
 
         //if by F1 factor
         if (by) {
+            if (this.logDebug)
+                console.log("--------------- Trunament by F1 started.");
             for (let i = 0; i < this._numberOfTournamentRounds; i++) {
                 var { left, rigth } = this.getRandomFirstHalfNumber(halfOfElementsCount);
                 var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth);
-                
+
                 result.add(this.selectBestBy(leftChromosome, rigthChromosome, true));
             }
             //else by F2 factor
         } else {
+            if (this.logDebug)
+                console.log("--------------- Trunament by F2 started.");
             for (let i = 0; i < this._numberOfTournamentRounds; i++) {
                 var { left, rigth } = this.getRandomSecondHalfNumber(left, halfOfElementsCount, rigth);
                 var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth);
 
                 result.add(this.selectBestBy(leftChromosome, rigthChromosome, false));
-
             }
         }
         if (result.size == this._numberOfTournamentRounds) {
 
         } else {
-
+            if (this.logDebug)
+                console.log("Duplicate in population deleted, should be: " + this._numberOfTournamentRounds + ", but was: " + result.size + ".");
             var res = this.fixPopulation(result, this._numberOfTournamentRounds);
-            console.log("Duplicate in population deleted!");
         }
+        if (this.logDebug)
+            console.log("--------------- Trunament ended.");
 
         return Array.from(result.values());
     }
@@ -57,10 +62,16 @@ export class EvolutionService {
         do {
             var diff: number = Math.abs(chromosomeCount - result.size);
             var missingChromosomes = this._populationModel.generatePopulation(diff);
-            result.forEach(missingChromosomes.add, missingChromosomes);
-        } while (result.size < chromosomeCount)
-        console.log("fixPopulation: result.size: " + result.size);
 
+            if (this.logDebug)
+                console.log("Fixing population, missing: " + diff + ".");
+
+            missingChromosomes.forEach(missingElement => {
+                result.add(missingElement);
+            });
+        } while (result.size < chromosomeCount)
+        if (this.logDebug)
+            console.log(result.size == chromosomeCount ? "ok, " + result.size + " elements in population" : "erron during fixing, was: " + result.size + " should be: " + chromosomeCount)
         return result;
     }
 
@@ -102,7 +113,7 @@ export class EvolutionService {
             leftResult = this._populationModel.getConnectedEdgeCountAndWegithCount(leftChromosomeModel, this._matrix)[1];
             rightResult = this._populationModel.getConnectedEdgeCountAndWegithCount(rigthChromosomeModel, this._matrix)[1];
         }
-        return leftResult > rightResult ? leftChromosomeModel : rigthChromosomeModel;
+        return leftResult < rightResult ? leftChromosomeModel : rigthChromosomeModel;
     }
 
 }

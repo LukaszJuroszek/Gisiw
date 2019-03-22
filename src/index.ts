@@ -1,5 +1,4 @@
 import { Matrix } from './Matrix';
-import { Chart } from 'canvasjs'
 import { GraphService } from './GraphService';
 import { EvolutionService } from './EvolutionService';
 import { PopulationModel } from './PopulationModel';
@@ -10,12 +9,16 @@ window.onload = function () {
     //data charts init
     var dataPointsOfF1Sum = [];
     var dataPointsOfF2Sum = [];
+    var dataPointsPareto = [];
     var iteractionCounter = 1;
+
+    //debug settings
+    var logDebug: boolean = false;
 
     //graph settings
     var probability: number = 0.150;
     var probabilityStep: number = 0.05;
-    var nodeCount: number = 30;
+    var nodeCount: number = 6;
 
     //population settings
     var maxDiffBetweenEdges: number = 6;
@@ -24,7 +27,7 @@ window.onload = function () {
     var populationSize: number = 100;
 
     //evolutions settings
-    var numberOfTournamentRounds: number = 50;
+    var numberOfTournamentRounds: number = populationSize / 2;
     var numberOfIterations: number = 100;
 
     //init of matrix
@@ -34,22 +37,50 @@ window.onload = function () {
     var isConsistent = adjensceMatrix.DepthFirstSearch();
 
     //init population
-    var population = new PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode);
+    var population = new PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug);
     //init evolution
-    var ev = new EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, numberOfIterations);
-    ev.iterate();
+    var ev = new EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
+    // ev.iterateBy();
 
     console.log(population);
 
-    dataPointsOfF1Sum.push({
-        x: iteractionCounter,
-        y: population.getF1Sum(adjensceMatrix)
-    });
+    document.getElementById("run").addEventListener("click", function (e) {
+        e.preventDefault();
+        for (let i = 0; i < numberOfIterations; i++) {
+            var populationAfterIteration = ev.runIteration();
+            var sumF1 = populationAfterIteration.getF1Sum();
+            var sumF2 = populationAfterIteration.getF2Sum();
+            var paretoPoins = populationAfterIteration.getParetoPairs();
+            updateDataPointsOfF1AndF2Sum(sumF1, sumF2);
+            updateDataParetoChart(paretoPoins);
+        }
+    }, false);
 
-    dataPointsOfF2Sum.push({
-        x: iteractionCounter,
-        y: population.getF2Sum(adjensceMatrix)
-    });
+    function updateDataPointsOfF1AndF2Sum(sumF1: number, sumF2: number) {
+        dataPointsOfF1Sum.push({
+            x: iteractionCounter,
+            y: sumF1
+        });
+
+        dataPointsOfF2Sum.push({
+            x: iteractionCounter,
+            y: sumF2
+        });
+        iteractionCounter++;
+        // updating legend text with  updated with y Value 
+        sumChart.render();
+    }
+
+    function updateDataParetoChart(paretoPoins: [number, number][]) {
+        paretoPoins.forEach(pair => {
+            dataPointsPareto.push({
+                x: pair[0],
+                y: pair[1]
+            });
+        });
+        paretoChart.render();
+    }
+
 
     document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
     document.getElementById("nodeCount").textContent = ("Nodes: ") + nodeCount;
@@ -67,7 +98,7 @@ window.onload = function () {
             document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(2);
         }
     }, false);
-    
+
     $('#generate').click(function (e) {
         e.preventDefault();
         adjensceMatrix = new Matrix(nodeCount, probability);
@@ -77,26 +108,10 @@ window.onload = function () {
 
     document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
 
-    $('#run').click(function (e) {
-        e.preventDefault();
-        updateChart();
-    });
-
-    function updateChart() {
-        var number = Math.floor((Math.random() * 10) + 1);
-        dataPointsOfF1Sum.push({
-            x: iteractionCounter,
-            y: number
-        });
-        iteractionCounter++;
-        // updating legend text with  updated with y Value 
-        sumChart.render();
-    }
-
     var sumChart = new CanvasJS.Chart("sumChart", {
         animationEnabled: false,
         theme: "light2",
-
+        zoomEnabled: true,
         title: {
             text: "Simple Line Chart"
         },
@@ -109,14 +124,17 @@ window.onload = function () {
             fontSize: 22,
             fontColor: "black",
         },
+        toolTip: {
+            shared: true
+        },
         data: [{
-            type: "spline",
+            type: "line",
             showInLegend: true,
             name: "Sum F1(x)",
             dataPoints: dataPointsOfF1Sum
         },
         {
-            type: "spline",
+            type: "line",
             showInLegend: true,
             name: "Sum F2(x)",
             dataPoints: dataPointsOfF2Sum
@@ -131,30 +149,19 @@ window.onload = function () {
             axisX: {
                 gridThickness: 1,
                 interval: 1,
+                title: "F1",
             },
             axisY: {
                 interval: 1,
+                title: "F2",
             },
             data: [
                 {
                     type: "scatter",
-                    dataPoints: [
-                        { x: 2, y: 3 },
-                        { x: 3, y: 2 },
-                        { x: 4, y: 2 },
-                        { x: 2, y: 4 },
-                        { x: 4, y: 5 },
-                        { x: 4, y: 6 },
-                        { x: 4, y: 2 },
-                        { x: 4, y: 2 },
-                        { x: 1, y: 4 },
-                        { x: 1, y: 2 },
-                        { x: 1, y: 2 },
-                        { x: 4, y: 2 },
-                        { x: 5, y: 6 },
-                    ]
+                    dataPoints: dataPointsPareto
                 }
             ]
         });
     paretoChart.render();
+
 }

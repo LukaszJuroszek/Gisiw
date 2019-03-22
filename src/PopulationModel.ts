@@ -2,20 +2,21 @@ import { ChromosomeElement, ChromosomeModel } from "./ChromosomeModel";
 import { Matrix } from "./Matrix";
 
 export class PopulationModel {
-    private _popuation: Set<ChromosomeModel>;
+    public popuation: Set<ChromosomeModel>;
 
     constructor(private _matrix: Matrix,
         private _populationSize: number,
         private _probability: number,
         private _maxDiffBetweenEdges: number,
-        private _maxDiffBetweenNode: number) {
+        private _maxDiffBetweenNode: number,
+        private _logDebug: boolean) {
 
-        this._popuation = new Set<ChromosomeModel>();
-
-        this._popuation = this.generatePopulation( _populationSize);
+        this.popuation = this.generatePopulation(_populationSize);
     }
 
     public generatePopulation(_populationSize: number): Set<ChromosomeModel> {
+        if (this._logDebug)
+            console.log("Generate population with " + _populationSize + " elements.");
         var result = new Set<ChromosomeModel>();
         do {
             result.add(this.createChromosomeFromMatrix(this._matrix));
@@ -44,19 +45,27 @@ export class PopulationModel {
         return result;
     }
 
-
-    public getF1Sum(matrix: Matrix): number {
-        var result: number = 0;
-        this._popuation.forEach(chromosomeModel => {
-            result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, matrix)[0];
+    public getParetoPairs(): Array<[number, number]> {
+        var result: Array<[number, number]> = new Array<[number, number]>();
+        Array.from(this.popuation.values()).forEach(chromosomeModel => {
+            result.push([this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[0],
+            this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[1]]);
         });
         return result;
     }
 
-    public getF2Sum(matrix: Matrix): number {
+    public getF1Sum(): number {
         var result: number = 0;
-        this._popuation.forEach(chromosomeModel => {
-            result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, matrix)[1];
+        this.popuation.forEach(chromosomeModel => {
+            result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[0];
+        });
+        return result;
+    }
+
+    public getF2Sum(): number {
+        var result: number = 0;
+        this.popuation.forEach(chromosomeModel => {
+            result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[1];
         });
         return result;
     }
@@ -102,10 +111,10 @@ export class PopulationModel {
     }
 
     public getPopulationCount(): number {
-        return this._popuation.size;
+        return this.popuation.size;
     }
 
     public getChromosomeByIndex(index: number): ChromosomeModel {
-        return Array.from(this._popuation.values())[index];
+        return Array.from(this.popuation.values())[index];
     }
 }
