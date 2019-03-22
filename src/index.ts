@@ -18,7 +18,7 @@ window.onload = function () {
     //graph settings
     var probability: number = 0.150;
     var probabilityStep: number = 0.05;
-    var nodeCount: number = 6;
+    var nodeCount: number = 30;
 
     //population settings
     var maxDiffBetweenEdges: number = 6;
@@ -42,17 +42,18 @@ window.onload = function () {
     var ev = new EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
     // ev.iterateBy();
 
-    console.log(population);
-
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
+        var x = 0;
         for (let i = 0; i < numberOfIterations; i++) {
             var populationAfterIteration = ev.runIteration();
-            var sumF1 = populationAfterIteration.getF1Sum();
-            var sumF2 = populationAfterIteration.getF2Sum();
-            var paretoPoins = populationAfterIteration.getParetoPairs();
+            var [sumF1, sumF2, paretoPoins] = populationAfterIteration.getF1SumF2SumAndParetoPairs();
             updateDataPointsOfF1AndF2Sum(sumF1, sumF2);
-            updateDataParetoChart(paretoPoins);
+            if (x === i) {
+                x = x === 0 ? 1 : x;
+                updateDataParetoChart(paretoPoins);
+                x *= 10;
+            }
         }
     }, false);
 
@@ -75,12 +76,12 @@ window.onload = function () {
         paretoPoins.forEach(pair => {
             dataPointsPareto.push({
                 x: pair[0],
-                y: pair[1]
+                y: pair[1],
+                color: perc2color(iteractionCounter / 10)
             });
         });
         paretoChart.render();
     }
-
 
     document.getElementById("probability").textContent = ("Probability: ") + (Math.round(probability * 100) / 100).toFixed(4);
     document.getElementById("nodeCount").textContent = ("Nodes: ") + nodeCount;
@@ -112,9 +113,6 @@ window.onload = function () {
         animationEnabled: false,
         theme: "light2",
         zoomEnabled: true,
-        title: {
-            text: "Simple Line Chart"
-        },
         axisY: {
             includeZero: false
         },
@@ -143,18 +141,6 @@ window.onload = function () {
     sumChart.render();
     var paretoChart = new CanvasJS.Chart("paretoChart",
         {
-            title: {
-                text: "Pareto front"
-            },
-            axisX: {
-                gridThickness: 1,
-                interval: 1,
-                title: "F1",
-            },
-            axisY: {
-                interval: 1,
-                title: "F2",
-            },
             data: [
                 {
                     type: "scatter",
@@ -163,5 +149,19 @@ window.onload = function () {
             ]
         });
     paretoChart.render();
+
+    function perc2color(perc) {
+        var r, g, b = 0;
+        if (perc < 50) {
+            r = 255;
+            g = Math.round(5.1 * perc);
+        }
+        else {
+            g = 255;
+            r = Math.round(510 - 5.10 * perc);
+        }
+        var h = r * 0x10000 + g * 0x100 + b * 0x1;
+        return '#' + ('000000' + h.toString(16)).slice(-6);
+    }
 
 }

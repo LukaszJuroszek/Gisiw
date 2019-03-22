@@ -13,16 +13,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
     <style type="text/css">
-        #paretoChart,
-        #graphNetwork {
-            width: 50%;
-            height: 45%;
+        #paretoChart {
+            width: 100%;
+            height: 90%;
         }
 
-        #sumChart,
-        #sumChart2 {
-            height: 40%;
-            width: 50%;
+        #graphNetwork,
+        #sumChart {
+            height: 45%;
+            width: 100%;
         }
 
         h3,
@@ -36,24 +35,26 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-6 p-0" id="graphNetwork"></div>
-            <div class="col-md-6 p-0" id="paretoChart"></div>
+            <div class="col-md-6 ">
+                <div class="col-md-12" id="graphNetwork"></div>
+                <div class="col-md-12 " id="sumChart"></div>
+            </div>
+            <div class="col-md-6">
+                <div class="col-md-12" id="paretoChart"></div>
+            </div>
         </div>
-        <div class="row">
-            <div class="col-md-12 p-0" id="sumChart"></div>
-        </div>
-        <div class="row">
-            <h4 class="col-md-2" id="dfsResult">Consistent: false</h2>
-                <h4 class="col-md-2" id="nodeCount">Nodes: 0</h2>
-                    <button class="btn btn-info col-md-3" id="generate">Generate</button>
-                    <h4 class="col-md-3" id="probability">Probability: 0</h2>
-                        <button class="btn btn-danger col-md-1" id="decreaseProbability">-</button>
-                        <button class="btn btn-success col-md-1" id="increaseProbability">+</button>
-        </div>
-        <div class="row">
-            <button class="btn btn-info col-md-3" id="run">Run 100 cycles</button>
-            <button class="btn btn-info col-md-3" id="showBest">Show best Chromosome</button>
-        </div>
+    <div class="row">
+        <h4 class="col-md-2" id="dfsResult">Consistent: false</h2>
+            <h4 class="col-md-2" id="nodeCount">Nodes: 0</h2>
+                <button class="btn btn-info col-md-3" id="generate">Generate</button>
+                <h4 class="col-md-3" id="probability">Probability: 0</h2>
+                    <button class="btn btn-danger col-md-1" id="decreaseProbability">-</button>
+                    <button class="btn btn-success col-md-1" id="increaseProbability">+</button>
+    </div>
+    <div class="row">
+        <button class="btn btn-info col-md-3" id="run">Run 100 cycles</button>
+        <button class="btn btn-info col-md-3" id="showBest">Show best Chromosome</button>
+    </div>
 </body>
 
 </html>

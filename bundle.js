@@ -59950,6 +59950,14 @@ class ChromosomeModel {
         }
         return result.toString();
     }
+    getStringWithSums() {
+        var result = new Array();
+        for (let i = 0; i < this.chromosome.length; i++) {
+            var node = this.chromosome[i].isFirstPart ? "0" : "1";
+            result.push(node);
+        }
+        return result.toString() + " sumOfF1: " + this.sumOfF1 + " sumOfF2: " + this.sumOfF2;
+    }
 }
 exports.ChromosomeModel = ChromosomeModel;
 class ChromosomeElement {
@@ -59977,6 +59985,11 @@ class EvolutionService {
         bestCollectionByF2 = this.getBestChromosomeModelsBy(false);
         //copy new population to model
         this._populationModel.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
+        console.log(this._populationModel.popuation);
+        this._populationModel.popuation = this.shuffle(this._populationModel.popuation);
+        console.log(this._populationModel.popuation);
+        if (this.logDebug)
+            console.log("--------------- _populationModel." + this._populationModel.popuation.size);
         return this._populationModel;
     }
     getBestChromosomeModelsBy(by) {
@@ -60053,15 +60066,22 @@ class EvolutionService {
         var rightResult = 0;
         //if by F1 factor
         if (by) {
-            leftResult = this._populationModel.getConnectedEdgeCountAndWegithCount(leftChromosomeModel, this._matrix)[0];
-            rightResult = this._populationModel.getConnectedEdgeCountAndWegithCount(rigthChromosomeModel, this._matrix)[0];
+            leftResult = leftChromosomeModel.sumOfF1;
+            rightResult = rigthChromosomeModel.sumOfF1;
             //else by F2 factor
         }
         else {
-            leftResult = this._populationModel.getConnectedEdgeCountAndWegithCount(leftChromosomeModel, this._matrix)[1];
-            rightResult = this._populationModel.getConnectedEdgeCountAndWegithCount(rigthChromosomeModel, this._matrix)[1];
+            leftResult = leftChromosomeModel.sumOfF2;
+            rightResult = rigthChromosomeModel.sumOfF2;
         }
         return leftResult < rightResult ? leftChromosomeModel : rigthChromosomeModel;
+    }
+    shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
     }
 }
 exports.EvolutionService = EvolutionService;
@@ -60277,43 +60297,59 @@ class PopulationModel {
         var result;
         do {
             result = this.generateChromosome(matrix.elements.length);
-        } while (this.getConnectedEdgeCountAndWegithCount(result, matrix)[0] <= this._maxDiffBetweenEdges &&
-            this.getNodeDifference(result) <= this._maxDiffBetweenNode);
+        } while (result.sumOfF1 <= this._maxDiffBetweenEdges);
         return result;
     }
     generateChromosome(nodeNumbers) {
         var result = new ChromosomeModel_1.ChromosomeModel();
-        for (let i = 0; i < nodeNumbers; i++) {
-            result.chromosome.push(new ChromosomeModel_1.ChromosomeElement(i, Math.random() < this._probability ? true : false));
-        }
+        var nodeNumber = 0;
+        do {
+            nodeNumber = 0;
+            for (let i = 0; i < nodeNumbers; i++) {
+                var isFirstPart = Math.random() < this._probability ? true : false;
+                result.chromosome.push(new ChromosomeModel_1.ChromosomeElement(i, isFirstPart));
+                nodeNumber = isFirstPart ? nodeNumber + 1 : nodeNumber;
+            }
+        } while (Math.abs(result.chromosome.length - nodeNumber) <= this._maxDiffBetweenNode);
+        var we = this.getConnectedEdgeCountAndWegithCount(result, this._matrix);
+        result.sumOfF1 = we[0];
+        result.sumOfF2 = we[1];
         return result;
     }
-    getParetoPairs() {
-        var result = new Array();
-        Array.from(this.popuation.values()).forEach(chromosomeModel => {
-            result.push([this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[0],
-                this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[1]]);
-        });
-        return result;
-    }
-    getF1Sum() {
-        var result = 0;
+    getF1SumF2SumAndParetoPairs() {
+        var sumf1 = 0;
+        var sumf2 = 0;
+        var pairs = new Array();
         this.popuation.forEach(chromosomeModel => {
-            result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[0];
+            console.log(chromosomeModel.getStringWithSums());
+            sumf1 += chromosomeModel.sumOfF1;
+            sumf2 += chromosomeModel.sumOfF2;
+            pairs.push([chromosomeModel.sumOfF1, chromosomeModel.sumOfF2]);
         });
-        return result;
+        return [sumf1, sumf2, pairs];
     }
-    getF2Sum() {
-        var result = 0;
-        this.popuation.forEach(chromosomeModel => {
-            result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[1];
-        });
-        return result;
-    }
-    getNodeDifference(chromosomeModel) {
-        var firstPartOfGraph = chromosomeModel.chromosome.filter(node => node.isFirstPart === true).length;
-        return Math.abs(firstPartOfGraph - chromosomeModel.chromosome.length);
-    }
+    // public getParetoPairs(): Array<[number, number]> {
+    //     var result: Array<[number, number]> = new Array<[number, number]>();
+    //     Array.from(this.popuation.values()).forEach(chromosomeModel => {
+    //         var points = this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix);
+    //         result.push([points[0], points[1]]);
+    //     });
+    //     return result;
+    // }
+    // public getF1Sum(): number {
+    //     var result: number = 0;
+    //     this.popuation.forEach(chromosomeModel => {
+    //         result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[0];
+    //     });
+    //     return result;
+    // }
+    // public getF2Sum(): number {
+    //     var result: number = 0;
+    //     this.popuation.forEach(chromosomeModel => {
+    //         result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[1];
+    //     });
+    //     return result;
+    // }
     getConnectedEdgeCountAndWegithCount(chromosomeModel, matrix) {
         var edgeCount = 0;
         var edgeWeigthCount = 0;
@@ -60371,7 +60407,7 @@ window.onload = function () {
     //graph settings
     var probability = 0.150;
     var probabilityStep = 0.05;
-    var nodeCount = 6;
+    var nodeCount = 30;
     //population settings
     var maxDiffBetweenEdges = 6;
     var maxDiffBetweenNode = 4;
@@ -60389,16 +60425,18 @@ window.onload = function () {
     //init evolution
     var ev = new EvolutionService_1.EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
     // ev.iterateBy();
-    console.log(population);
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
+        var x = 0;
         for (let i = 0; i < numberOfIterations; i++) {
             var populationAfterIteration = ev.runIteration();
-            var sumF1 = populationAfterIteration.getF1Sum();
-            var sumF2 = populationAfterIteration.getF2Sum();
-            var paretoPoins = populationAfterIteration.getParetoPairs();
+            var [sumF1, sumF2, paretoPoins] = populationAfterIteration.getF1SumF2SumAndParetoPairs();
             updateDataPointsOfF1AndF2Sum(sumF1, sumF2);
-            updateDataParetoChart(paretoPoins);
+            if (x === i) {
+                x = x === 0 ? 1 : x;
+                updateDataParetoChart(paretoPoins);
+                x *= 10;
+            }
         }
     }, false);
     function updateDataPointsOfF1AndF2Sum(sumF1, sumF2) {
@@ -60418,7 +60456,8 @@ window.onload = function () {
         paretoPoins.forEach(pair => {
             dataPointsPareto.push({
                 x: pair[0],
-                y: pair[1]
+                y: pair[1],
+                color: perc2color(iteractionCounter / 10)
             });
         });
         paretoChart.render();
@@ -60450,9 +60489,6 @@ window.onload = function () {
         animationEnabled: false,
         theme: "light2",
         zoomEnabled: true,
-        title: {
-            text: "Simple Line Chart"
-        },
         axisY: {
             includeZero: false
         },
@@ -60480,18 +60516,6 @@ window.onload = function () {
     });
     sumChart.render();
     var paretoChart = new CanvasJS.Chart("paretoChart", {
-        title: {
-            text: "Pareto front"
-        },
-        axisX: {
-            gridThickness: 1,
-            interval: 1,
-            title: "F1",
-        },
-        axisY: {
-            interval: 1,
-            title: "F2",
-        },
         data: [
             {
                 type: "scatter",
@@ -60500,6 +60524,19 @@ window.onload = function () {
         ]
     });
     paretoChart.render();
+    function perc2color(perc) {
+        var r, g, b = 0;
+        if (perc < 50) {
+            r = 255;
+            g = Math.round(5.1 * perc);
+        }
+        else {
+            g = 255;
+            r = Math.round(510 - 5.10 * perc);
+        }
+        var h = r * 0x10000 + g * 0x100 + b * 0x1;
+        return '#' + ('000000' + h.toString(16)).slice(-6);
+    }
 };
 
 },{"./EvolutionService":3,"./GraphService":4,"./Matrix":5,"./PopulationModel":7}]},{},[8]);

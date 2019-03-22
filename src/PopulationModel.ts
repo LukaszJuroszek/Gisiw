@@ -29,51 +29,66 @@ export class PopulationModel {
         var result: ChromosomeModel;
         do {
             result = this.generateChromosome(matrix.elements.length);
-        } while (
-            this.getConnectedEdgeCountAndWegithCount(result, matrix)[0] <= this._maxDiffBetweenEdges &&
-            this.getNodeDifference(result) <= this._maxDiffBetweenNode);
-
+        } while (result.sumOfF1 <= this._maxDiffBetweenEdges);
         return result;
     }
 
     private generateChromosome(nodeNumbers: number): ChromosomeModel {
         var result: ChromosomeModel = new ChromosomeModel();
+        var nodeNumber = 0;
+        do {
+            nodeNumber = 0;
+            for (let i = 0; i < nodeNumbers; i++) {
+                var isFirstPart = Math.random() < this._probability ? true : false;
+                result.chromosome.push(new ChromosomeElement(i, isFirstPart));
+                nodeNumber = isFirstPart ? nodeNumber + 1 : nodeNumber;
+            }
+        } while (Math.abs(result.chromosome.length - nodeNumber) <= this._maxDiffBetweenNode);
 
-        for (let i = 0; i < nodeNumbers; i++) {
-            result.chromosome.push(new ChromosomeElement(i, Math.random() < this._probability ? true : false));
-        }
+        var we = this.getConnectedEdgeCountAndWegithCount(result, this._matrix);
+        result.sumOfF1 = we[0];
+        result.sumOfF2 = we[1];
+
         return result;
     }
 
-    public getParetoPairs(): Array<[number, number]> {
-        var result: Array<[number, number]> = new Array<[number, number]>();
-        Array.from(this.popuation.values()).forEach(chromosomeModel => {
-            result.push([this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[0],
-            this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[1]]);
-        });
-        return result;
-    }
-
-    public getF1Sum(): number {
-        var result: number = 0;
+    public getF1SumF2SumAndParetoPairs(): [number, number, Array<[number, number]>] {
+        var sumf1: number = 0;
+        var sumf2: number = 0;
+        var pairs: Array<[number, number]> = new Array<[number, number]>();
         this.popuation.forEach(chromosomeModel => {
-            result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[0];
+            console.log(chromosomeModel.getStringWithSums())
+            sumf1 += chromosomeModel.sumOfF1;
+            sumf2 += chromosomeModel.sumOfF2;
+            pairs.push([chromosomeModel.sumOfF1, chromosomeModel.sumOfF2]);
         });
-        return result;
+        return [sumf1, sumf2, pairs];
     }
 
-    public getF2Sum(): number {
-        var result: number = 0;
-        this.popuation.forEach(chromosomeModel => {
-            result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[1];
-        });
-        return result;
-    }
+    // public getParetoPairs(): Array<[number, number]> {
+    //     var result: Array<[number, number]> = new Array<[number, number]>();
+    //     Array.from(this.popuation.values()).forEach(chromosomeModel => {
+    //         var points = this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix);
+    //         result.push([points[0], points[1]]);
+    //     });
+    //     return result;
+    // }
 
-    private getNodeDifference(chromosomeModel: ChromosomeModel): number {
-        var firstPartOfGraph = chromosomeModel.chromosome.filter(node => node.isFirstPart === true).length;
-        return Math.abs(firstPartOfGraph - chromosomeModel.chromosome.length);
-    }
+    // public getF1Sum(): number {
+    //     var result: number = 0;
+    //     this.popuation.forEach(chromosomeModel => {
+    //         result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[0];
+    //     });
+    //     return result;
+    // }
+
+    // public getF2Sum(): number {
+    //     var result: number = 0;
+    //     this.popuation.forEach(chromosomeModel => {
+    //         result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[1];
+    //     });
+    //     return result;
+    // }
 
     public getConnectedEdgeCountAndWegithCount(chromosomeModel: ChromosomeModel, matrix: Matrix): [number, number] {
         var edgeCount: number = 0;

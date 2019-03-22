@@ -16,14 +16,18 @@ export class EvolutionService {
         bestCollectionByF2 = this.getBestChromosomeModelsBy(false);
         //copy new population to model
         this._populationModel.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
+        console.log(this._populationModel.popuation);
+        this._populationModel.popuation= this.shuffle(this._populationModel.popuation);
+        console.log(this._populationModel.popuation);
 
+        if (this.logDebug)
+            console.log("--------------- _populationModel." + this._populationModel.popuation.size);
         return this._populationModel;
     }
 
     public getBestChromosomeModelsBy(by: boolean): Array<ChromosomeModel> {
         var halfOfElementsCount: number = Math.floor(this._populationModel.getPopulationCount() / 2.0);
         var result = new Set<ChromosomeModel>();
-
         //if by F1 factor
         if (by) {
             if (this.logDebug)
@@ -106,14 +110,22 @@ export class EvolutionService {
         var rightResult: number = 0;
         //if by F1 factor
         if (by) {
-            leftResult = this._populationModel.getConnectedEdgeCountAndWegithCount(leftChromosomeModel, this._matrix)[0];
-            rightResult = this._populationModel.getConnectedEdgeCountAndWegithCount(rigthChromosomeModel, this._matrix)[0];
+            leftResult = leftChromosomeModel.sumOfF1;
+            rightResult = rigthChromosomeModel.sumOfF1;
             //else by F2 factor
         } else {
-            leftResult = this._populationModel.getConnectedEdgeCountAndWegithCount(leftChromosomeModel, this._matrix)[1];
-            rightResult = this._populationModel.getConnectedEdgeCountAndWegithCount(rigthChromosomeModel, this._matrix)[1];
+            leftResult = leftChromosomeModel.sumOfF2;
+            rightResult = rigthChromosomeModel.sumOfF2;
         }
         return leftResult < rightResult ? leftChromosomeModel : rigthChromosomeModel;
+    }
+
+    private shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
     }
 
 }
