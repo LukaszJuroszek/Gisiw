@@ -53,8 +53,9 @@ export class Matrix {
         return result;
     }
 
-    public DepthFirstSearch() {
+    public DepthFirstSearch(): boolean {
         var nodeNeighbors = this.GetNodeNeighbors();
+        var isCostistent: boolean = false;
         //this function take only two way directed graph
         var visited = new Set();
         var stack = [];
@@ -71,6 +72,7 @@ export class Matrix {
                 }
             }, this);
         }
-        document.getElementById("dfsResult").textContent = ("Consistent: ") + (visited.size === this.elements.length);
+        isCostistent = visited.size === this.elements.length;
+        return isCostistent;
     }
 }

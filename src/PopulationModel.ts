@@ -2,63 +2,71 @@ import { ChromosomeElement, ChromosomeModel } from "./ChromosomeModel";
 import { Matrix } from "./Matrix";
 
 export class PopulationModel {
-    private _popuation: Array<ChromosomeModel>;
+    private _popuation: Set<ChromosomeModel>;
 
-    constructor(matrix: Matrix,
+    constructor(private _matrix: Matrix,
         private _populationSize: number,
         private _probability: number,
         private _maxDiffBetweenEdges: number,
         private _maxDiffBetweenNode: number) {
 
-        this._popuation = new Array<ChromosomeModel>();
-        for (let i = 0; i < this._populationSize; i++) {
-            this._popuation.push(this.CreateChromosomeFromMatrix(matrix));
-        }
+        this._popuation = new Set<ChromosomeModel>();
+
+        this._popuation = this.generatePopulation( _populationSize);
     }
 
-    private GenerateChromosome(matrix: Matrix): ChromosomeModel {
+    public generatePopulation(_populationSize: number): Set<ChromosomeModel> {
+        var result = new Set<ChromosomeModel>();
+        do {
+            result.add(this.createChromosomeFromMatrix(this._matrix));
+        } while (result.size < _populationSize);
+
+        return result;
+    }
+
+    public createChromosomeFromMatrix(matrix: Matrix): ChromosomeModel {
+        var result: ChromosomeModel;
+        do {
+            result = this.generateChromosome(matrix.elements.length);
+        } while (
+            this.getConnectedEdgeCountAndWegithCount(result, matrix)[0] <= this._maxDiffBetweenEdges &&
+            this.getNodeDifference(result) <= this._maxDiffBetweenNode);
+
+        return result;
+    }
+
+    private generateChromosome(nodeNumbers: number): ChromosomeModel {
         var result: ChromosomeModel = new ChromosomeModel();
 
-        for (let i = 0; i < matrix.elements.length; i++) {
+        for (let i = 0; i < nodeNumbers; i++) {
             result.chromosome.push(new ChromosomeElement(i, Math.random() < this._probability ? true : false));
         }
         return result;
     }
 
-    public CreateChromosomeFromMatrix(matrix: Matrix): ChromosomeModel {
-        var result: ChromosomeModel;
 
-        do {
-            result = this.GenerateChromosome(matrix);
-            console.log("Generating..");
-        } while (this.GetConnectedEdgeCountAndWegithCount(result, matrix)[0] <= this._maxDiffBetweenEdges &&
-            this.GetNodeDifference(result) <= this._maxDiffBetweenNode);
-
-        return result;
-    }
-
-    public GetF1Sum(matrix: Matrix): number {
+    public getF1Sum(matrix: Matrix): number {
         var result: number = 0;
         this._popuation.forEach(chromosomeModel => {
-            result += this.GetConnectedEdgeCountAndWegithCount(chromosomeModel, matrix)[0];
+            result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, matrix)[0];
         });
         return result;
     }
 
-    public GetF2Sum(matrix: Matrix): number {
+    public getF2Sum(matrix: Matrix): number {
         var result: number = 0;
         this._popuation.forEach(chromosomeModel => {
-            result += this.GetConnectedEdgeCountAndWegithCount(chromosomeModel, matrix)[1];
+            result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, matrix)[1];
         });
         return result;
     }
 
-    public GetNodeDifference(chromosomeModel: ChromosomeModel): number {
+    private getNodeDifference(chromosomeModel: ChromosomeModel): number {
         var firstPartOfGraph = chromosomeModel.chromosome.filter(node => node.isFirstPart === true).length;
         return Math.abs(firstPartOfGraph - chromosomeModel.chromosome.length);
     }
 
-    public GetConnectedEdgeCountAndWegithCount(chromosomeModel: ChromosomeModel, matrix: Matrix): [number, number] {
+    public getConnectedEdgeCountAndWegithCount(chromosomeModel: ChromosomeModel, matrix: Matrix): [number, number] {
         var edgeCount: number = 0;
         var edgeWeigthCount: number = 0;
 
@@ -91,5 +99,13 @@ export class PopulationModel {
         return n => {
             return n.isFirstPart === false && n.nodeNumber === i;
         };
+    }
+
+    public getPopulationCount(): number {
+        return this._popuation.size;
+    }
+
+    public getChromosomeByIndex(index: number): ChromosomeModel {
+        return Array.from(this._popuation.values())[index];
     }
 }

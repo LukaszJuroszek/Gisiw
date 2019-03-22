@@ -6,6 +6,15 @@ export class ChromosomeModel {
     constructor() {
         this.chromosome = new Array<ChromosomeElement>();
     }
+
+    public getString(): string {
+        var result: Array<String> = new Array<String>()
+        for (let i = 0; i < this.chromosome.length; i++) {
+            var node = this.chromosome[i].isFirstPart ? "0" : "1";
+            result.push(node);
+        }
+        return result.toString();
+    }
 }
 
 export class ChromosomeElement {
