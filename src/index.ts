@@ -80,7 +80,7 @@ window.onload = function () {
             dataPointsPareto.push({
                 x: pair[0],
                 y: pair[1],
-                color: perc2color(iteractionCounter /10)
+                color: perc2color(iteractionCounter / 10)
             });
         });
         paretoChart.render();
@@ -113,12 +113,12 @@ window.onload = function () {
         document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
 
         //clear charts data 
-         dataPointsOfF1Sum = [];
-         dataPointsOfF2Sum = [];
-         dataPointsPareto = [];
-         iteractionCounter = 1;
-         sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
-         paretoChart = generateParetoChart(dataPointsPareto);
+        dataPointsOfF1Sum = [];
+        dataPointsOfF2Sum = [];
+        dataPointsPareto = [];
+        iteractionCounter = 1;
+        sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
+        paretoChart = generateParetoChart(dataPointsPareto);
     });
 
     document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
@@ -160,13 +160,15 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[]) {
             shared: true
         },
         data: [{
-            type: "line",
+            type: "spline",
             showInLegend: true,
             name: "Sum F1(x)",
             dataPoints: dataPointsOfF1Sum
         },
         {
-            type: "line",
+            axisYType: "secondary",
+            axisYIndex: 1,
+            type: "spline",
             showInLegend: true,
             name: "Sum F2(x)",
             dataPoints: dataPointsOfF2Sum

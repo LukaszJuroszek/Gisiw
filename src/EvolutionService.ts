@@ -9,7 +9,6 @@ export class EvolutionService {
         private logDebug: boolean) { }
 
     public runIteration(population: PopulationModel): PopulationModel {
-        console.log(population.getF1SumF2SumAndParetoPairs());
 
         var bestCollectionByF1 = new Array<ChromosomeModel>();
         var bestCollectionByF2 = new Array<ChromosomeModel>();
@@ -19,10 +18,8 @@ export class EvolutionService {
 
         //copy new population to model
         population.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
-         population.popuation = this.shuffle(population.popuation);
-        
-        console.log(population.getF1SumF2SumAndParetoPairs());
-        console.log("--------------- _populationModel." + population.popuation.size);
+        //  population.popuation = this.shuffle(population.popuation);
+
         return population;
     }
 
@@ -35,6 +32,10 @@ export class EvolutionService {
                 console.log("--------------- Trunament by F1 started.");
             for (let i = 0; i < this.numberOfTournamentRounds; i++) {
                 var { left, rigth } = this.getRandomFirstHalfNumber(halfOfElementsCount);
+                do {
+                    var { left, rigth } = this.getRandomFirstHalfNumber(halfOfElementsCount);
+                } while (left == rigth)
+                var { left, rigth } = this.getRandomFirstHalfNumber(halfOfElementsCount);
                 var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth, populationModel);
 
                 result.popuation.add(this.selectBestBy(leftChromosome, rigthChromosome, true));
@@ -44,7 +45,10 @@ export class EvolutionService {
             if (this.logDebug)
                 console.log("--------------- Trunament by F2 started.");
             for (let i = 0; i < this.numberOfTournamentRounds; i++) {
-                var { left, rigth } = this.getRandomSecondHalfNumber(left, halfOfElementsCount, rigth);
+                var { left, rigth } = this.getRandomSecondHalfNumber(halfOfElementsCount);
+                do {
+                    var { left, rigth } = this.getRandomSecondHalfNumber(halfOfElementsCount);
+                } while (left == rigth)
                 var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth, populationModel);
 
                 result.popuation.add(this.selectBestBy(leftChromosome, rigthChromosome, false));
@@ -66,11 +70,11 @@ export class EvolutionService {
     private fixPopulation(populationModel: PopulationModel, populationSize: number): PopulationModel {
         populationModel = this.populationService.generatePopulationOrAddMissingIfPopulationSize(populationModel, populationSize);
         if (this.logDebug)
-        console.log("Population size after fix: " + populationModel.popuation.size);
+            console.log("Population size after fix: " + populationModel.popuation.size);
         return populationModel;
     }
 
-    private getRandomSecondHalfNumber(left: number, halfOfElementsCount: number, rigth: number) {
+    private getRandomSecondHalfNumber(halfOfElementsCount: number) {
         var left = this.getSecondHalfIndexNumber(halfOfElementsCount);
         var rigth = this.getSecondHalfIndexNumber(halfOfElementsCount);
         return { left, rigth };
@@ -97,18 +101,17 @@ export class EvolutionService {
     }
 
     private selectBestBy(leftChromosomeModel: ChromosomeModel, rigthChromosomeModel: ChromosomeModel, by: boolean): ChromosomeModel {
-        var leftResult: number = 0;
-        var rightResult: number = 0;
         //if by F1 factor
         if (by) {
-            leftResult = leftChromosomeModel.sumOfF1;
-            rightResult = rigthChromosomeModel.sumOfF1;
+            return leftChromosomeModel.sumOfF1 <= rigthChromosomeModel.sumOfF1 && 
+            leftChromosomeModel.sumOfF2 <= rigthChromosomeModel.sumOfF2
+            ? leftChromosomeModel : rigthChromosomeModel;
             //else by F2 factor
         } else {
-            leftResult = leftChromosomeModel.sumOfF2;
-            rightResult = rigthChromosomeModel.sumOfF2;
+            return leftChromosomeModel.sumOfF2 <= rigthChromosomeModel.sumOfF2 &&
+            leftChromosomeModel.sumOfF1 <= rigthChromosomeModel.sumOfF1  
+            ? leftChromosomeModel : rigthChromosomeModel;
         }
-        return leftResult < rightResult ? leftChromosomeModel : rigthChromosomeModel;
     }
 
     private shuffle(array) {
