@@ -1,6 +1,5 @@
 import { ChromosomeModel, ChromosomeElement } from "./ChromosomeModel";
 import { Matrix } from "./Matrix";
-import { PopulationModel } from "./PopulationModel";
 
 export class PopulationService {
     private _chromosomeParts: Array<[number, string]> = [[0, "firstPart"], [1, "secondPart"]];
@@ -8,17 +7,18 @@ export class PopulationService {
     constructor(private _matrix: Matrix,
         private _probability: number,
         private _maxDiffBetweenEdges: number,
-        private _maxDiffBetweenNode: number,
-        private _logDebug: boolean) {
+        private _maxDiffBetweenNode: number) {
     }
 
-    public generatePopulationOrAddMissingIfPopulationSize(result: PopulationModel, populationSize: number): PopulationModel {
-        if (this._logDebug)
-            console.log("Generate population with " + populationSize + " elements.");
-        do {
-            result.popuation.add(this.generateChromosomeBy(this._matrix));
-        } while (result.popuation.size < populationSize);
-
+    public generatePopulationOrAddMissingIfPopulationSize(result: Array<ChromosomeModel>, populationSize: number): Array<ChromosomeModel> {
+        var temp = new Set<ChromosomeModel>(result);
+        if (temp.size < populationSize) {
+            do {
+                temp.add(this.generateChromosomeBy(this._matrix));
+            }
+            while (temp.size < populationSize);
+        }
+        result = Array.from(temp);
         return result;
     }
 
@@ -79,5 +79,17 @@ export class PopulationService {
         return n => {
             return n.chromosomePartNumber === partNumber && n.nodeNumber === nodeNumber;
         };
+    }
+
+    public getF1SumF2SumAndParetoPairs(population: Array<ChromosomeModel>): [number, number, Array<[number, number]>] {
+        var sumf1: number = 0;
+        var sumf2: number = 0;
+        var pairs: Array<[number, number]> = new Array<[number, number]>();
+        population.forEach(chromosomeModel => {
+            sumf1 += chromosomeModel.sumOfF1;
+            sumf2 += chromosomeModel.sumOfF2;
+            pairs.push([chromosomeModel.sumOfF1, chromosomeModel.sumOfF2]);
+        });
+        return [sumf1, sumf2, pairs];
     }
 }

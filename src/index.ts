@@ -1,9 +1,8 @@
 import { Matrix } from './Matrix';
 import { GraphService } from './GraphService';
 import { EvolutionService } from './EvolutionService';
-import { PopulationModel } from './PopulationModel';
 import { PopulationService } from './PopulationService';
-import { ChromosomeElement, ChromosomeModel } from './ChromosomeModel';
+import { ChromosomeModel } from './ChromosomeModel';
 declare var CanvasJS: any
 
 //init
@@ -25,8 +24,8 @@ window.onload = function () {
 
     //population settings
     var maxDiffBetweenEdges: number = 6;
-    var maxDiffBetweenNode: number = 4;
-    var probabilityForChromosome: number = 0.3;
+    var maxDiffBetweenNode: number = 6;
+    var probabilityForChromosome: number = 0.1;
     var populationSize: number = 100;
 
     //evolutions settings
@@ -40,17 +39,17 @@ window.onload = function () {
 
 
     //init population
-    var popService = new PopulationService(adjensceMatrix, probabilityForChromosome, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug)
-    var population = popService.generatePopulationOrAddMissingIfPopulationSize(new PopulationModel(new Set<ChromosomeModel>()), populationSize);
+    var popService = new PopulationService(adjensceMatrix, probabilityForChromosome, maxDiffBetweenEdges, maxDiffBetweenNode)
+    var population = popService.generatePopulationOrAddMissingIfPopulationSize(new Array<ChromosomeModel>(), populationSize);
     //init evolution
-    var ev = new EvolutionService(numberOfTournamentRounds, popService, logDebug);
+    var ev = new EvolutionService(numberOfTournamentRounds, popService);
 
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
         var x = 0;
         for (let i = 0; i < numberOfIterations; i++) {
             population = ev.runIteration(population);
-            var [sumF1, sumF2, paretoPoins] = population.getF1SumF2SumAndParetoPairs();
+            var [sumF1, sumF2, paretoPoins] = popService.getF1SumF2SumAndParetoPairs(population);
             updateDataPointsOfF1AndF2Sum(sumF1, sumF2);
             if (x === i) {
                 x = x === 0 ? 1 : x;
@@ -109,7 +108,7 @@ window.onload = function () {
         new GraphService(adjensceMatrix);
         isConsistent = adjensceMatrix.DepthFirstSearch();
         //init population
-        population = popService.generatePopulationOrAddMissingIfPopulationSize(new PopulationModel(new Set<ChromosomeModel>()), populationSize);
+        population = popService.generatePopulationOrAddMissingIfPopulationSize(new Array<ChromosomeModel>(), populationSize);
         document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
 
         //clear charts data 
