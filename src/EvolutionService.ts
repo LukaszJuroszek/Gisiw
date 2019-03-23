@@ -19,7 +19,7 @@ export class EvolutionService {
 
         //copy new population to model
         population.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
-        //  population.popuation = this.shuffle(population.popuation);
+         population.popuation = this.shuffle(population.popuation);
         
         console.log(population.getF1SumF2SumAndParetoPairs());
         console.log("--------------- _populationModel." + population.popuation.size);
