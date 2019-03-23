@@ -10,7 +10,7 @@ export class ChromosomeModel {
     public getString(): string {
         var result: Array<String> = new Array<String>()
         for (let i = 0; i < this.chromosome.length; i++) {
-            var node = this.chromosome[i].isFirstPart ? "0" : "1";
+            var node = this.chromosome[i].chromosomePartNumber.toString();
             result.push(node);
         }
         return result.toString();
@@ -19,7 +19,7 @@ export class ChromosomeModel {
     public getStringWithSums(): string {
         var result: Array<String> = new Array<String>()
         for (let i = 0; i < this.chromosome.length; i++) {
-            var node = this.chromosome[i].isFirstPart ? "0" : "1";
+            var node = this.chromosome[i].chromosomePartNumber.toString();
             result.push(node);
         }
         return result.toString() + " sumOfF1: " + this.sumOfF1 + " sumOfF2: " + this.sumOfF2;

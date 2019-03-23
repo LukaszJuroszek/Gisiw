@@ -2,10 +2,13 @@ import { Matrix } from './Matrix';
 import { GraphService } from './GraphService';
 import { EvolutionService } from './EvolutionService';
 import { PopulationModel } from './PopulationModel';
+import { PopulationService } from './PopulationService';
+import { ChromosomeElement, ChromosomeModel } from './ChromosomeModel';
 declare var CanvasJS: any
 
 //init
 window.onload = function () {
+
     //data charts init
     var dataPointsOfF1Sum = [];
     var dataPointsOfF2Sum = [];
@@ -23,7 +26,7 @@ window.onload = function () {
     //population settings
     var maxDiffBetweenEdges: number = 6;
     var maxDiffBetweenNode: number = 4;
-    var probability: number = 0.1;
+    var probabilityForChromosome: number = 0.3;
     var populationSize: number = 100;
 
     //evolutions settings
@@ -35,17 +38,19 @@ window.onload = function () {
     new GraphService(adjensceMatrix);
     var isConsistent = adjensceMatrix.DepthFirstSearch();
 
+
     //init population
-    var population = new PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug);
+    var popService = new PopulationService(adjensceMatrix, probabilityForChromosome, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug)
+    var population = popService.generatePopulationOrAddMissingIfPopulationSize(new PopulationModel(new Set<ChromosomeModel>()), populationSize);
     //init evolution
-    var ev = new EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
+    var ev = new EvolutionService(numberOfTournamentRounds, popService, logDebug);
 
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
         var x = 0;
         for (let i = 0; i < numberOfIterations; i++) {
-            var populationAfterIteration = ev.runIteration();
-            var [sumF1, sumF2, paretoPoins] = populationAfterIteration.getF1SumF2SumAndParetoPairs();
+            population = ev.runIteration(population);
+            var [sumF1, sumF2, paretoPoins] = population.getF1SumF2SumAndParetoPairs();
             updateDataPointsOfF1AndF2Sum(sumF1, sumF2);
             if (x === i) {
                 x = x === 0 ? 1 : x;
@@ -75,7 +80,7 @@ window.onload = function () {
             dataPointsPareto.push({
                 x: pair[0],
                 y: pair[1],
-                color: perc2color(iteractionCounter / 10)
+                color: perc2color(iteractionCounter /10)
             });
         });
         paretoChart.render();
@@ -104,14 +109,40 @@ window.onload = function () {
         new GraphService(adjensceMatrix);
         isConsistent = adjensceMatrix.DepthFirstSearch();
         //init population
-        population = new PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug);
-        //init evolution
-        ev = new EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
+        population = popService.generatePopulationOrAddMissingIfPopulationSize(new PopulationModel(new Set<ChromosomeModel>()), populationSize);
         document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
+
+        //clear charts data 
+         dataPointsOfF1Sum = [];
+         dataPointsOfF2Sum = [];
+         dataPointsPareto = [];
+         iteractionCounter = 1;
+         sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
+         paretoChart = generateParetoChart(dataPointsPareto);
     });
 
     document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
 
+    var sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
+    var paretoChart = generateParetoChart(dataPointsPareto);
+
+    function perc2color(perc) {
+        var r, g, b = 0;
+        if (perc < 50) {
+            r = 255;
+            g = Math.round(5.1 * perc);
+        }
+        else {
+            g = 255;
+            r = Math.round(510 - 5.10 * perc);
+        }
+        var h = r * 0x10000 + g * 0x100 + b * 0x1;
+        return '#' + ('000000' + h.toString(16)).slice(-6);
+    }
+
+}
+
+function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[]) {
     var sumChart = new CanvasJS.Chart("sumChart", {
         animationEnabled: false,
         theme: "light2",
@@ -142,29 +173,18 @@ window.onload = function () {
         }]
     });
     sumChart.render();
-    var paretoChart = new CanvasJS.Chart("paretoChart",
-        {
-            data: [
-                {
-                    type: "scatter",
-                    dataPoints: dataPointsPareto
-                }
-            ]
-        });
+    return sumChart;
+}
+
+function generateParetoChart(dataPointsPareto: any[]) {
+    var paretoChart = new CanvasJS.Chart("paretoChart", {
+        data: [
+            {
+                type: "scatter",
+                dataPoints: dataPointsPareto
+            }
+        ]
+    });
     paretoChart.render();
-
-    function perc2color(perc) {
-        var r, g, b = 0;
-        if (perc < 50) {
-            r = 255;
-            g = Math.round(5.1 * perc);
-        }
-        else {
-            g = 255;
-            r = Math.round(510 - 5.10 * perc);
-        }
-        var h = r * 0x10000 + g * 0x100 + b * 0x1;
-        return '#' + ('000000' + h.toString(16)).slice(-6);
-    }
-
+    return paretoChart;
 }

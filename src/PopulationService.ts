@@ -1,27 +1,23 @@
 import { ChromosomeModel, ChromosomeElement } from "./ChromosomeModel";
 import { Matrix } from "./Matrix";
+import { PopulationModel } from "./PopulationModel";
 
 export class PopulationService {
     private _chromosomeParts: Array<[number, string]> = [[0, "firstPart"], [1, "secondPart"]];
-    public popuation: Set<ChromosomeModel>;
 
     constructor(private _matrix: Matrix,
-        populationSize: number,
         private _probability: number,
         private _maxDiffBetweenEdges: number,
         private _maxDiffBetweenNode: number,
         private _logDebug: boolean) {
-
-        this.popuation = this.generatePopulation(populationSize);
     }
 
-    public generatePopulation(_populationSize: number): Set<ChromosomeModel> {
+    public generatePopulationOrAddMissingIfPopulationSize(result: PopulationModel, populationSize: number): PopulationModel {
         if (this._logDebug)
-            console.log("Generate population with " + _populationSize + " elements.");
-        var result = new Set<ChromosomeModel>();
+            console.log("Generate population with " + populationSize + " elements.");
         do {
-            result.add(this.generateChromosomeBy(this._matrix));
-        } while (result.size < _populationSize);
+            result.popuation.add(this.generateChromosomeBy(this._matrix));
+        } while (result.popuation.size < populationSize);
 
         return result;
     }

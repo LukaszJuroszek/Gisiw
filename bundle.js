@@ -59945,7 +59945,7 @@ class ChromosomeModel {
     getString() {
         var result = new Array();
         for (let i = 0; i < this.chromosome.length; i++) {
-            var node = this.chromosome[i].isFirstPart ? "0" : "1";
+            var node = this.chromosome[i].chromosomePartNumber.toString();
             result.push(node);
         }
         return result.toString();
@@ -59953,7 +59953,7 @@ class ChromosomeModel {
     getStringWithSums() {
         var result = new Array();
         for (let i = 0; i < this.chromosome.length; i++) {
-            var node = this.chromosome[i].isFirstPart ? "0" : "1";
+            var node = this.chromosome[i].chromosomePartNumber.toString();
             result.push(node);
         }
         return result.toString() + " sumOfF1: " + this.sumOfF1 + " sumOfF2: " + this.sumOfF2;
@@ -59961,9 +59961,9 @@ class ChromosomeModel {
 }
 exports.ChromosomeModel = ChromosomeModel;
 class ChromosomeElement {
-    constructor(nodeNumber, isFirstPart) {
+    constructor(nodeNumber, chromosomePartNumber) {
         this.nodeNumber = nodeNumber;
-        this.isFirstPart = isFirstPart;
+        this.chromosomePartNumber = chromosomePartNumber;
     }
 }
 exports.ChromosomeElement = ChromosomeElement;
@@ -59971,76 +59971,65 @@ exports.ChromosomeElement = ChromosomeElement;
 },{}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const PopulationModel_1 = require("./PopulationModel");
 class EvolutionService {
-    constructor(_populationModel, _matrix, numberOfTournamentRounds, logDebug) {
-        this._populationModel = _populationModel;
-        this._matrix = _matrix;
+    constructor(numberOfTournamentRounds, populationService, logDebug) {
+        this.numberOfTournamentRounds = numberOfTournamentRounds;
+        this.populationService = populationService;
         this.logDebug = logDebug;
-        this._numberOfTournamentRounds = numberOfTournamentRounds;
     }
-    runIteration() {
+    runIteration(population) {
+        console.log(population.getF1SumF2SumAndParetoPairs());
         var bestCollectionByF1 = new Array();
         var bestCollectionByF2 = new Array();
-        bestCollectionByF1 = this.getBestChromosomeModelsBy(true);
-        bestCollectionByF2 = this.getBestChromosomeModelsBy(false);
+        bestCollectionByF1 = this.getBestChromosomeModelsBy(true, population);
+        bestCollectionByF2 = this.getBestChromosomeModelsBy(false, population);
         //copy new population to model
-        this._populationModel.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
-        if (this.logDebug)
-            console.log(this._populationModel.popuation);
-        // this._populationModel.popuation = this.shuffle(this._populationModel.popuation);
-        if (this.logDebug)
-            console.log(this._populationModel.popuation);
-        if (this.logDebug)
-            console.log("--------------- _populationModel." + this._populationModel.popuation.size);
-        return this._populationModel;
+        population.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
+        //  population.popuation = this.shuffle(population.popuation);
+        console.log(population.getF1SumF2SumAndParetoPairs());
+        console.log("--------------- _populationModel." + population.popuation.size);
+        return population;
     }
-    getBestChromosomeModelsBy(by) {
-        var halfOfElementsCount = Math.floor(this._populationModel.getPopulationCount() / 2.0);
-        var result = new Set();
+    getBestChromosomeModelsBy(by, populationModel) {
+        var halfOfElementsCount = Math.floor(populationModel.getPopulationCount() / 2.0);
+        var result = new PopulationModel_1.PopulationModel(new Set());
         //if by F1 factor
         if (by) {
             if (this.logDebug)
                 console.log("--------------- Trunament by F1 started.");
-            for (let i = 0; i < this._numberOfTournamentRounds; i++) {
+            for (let i = 0; i < this.numberOfTournamentRounds; i++) {
                 var { left, rigth } = this.getRandomFirstHalfNumber(halfOfElementsCount);
-                var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth);
-                result.add(this.selectBestBy(leftChromosome, rigthChromosome, true));
+                var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth, populationModel);
+                result.popuation.add(this.selectBestBy(leftChromosome, rigthChromosome, true));
             }
             //else by F2 factor
         }
         else {
             if (this.logDebug)
                 console.log("--------------- Trunament by F2 started.");
-            for (let i = 0; i < this._numberOfTournamentRounds; i++) {
+            for (let i = 0; i < this.numberOfTournamentRounds; i++) {
                 var { left, rigth } = this.getRandomSecondHalfNumber(left, halfOfElementsCount, rigth);
-                var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth);
-                result.add(this.selectBestBy(leftChromosome, rigthChromosome, false));
+                var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth, populationModel);
+                result.popuation.add(this.selectBestBy(leftChromosome, rigthChromosome, false));
             }
         }
-        if (result.size == this._numberOfTournamentRounds) {
+        if (result.popuation.size == this.numberOfTournamentRounds) {
         }
         else {
             if (this.logDebug)
-                console.log("Duplicate in population deleted, should be: " + this._numberOfTournamentRounds + ", but was: " + result.size + ".");
-            result = this.fixPopulation(result, this._numberOfTournamentRounds);
+                console.log("Duplicate in population deleted, should be: " + this.numberOfTournamentRounds + ", but was: " + result.popuation.size + ".");
+            result = this.fixPopulation(result, this.numberOfTournamentRounds);
         }
         if (this.logDebug)
             console.log("--------------- Trunament ended.");
-        return Array.from(result.values());
+        return Array.from(result.popuation.values());
     }
-    fixPopulation(result, chromosomeCount) {
-        do {
-            var diff = Math.abs(chromosomeCount - result.size);
-            var missingChromosomes = this._populationModel.generatePopulation(diff);
-            if (this.logDebug)
-                console.log("Fixing population, missing: " + diff + ".");
-            missingChromosomes.forEach(missingElement => {
-                result.add(missingElement);
-            });
-        } while (result.size < chromosomeCount);
+    fixPopulation(populationModel, populationSize) {
+        populationModel = this.populationService.generatePopulationOrAddMissingIfPopulationSize(populationModel, populationSize);
         if (this.logDebug)
-            console.log(result.size == chromosomeCount ? "ok, " + result.size + " elements in population" : "erron during fixing, was: " + result.size + " should be: " + chromosomeCount);
-        return result;
+            console.log("Population size after fix: " + populationModel.popuation.size);
+        return populationModel;
     }
     getRandomSecondHalfNumber(left, halfOfElementsCount, rigth) {
         var left = this.getSecondHalfIndexNumber(halfOfElementsCount);
@@ -60052,9 +60041,9 @@ class EvolutionService {
         var rigth = this.getFirstHalfIndexNumber(halfOfElementsCount);
         return { left, rigth };
     }
-    getLeftAndRigthChromomosomeByNumber(left, rigth) {
-        var leftChromosome = this._populationModel.getChromosomeByIndex(left);
-        var rigthChromosome = this._populationModel.getChromosomeByIndex(rigth);
+    getLeftAndRigthChromomosomeByNumber(left, rigth, populationModel) {
+        var leftChromosome = populationModel.getChromosomeByIndex(left);
+        var rigthChromosome = populationModel.getChromosomeByIndex(rigth);
         return { leftChromosome, rigthChromosome };
     }
     getFirstHalfIndexNumber(halfOfElementsCount) {
@@ -60088,7 +60077,7 @@ class EvolutionService {
 }
 exports.EvolutionService = EvolutionService;
 
-},{}],4:[function(require,module,exports){
+},{"./PopulationModel":6}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const vis = require("vis");
@@ -60102,8 +60091,8 @@ class GraphService {
         var edges = new Array();
         for (var i = 0; i < nodeNeighbors.length; i++) {
             for (var j = 0; j < nodeNeighbors[i].neighbors.length; j++) {
-                edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j].num, width: nodeNeighbors[i].neighbors[j].edgeValue / 5.0 });
-                edges.push({ from: nodeNeighbors[i].neighbors[j].num, to: nodeNeighbors[i].id, width: nodeNeighbors[i].neighbors[j].edgeValue / 5.0 });
+                edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j].num, width: nodeNeighbors[i].neighbors[j].edgeValue / 10.0 });
+                edges.push({ from: nodeNeighbors[i].neighbors[j].num, to: nodeNeighbors[i].id, width: nodeNeighbors[i].neighbors[j].edgeValue / 10.0 });
             }
         }
         var result = new vis.DataSet(edges);
@@ -60186,9 +60175,11 @@ exports.GraphService = GraphService;
 },{"vis":1}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const MatrixElement_1 = require("./MatrixElement");
 class Matrix {
     constructor(node, probabilityForEdge) {
+        this.weigthIfNoEdge = 0;
+        this.defaultWeigthIfHasEdge = 1;
+        this.maxEdgeWeigth = 100;
         this.GenerateAdjensceMatrix(node, probabilityForEdge);
     }
     GenerateAdjensceMatrix(node, probabilityForEdge) {
@@ -60196,21 +60187,21 @@ class Matrix {
         for (var i = 0; i < node; i++) {
             this.elements[i] = new Array(node);
             for (var j = 0; j < node; j++) {
-                this.elements[i][j] = new MatrixElement_1.MatrixElement(0, i, j);
+                this.elements[i][j] = this.weigthIfNoEdge;
             }
         }
         for (var i = 0; i < node; i++) {
             for (var j = (i + 1); j < node; j++) {
                 var hasEdge = Math.random() < probabilityForEdge ? true : false;
-                var weigthIfHasEdge = 1;
+                var weigthIfHasEdge = this.defaultWeigthIfHasEdge;
                 if (hasEdge) {
-                    weigthIfHasEdge = Math.floor((Math.random() * 10) + 1);
-                    this.elements[i][j] = new MatrixElement_1.MatrixElement(weigthIfHasEdge, j, i);
+                    weigthIfHasEdge = Math.floor((Math.random() * this.maxEdgeWeigth) + this.defaultWeigthIfHasEdge);
+                    this.elements[i][j] = weigthIfHasEdge;
                 }
                 else {
-                    this.elements[i][j] = new MatrixElement_1.MatrixElement(0, j, i);
+                    this.elements[i][j] = this.weigthIfNoEdge;
                 }
-                this.elements[j][i] = new MatrixElement_1.MatrixElement(0, i, j);
+                this.elements[j][i] = this.weigthIfNoEdge;
             }
         }
     }
@@ -60219,14 +60210,14 @@ class Matrix {
         for (var i = 0; i < this.elements.length; i++) {
             var tmp = new Array();
             for (var j = (i + 1); j < this.elements.length; j++) {
-                this.elements[j][i].value = this.elements[i][j].value;
+                this.elements[j][i] = this.elements[i][j];
             }
         }
         for (var i = 0; i < this.elements.length; i++) {
             var tmp = new Array();
             for (var j = 0; j < this.elements[i].length; j++) {
-                if (this.elements[i][j].value >= 1) {
-                    tmp.push({ num: j, edgeValue: this.elements[i][j].value });
+                if (this.elements[i][j] >= 1) {
+                    tmp.push({ num: j, edgeValue: this.elements[i][j] });
                 }
             }
             tmp.sort((function (a, b) { return b.num - a.num; }));
@@ -60260,42 +60251,55 @@ class Matrix {
 }
 exports.Matrix = Matrix;
 
-},{"./MatrixElement":6}],6:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class MatrixElement {
-    constructor(hasEdge, colNumber, rowNumber) {
-        this.value = hasEdge;
-        this.row = rowNumber;
-        this.col = colNumber;
+class PopulationModel {
+    constructor(_popuation) {
+        this.popuation = _popuation;
+    }
+    getF1SumF2SumAndParetoPairs() {
+        var sumf1 = 0;
+        var sumf2 = 0;
+        var pairs = new Array();
+        this.popuation.forEach(chromosomeModel => {
+            sumf1 += chromosomeModel.sumOfF1;
+            sumf2 += chromosomeModel.sumOfF2;
+            pairs.push([chromosomeModel.sumOfF1, chromosomeModel.sumOfF2]);
+        });
+        return [sumf1, sumf2, pairs];
+    }
+    getPopulationCount() {
+        return this.popuation.size;
+    }
+    getChromosomeByIndex(index) {
+        return Array.from(this.popuation.values())[index];
     }
 }
-exports.MatrixElement = MatrixElement;
+exports.PopulationModel = PopulationModel;
 
 },{}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const ChromosomeModel_1 = require("./ChromosomeModel");
-class PopulationModel {
-    constructor(_matrix, _populationSize, _probability, _maxDiffBetweenEdges, _maxDiffBetweenNode, _logDebug) {
+class PopulationService {
+    constructor(_matrix, _probability, _maxDiffBetweenEdges, _maxDiffBetweenNode, _logDebug) {
         this._matrix = _matrix;
-        this._populationSize = _populationSize;
         this._probability = _probability;
         this._maxDiffBetweenEdges = _maxDiffBetweenEdges;
         this._maxDiffBetweenNode = _maxDiffBetweenNode;
         this._logDebug = _logDebug;
-        this.popuation = this.generatePopulation(_populationSize);
+        this._chromosomeParts = [[0, "firstPart"], [1, "secondPart"]];
     }
-    generatePopulation(_populationSize) {
+    generatePopulationOrAddMissingIfPopulationSize(result, populationSize) {
         if (this._logDebug)
-            console.log("Generate population with " + _populationSize + " elements.");
-        var result = new Set();
+            console.log("Generate population with " + populationSize + " elements.");
         do {
-            result.add(this.createChromosomeFromMatrix(this._matrix));
-        } while (result.size < _populationSize);
+            result.popuation.add(this.generateChromosomeBy(this._matrix));
+        } while (result.popuation.size < populationSize);
         return result;
     }
-    createChromosomeFromMatrix(matrix) {
+    generateChromosomeBy(matrix) {
         var result;
         do {
             result = this.generateChromosome(matrix.elements.length);
@@ -60309,7 +60313,12 @@ class PopulationModel {
             nodeNumber = 0;
             for (let i = 0; i < nodeNumbers; i++) {
                 var isFirstPart = Math.random() < this._probability ? true : false;
-                result.chromosome.push(new ChromosomeModel_1.ChromosomeElement(i, isFirstPart));
+                if (isFirstPart) {
+                    result.chromosome.push(new ChromosomeModel_1.ChromosomeElement(i, this._chromosomeParts[0][0]));
+                }
+                else {
+                    result.chromosome.push(new ChromosomeModel_1.ChromosomeElement(i, this._chromosomeParts[1][0]));
+                }
                 nodeNumber = isFirstPart ? nodeNumber + 1 : nodeNumber;
             }
         } while (Math.abs(result.chromosome.length - nodeNumber) <= this._maxDiffBetweenNode);
@@ -60318,76 +60327,32 @@ class PopulationModel {
         result.sumOfF2 = we[1];
         return result;
     }
-    getF1SumF2SumAndParetoPairs() {
-        var sumf1 = 0;
-        var sumf2 = 0;
-        var pairs = new Array();
-        this.popuation.forEach(chromosomeModel => {
-            sumf1 += chromosomeModel.sumOfF1;
-            sumf2 += chromosomeModel.sumOfF2;
-            pairs.push([chromosomeModel.sumOfF1, chromosomeModel.sumOfF2]);
-        });
-        return [sumf1, sumf2, pairs];
-    }
-    // public getParetoPairs(): Array<[number, number]> {
-    //     var result: Array<[number, number]> = new Array<[number, number]>();
-    //     Array.from(this.popuation.values()).forEach(chromosomeModel => {
-    //         var points = this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix);
-    //         result.push([points[0], points[1]]);
-    //     });
-    //     return result;
-    // }
-    // public getF1Sum(): number {
-    //     var result: number = 0;
-    //     this.popuation.forEach(chromosomeModel => {
-    //         result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[0];
-    //     });
-    //     return result;
-    // }
-    // public getF2Sum(): number {
-    //     var result: number = 0;
-    //     this.popuation.forEach(chromosomeModel => {
-    //         result += this.getConnectedEdgeCountAndWegithCount(chromosomeModel, this._matrix)[1];
-    //     });
-    //     return result;
-    // }
     getConnectedEdgeCountAndWegithCount(chromosomeModel, matrix) {
         var edgeCount = 0;
         var edgeWeigthCount = 0;
         for (let i = 0; i < matrix.elements.length; i++) {
-            var rowElem = chromosomeModel.chromosome.find(this.findFirstPartOfGraph(i));
+            var rowElem = chromosomeModel.chromosome.find(this.getPartOfGraphBy(i, this._chromosomeParts[0][0]));
             //first part is selected by user, second is not present, via row
             if (rowElem === undefined) {
                 for (let j = 0; j < matrix.elements[i].length; j++) {
                     //check if column is in first present
-                    var element = chromosomeModel.chromosome.find(this.findSecondPartOfGraph(j));
-                    if (element !== undefined && matrix.elements[i][j].value >= 1) {
+                    var element = chromosomeModel.chromosome.find(this.getPartOfGraphBy(j, this._chromosomeParts[1][0]));
+                    if (element !== undefined && matrix.elements[i][j] >= 1) {
                         edgeCount++;
-                        edgeWeigthCount += matrix.elements[i][j].value;
+                        edgeWeigthCount += matrix.elements[i][j];
                     }
                 }
             }
         }
         return [edgeCount, edgeWeigthCount];
     }
-    findSecondPartOfGraph(j) {
+    getPartOfGraphBy(nodeNumber, partNumber) {
         return n => {
-            return n.isFirstPart === true && n.nodeNumber === j;
+            return n.chromosomePartNumber === partNumber && n.nodeNumber === nodeNumber;
         };
-    }
-    findFirstPartOfGraph(i) {
-        return n => {
-            return n.isFirstPart === false && n.nodeNumber === i;
-        };
-    }
-    getPopulationCount() {
-        return this.popuation.size;
-    }
-    getChromosomeByIndex(index) {
-        return Array.from(this.popuation.values())[index];
     }
 }
-exports.PopulationModel = PopulationModel;
+exports.PopulationService = PopulationService;
 
 },{"./ChromosomeModel":2}],8:[function(require,module,exports){
 "use strict";
@@ -60396,6 +60361,7 @@ const Matrix_1 = require("./Matrix");
 const GraphService_1 = require("./GraphService");
 const EvolutionService_1 = require("./EvolutionService");
 const PopulationModel_1 = require("./PopulationModel");
+const PopulationService_1 = require("./PopulationService");
 //init
 window.onload = function () {
     //data charts init
@@ -60412,7 +60378,7 @@ window.onload = function () {
     //population settings
     var maxDiffBetweenEdges = 6;
     var maxDiffBetweenNode = 4;
-    var probability = 0.1;
+    var probabilityForChromosome = 0.3;
     var populationSize = 100;
     //evolutions settings
     var numberOfTournamentRounds = populationSize / 2;
@@ -60422,15 +60388,16 @@ window.onload = function () {
     new GraphService_1.GraphService(adjensceMatrix);
     var isConsistent = adjensceMatrix.DepthFirstSearch();
     //init population
-    var population = new PopulationModel_1.PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug);
+    var popService = new PopulationService_1.PopulationService(adjensceMatrix, probabilityForChromosome, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug);
+    var population = popService.generatePopulationOrAddMissingIfPopulationSize(new PopulationModel_1.PopulationModel(new Set()), populationSize);
     //init evolution
-    var ev = new EvolutionService_1.EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
+    var ev = new EvolutionService_1.EvolutionService(numberOfTournamentRounds, popService, logDebug);
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
         var x = 0;
         for (let i = 0; i < numberOfIterations; i++) {
-            var populationAfterIteration = ev.runIteration();
-            var [sumF1, sumF2, paretoPoins] = populationAfterIteration.getF1SumF2SumAndParetoPairs();
+            population = ev.runIteration(population);
+            var [sumF1, sumF2, paretoPoins] = population.getF1SumF2SumAndParetoPairs();
             updateDataPointsOfF1AndF2Sum(sumF1, sumF2);
             if (x === i) {
                 x = x === 0 ? 1 : x;
@@ -60484,11 +60451,34 @@ window.onload = function () {
         new GraphService_1.GraphService(adjensceMatrix);
         isConsistent = adjensceMatrix.DepthFirstSearch();
         //init population
-        population = new PopulationModel_1.PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug);
-        //init evolution
-        ev = new EvolutionService_1.EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
+        population = popService.generatePopulationOrAddMissingIfPopulationSize(new PopulationModel_1.PopulationModel(new Set()), populationSize);
         document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
+        //clear charts data 
+        dataPointsOfF1Sum = [];
+        dataPointsOfF2Sum = [];
+        dataPointsPareto = [];
+        iteractionCounter = 1;
+        sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
+        paretoChart = generateParetoChart(dataPointsPareto);
     });
+    document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
+    var sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
+    var paretoChart = generateParetoChart(dataPointsPareto);
+    function perc2color(perc) {
+        var r, g, b = 0;
+        if (perc < 50) {
+            r = 255;
+            g = Math.round(5.1 * perc);
+        }
+        else {
+            g = 255;
+            r = Math.round(510 - 5.10 * perc);
+        }
+        var h = r * 0x10000 + g * 0x100 + b * 0x1;
+        return '#' + ('000000' + h.toString(16)).slice(-6);
+    }
+};
+function generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum) {
     var sumChart = new CanvasJS.Chart("sumChart", {
         animationEnabled: false,
         theme: "light2",
@@ -60519,6 +60509,9 @@ window.onload = function () {
             }]
     });
     sumChart.render();
+    return sumChart;
+}
+function generateParetoChart(dataPointsPareto) {
     var paretoChart = new CanvasJS.Chart("paretoChart", {
         data: [
             {
@@ -60528,19 +60521,7 @@ window.onload = function () {
         ]
     });
     paretoChart.render();
-    function perc2color(perc) {
-        var r, g, b = 0;
-        if (perc < 50) {
-            r = 255;
-            g = Math.round(5.1 * perc);
-        }
-        else {
-            g = 255;
-            r = Math.round(510 - 5.10 * perc);
-        }
-        var h = r * 0x10000 + g * 0x100 + b * 0x1;
-        return '#' + ('000000' + h.toString(16)).slice(-6);
-    }
-};
+    return paretoChart;
+}
 
-},{"./EvolutionService":3,"./GraphService":4,"./Matrix":5,"./PopulationModel":7}]},{},[8]);
+},{"./EvolutionService":3,"./GraphService":4,"./Matrix":5,"./PopulationModel":6,"./PopulationService":7}]},{},[8]);

@@ -1,85 +1,73 @@
 import { PopulationModel } from './PopulationModel';
 import { ChromosomeModel } from './ChromosomeModel';
-import { Matrix } from './Matrix';
+import { PopulationService } from './PopulationService';
 
 export class EvolutionService {
-    private _numberOfTournamentRounds: number;
-    constructor(private _populationModel: PopulationModel, private _matrix: Matrix, numberOfTournamentRounds: number, private logDebug: boolean) {
-        this._numberOfTournamentRounds = numberOfTournamentRounds;
-    }
 
-    public runIteration(): PopulationModel {
+    constructor(private numberOfTournamentRounds: number,
+        private populationService: PopulationService,
+        private logDebug: boolean) { }
+
+    public runIteration(population: PopulationModel): PopulationModel {
+        console.log(population.getF1SumF2SumAndParetoPairs());
+
         var bestCollectionByF1 = new Array<ChromosomeModel>();
         var bestCollectionByF2 = new Array<ChromosomeModel>();
 
-        bestCollectionByF1 = this.getBestChromosomeModelsBy(true);
-        bestCollectionByF2 = this.getBestChromosomeModelsBy(false);
+        bestCollectionByF1 = this.getBestChromosomeModelsBy(true, population);
+        bestCollectionByF2 = this.getBestChromosomeModelsBy(false, population);
 
         //copy new population to model
-        this._populationModel.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
-        if (this.logDebug)
-            console.log(this._populationModel.popuation);
-        // this._populationModel.popuation = this.shuffle(this._populationModel.popuation);
-        if (this.logDebug)
-            console.log(this._populationModel.popuation);
-
-        if (this.logDebug)
-            console.log("--------------- _populationModel." + this._populationModel.popuation.size);
-        return this._populationModel;
+        population.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
+        //  population.popuation = this.shuffle(population.popuation);
+        
+        console.log(population.getF1SumF2SumAndParetoPairs());
+        console.log("--------------- _populationModel." + population.popuation.size);
+        return population;
     }
 
-    public getBestChromosomeModelsBy(by: boolean): Array<ChromosomeModel> {
-        var halfOfElementsCount: number = Math.floor(this._populationModel.getPopulationCount() / 2.0);
-        var result = new Set<ChromosomeModel>();
+    public getBestChromosomeModelsBy(by: boolean, populationModel: PopulationModel): Array<ChromosomeModel> {
+        var halfOfElementsCount: number = Math.floor(populationModel.getPopulationCount() / 2.0);
+        var result = new PopulationModel(new Set<ChromosomeModel>());
         //if by F1 factor
         if (by) {
             if (this.logDebug)
                 console.log("--------------- Trunament by F1 started.");
-            for (let i = 0; i < this._numberOfTournamentRounds; i++) {
+            for (let i = 0; i < this.numberOfTournamentRounds; i++) {
                 var { left, rigth } = this.getRandomFirstHalfNumber(halfOfElementsCount);
-                var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth);
+                var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth, populationModel);
 
-                result.add(this.selectBestBy(leftChromosome, rigthChromosome, true));
+                result.popuation.add(this.selectBestBy(leftChromosome, rigthChromosome, true));
             }
             //else by F2 factor
         } else {
             if (this.logDebug)
                 console.log("--------------- Trunament by F2 started.");
-            for (let i = 0; i < this._numberOfTournamentRounds; i++) {
+            for (let i = 0; i < this.numberOfTournamentRounds; i++) {
                 var { left, rigth } = this.getRandomSecondHalfNumber(left, halfOfElementsCount, rigth);
-                var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth);
+                var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth, populationModel);
 
-                result.add(this.selectBestBy(leftChromosome, rigthChromosome, false));
+                result.popuation.add(this.selectBestBy(leftChromosome, rigthChromosome, false));
             }
         }
-        if (result.size == this._numberOfTournamentRounds) {
+        if (result.popuation.size == this.numberOfTournamentRounds) {
 
         } else {
             if (this.logDebug)
-                console.log("Duplicate in population deleted, should be: " + this._numberOfTournamentRounds + ", but was: " + result.size + ".");
-            result = this.fixPopulation(result, this._numberOfTournamentRounds);
+                console.log("Duplicate in population deleted, should be: " + this.numberOfTournamentRounds + ", but was: " + result.popuation.size + ".");
+            result = this.fixPopulation(result, this.numberOfTournamentRounds);
         }
         if (this.logDebug)
             console.log("--------------- Trunament ended.");
 
-        return Array.from(result.values());
+        return Array.from(result.popuation.values());
     }
 
-    private fixPopulation(result: Set<ChromosomeModel>, chromosomeCount: number): Set<ChromosomeModel> {
-        do {
-            var diff: number = Math.abs(chromosomeCount - result.size);
-            var missingChromosomes = this._populationModel.generatePopulation(diff);
-
-            if (this.logDebug)
-                console.log("Fixing population, missing: " + diff + ".");
-
-            missingChromosomes.forEach(missingElement => {
-                result.add(missingElement);
-            });
-        } while (result.size < chromosomeCount)
+    private fixPopulation(populationModel: PopulationModel, populationSize: number): PopulationModel {
+        populationModel = this.populationService.generatePopulationOrAddMissingIfPopulationSize(populationModel, populationSize);
         if (this.logDebug)
-            console.log(result.size == chromosomeCount ? "ok, " + result.size + " elements in population" : "erron during fixing, was: " + result.size + " should be: " + chromosomeCount)
-        return result;
+        console.log("Population size after fix: " + populationModel.popuation.size);
+        return populationModel;
     }
 
     private getRandomSecondHalfNumber(left: number, halfOfElementsCount: number, rigth: number) {
@@ -94,9 +82,9 @@ export class EvolutionService {
         return { left, rigth };
     }
 
-    private getLeftAndRigthChromomosomeByNumber(left: number, rigth: number) {
-        var leftChromosome = this._populationModel.getChromosomeByIndex(left);
-        var rigthChromosome = this._populationModel.getChromosomeByIndex(rigth);
+    private getLeftAndRigthChromomosomeByNumber(left: number, rigth: number, populationModel: PopulationModel) {
+        var leftChromosome = populationModel.getChromosomeByIndex(left);
+        var rigthChromosome = populationModel.getChromosomeByIndex(rigth);
         return { leftChromosome, rigthChromosome };
     }
 

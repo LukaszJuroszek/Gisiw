@@ -12,8 +12,8 @@ export class GraphService {
         var edges = new Array();
         for (var i = 0; i < nodeNeighbors.length; i++) {
             for (var j = 0; j < nodeNeighbors[i].neighbors.length; j++) {
-                edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j].num, width: nodeNeighbors[i].neighbors[j].edgeValue / 2.0 })
-                edges.push({ from: nodeNeighbors[i].neighbors[j].num, to: nodeNeighbors[i].id, width: nodeNeighbors[i].neighbors[j].edgeValue / 2.0 })
+                edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j].num, width: nodeNeighbors[i].neighbors[j].edgeValue / 10.0 })
+                edges.push({ from: nodeNeighbors[i].neighbors[j].num, to: nodeNeighbors[i].id, width: nodeNeighbors[i].neighbors[j].edgeValue / 10.0 })
             }
         }
         var result = new vis.DataSet(edges);

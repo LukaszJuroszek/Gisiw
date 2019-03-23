@@ -1,11 +1,10 @@
 import { ChromosomeElement, ChromosomeModel } from "./ChromosomeModel";
-import { Matrix } from "./Matrix";
 
 export class PopulationModel {
     public popuation: Set<ChromosomeModel>;
 
-    constructor(_logDebug: boolean, _popuation: Set<ChromosomeModel>) {
-        this.popuation = _popuation
+    constructor(_popuation: Set<ChromosomeModel>) {
+            this.popuation = _popuation
     }
 
     public getF1SumF2SumAndParetoPairs(): [number, number, Array<[number, number]>] {
@@ -27,5 +26,4 @@ export class PopulationModel {
     public getChromosomeByIndex(index: number): ChromosomeModel {
         return Array.from(this.popuation.values())[index];
     }
-
 }
