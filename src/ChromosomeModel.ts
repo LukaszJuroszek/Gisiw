@@ -29,9 +29,9 @@ export class ChromosomeModel {
 export class ChromosomeElement {
     nodeNumber: number;
     //chromosome is identifying spliting graph to two sub graph.
-    isFirstPart: boolean;
-    constructor(nodeNumber: number, isFirstPart: boolean) {
+    chromosomePartNumber: number;
+    constructor(nodeNumber: number, chromosomePartNumber: number) {
         this.nodeNumber = nodeNumber;
-        this.isFirstPart = isFirstPart
+        this.chromosomePartNumber = chromosomePartNumber
     }
 }

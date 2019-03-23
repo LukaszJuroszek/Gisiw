@@ -59985,9 +59985,11 @@ class EvolutionService {
         bestCollectionByF2 = this.getBestChromosomeModelsBy(false);
         //copy new population to model
         this._populationModel.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
-        console.log(this._populationModel.popuation);
-        this._populationModel.popuation = this.shuffle(this._populationModel.popuation);
-        console.log(this._populationModel.popuation);
+        if (this.logDebug)
+            console.log(this._populationModel.popuation);
+        // this._populationModel.popuation = this.shuffle(this._populationModel.popuation);
+        if (this.logDebug)
+            console.log(this._populationModel.popuation);
         if (this.logDebug)
             console.log("--------------- _populationModel." + this._populationModel.popuation.size);
         return this._populationModel;
@@ -60020,7 +60022,7 @@ class EvolutionService {
         else {
             if (this.logDebug)
                 console.log("Duplicate in population deleted, should be: " + this._numberOfTournamentRounds + ", but was: " + result.size + ".");
-            var res = this.fixPopulation(result, this._numberOfTournamentRounds);
+            result = this.fixPopulation(result, this._numberOfTournamentRounds);
         }
         if (this.logDebug)
             console.log("--------------- Trunament ended.");
@@ -60321,7 +60323,6 @@ class PopulationModel {
         var sumf2 = 0;
         var pairs = new Array();
         this.popuation.forEach(chromosomeModel => {
-            console.log(chromosomeModel.getStringWithSums());
             sumf1 += chromosomeModel.sumOfF1;
             sumf2 += chromosomeModel.sumOfF2;
             pairs.push([chromosomeModel.sumOfF1, chromosomeModel.sumOfF2]);
@@ -60411,7 +60412,7 @@ window.onload = function () {
     //population settings
     var maxDiffBetweenEdges = 6;
     var maxDiffBetweenNode = 4;
-    var probability = 0.4;
+    var probability = 0.1;
     var populationSize = 100;
     //evolutions settings
     var numberOfTournamentRounds = populationSize / 2;
@@ -60424,7 +60425,6 @@ window.onload = function () {
     var population = new PopulationModel_1.PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug);
     //init evolution
     var ev = new EvolutionService_1.EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
-    // ev.iterateBy();
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
         var x = 0;
@@ -60482,9 +60482,13 @@ window.onload = function () {
         e.preventDefault();
         adjensceMatrix = new Matrix_1.Matrix(nodeCount, probability);
         new GraphService_1.GraphService(adjensceMatrix);
-        adjensceMatrix.DepthFirstSearch();
+        isConsistent = adjensceMatrix.DepthFirstSearch();
+        //init population
+        population = new PopulationModel_1.PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug);
+        //init evolution
+        ev = new EvolutionService_1.EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
+        document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
     });
-    document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
     var sumChart = new CanvasJS.Chart("sumChart", {
         animationEnabled: false,
         theme: "light2",

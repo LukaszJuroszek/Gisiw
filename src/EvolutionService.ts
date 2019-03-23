@@ -14,11 +14,14 @@ export class EvolutionService {
 
         bestCollectionByF1 = this.getBestChromosomeModelsBy(true);
         bestCollectionByF2 = this.getBestChromosomeModelsBy(false);
+
         //copy new population to model
         this._populationModel.popuation = new Set(bestCollectionByF1.concat(bestCollectionByF2));
-        console.log(this._populationModel.popuation);
-        this._populationModel.popuation= this.shuffle(this._populationModel.popuation);
-        console.log(this._populationModel.popuation);
+        if (this.logDebug)
+            console.log(this._populationModel.popuation);
+        // this._populationModel.popuation = this.shuffle(this._populationModel.popuation);
+        if (this.logDebug)
+            console.log(this._populationModel.popuation);
 
         if (this.logDebug)
             console.log("--------------- _populationModel." + this._populationModel.popuation.size);
@@ -54,7 +57,7 @@ export class EvolutionService {
         } else {
             if (this.logDebug)
                 console.log("Duplicate in population deleted, should be: " + this._numberOfTournamentRounds + ", but was: " + result.size + ".");
-            var res = this.fixPopulation(result, this._numberOfTournamentRounds);
+            result = this.fixPopulation(result, this._numberOfTournamentRounds);
         }
         if (this.logDebug)
             console.log("--------------- Trunament ended.");

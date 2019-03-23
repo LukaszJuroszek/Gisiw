@@ -1,32 +1,35 @@
-import { MatrixElement } from './MatrixElement';
 
 export class Matrix {
-    elements: Array<Array<MatrixElement>>;
+    private weigthIfNoEdge: number = 0;
+    private defaultWeigthIfHasEdge: number = 1;
+    private maxEdgeWeigth: number = 10;
+    
+    elements: Array<Array<number>>;
 
     constructor(node: number, probabilityForEdge: number) {
         this.GenerateAdjensceMatrix(node, probabilityForEdge);
     }
 
     private GenerateAdjensceMatrix(node: number, probabilityForEdge: number): void {
-        this.elements = new Array<Array<MatrixElement>>();
+        this.elements = new Array<Array<number>>();
         for (var i = 0; i < node; i++) {
-            this.elements[i] = new Array<MatrixElement>(node);
+            this.elements[i] = new Array<number>(node);
             for (var j = 0; j < node; j++) {
-                this.elements[i][j] = new MatrixElement(0, i, j);
+                this.elements[i][j] = this.weigthIfNoEdge;
             }
         }
 
         for (var i = 0; i < node; i++) {
             for (var j = (i + 1); j < node; j++) {
                 var hasEdge = Math.random() < probabilityForEdge ? true : false;
-                var weigthIfHasEdge = 1;
+                var weigthIfHasEdge = this.defaultWeigthIfHasEdge;
                 if (hasEdge) {
-                    weigthIfHasEdge = Math.floor((Math.random() * 10) + 1);
-                    this.elements[i][j] = new MatrixElement(weigthIfHasEdge, j, i);
+                    weigthIfHasEdge = Math.floor((Math.random() * this.maxEdgeWeigth) + this.defaultWeigthIfHasEdge);
+                    this.elements[i][j] = weigthIfHasEdge;
                 } else {
-                    this.elements[i][j] = new MatrixElement(0, j, i);
+                    this.elements[i][j] = this.weigthIfNoEdge;
                 }
-                this.elements[j][i] = new MatrixElement(0, i, j);
+                this.elements[j][i] = this.weigthIfNoEdge
             }
         }
     }
@@ -36,14 +39,14 @@ export class Matrix {
         for (var i = 0; i < this.elements.length; i++) {
             var tmp = new Array();
             for (var j = (i + 1); j < this.elements.length; j++) {
-                this.elements[j][i].value = this.elements[i][j].value;
+                this.elements[j][i] = this.elements[i][j];
             }
         }
         for (var i = 0; i < this.elements.length; i++) {
             var tmp = new Array();
             for (var j = 0; j < this.elements[i].length; j++) {
-                if (this.elements[i][j].value >= 1) {
-                    tmp.push({ num: j, edgeValue: this.elements[i][j].value });
+                if (this.elements[i][j] >= 1) {
+                    tmp.push({ num: j, edgeValue: this.elements[i][j] });
                 }
             }
             tmp.sort((function (a, b) { return b.num - a.num }));

@@ -23,7 +23,7 @@ window.onload = function () {
     //population settings
     var maxDiffBetweenEdges: number = 6;
     var maxDiffBetweenNode: number = 4;
-    var probability: number = 0.4;
+    var probability: number = 0.1;
     var populationSize: number = 100;
 
     //evolutions settings
@@ -33,14 +33,12 @@ window.onload = function () {
     //init of matrix
     var adjensceMatrix = new Matrix(nodeCount, probability);
     new GraphService(adjensceMatrix);
-
     var isConsistent = adjensceMatrix.DepthFirstSearch();
 
     //init population
     var population = new PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug);
     //init evolution
     var ev = new EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
-    // ev.iterateBy();
 
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
@@ -104,7 +102,12 @@ window.onload = function () {
         e.preventDefault();
         adjensceMatrix = new Matrix(nodeCount, probability);
         new GraphService(adjensceMatrix);
-        adjensceMatrix.DepthFirstSearch();
+        isConsistent = adjensceMatrix.DepthFirstSearch();
+        //init population
+        population = new PopulationModel(adjensceMatrix, populationSize, probability, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug);
+        //init evolution
+        ev = new EvolutionService(population, adjensceMatrix, numberOfTournamentRounds, logDebug);
+        document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
     });
 
     document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
