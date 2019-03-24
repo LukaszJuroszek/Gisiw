@@ -26,15 +26,15 @@ export class PopulationService {
         var result: ChromosomeModel;
         do {
             result = this.generateChromosome(matrix.elements.length);
-        } while (result.sumOfF1 <= this._maxDiffBetweenEdges);
+        } while (this.checkDiffBetweenEdges(result));
         return result;
     }
 
     private generateChromosome(nodeNumbers: number): ChromosomeModel {
         var result: ChromosomeModel = new ChromosomeModel();
-        var nodeNumber = 0;
+        var nodeSum: number = 0;
         do {
-            nodeNumber = 0;
+            nodeSum = 0;
             for (let i = 0; i < nodeNumbers; i++) {
                 var isFirstPart = Math.random() < this._probability ? true : false;
                 if (isFirstPart) {
@@ -42,15 +42,32 @@ export class PopulationService {
                 } else {
                     result.chromosome.push(new ChromosomeElement(i, this._chromosomeParts[1][0]));
                 }
-                nodeNumber = isFirstPart ? nodeNumber + 1 : nodeNumber;
+                nodeSum = isFirstPart ? nodeSum + 1 : nodeSum;
             }
-        } while (Math.abs(result.chromosome.length - nodeNumber) <= this._maxDiffBetweenNode);
+        } while (this.checkDiffBetweenNodes(result, nodeSum));
 
         var we = this.getConnectedEdgeCountAndWegithCount(result, this._matrix);
         result.sumOfF1 = we[0];
         result.sumOfF2 = we[1];
 
         return result;
+    }
+
+    public checkDiffBetweenEdges(chrmomosomeModel: ChromosomeModel) {
+        return chrmomosomeModel.sumOfF1 <= this._maxDiffBetweenEdges;
+    }
+
+    private checkDiffBetweenNodes(chromosomeModel: ChromosomeModel, nodeSum: number) {
+        return Math.abs(chromosomeModel.chromosome.length - nodeSum) <= this._maxDiffBetweenNode;
+    }
+
+    public checkDiffBetweenNodesOnExistingChromosome(chromosomeModel: ChromosomeModel) {
+        var nodeSum: number = 0;
+        for (let i = 0; i < chromosomeModel.chromosome.length; i++) {
+            var isFirstPart = chromosomeModel.chromosome[i].chromosomePartNumber === this._chromosomeParts[0][0];
+            nodeSum = isFirstPart ? nodeSum + 1 : nodeSum;
+        }
+        return Math.abs(chromosomeModel.chromosome.length - nodeSum) <= this._maxDiffBetweenNode;
     }
 
     public getConnectedEdgeCountAndWegithCount(chromosomeModel: ChromosomeModel, matrix: Matrix): [number, number] {

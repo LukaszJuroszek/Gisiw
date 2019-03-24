@@ -159,7 +159,7 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[]) {
             shared: true
         },
         data: [{
-            type: "spline",
+            type: "line",
             showInLegend: true,
             name: "Sum F1(x)",
             dataPoints: dataPointsOfF1Sum
@@ -167,7 +167,7 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[]) {
         {
             axisYType: "secondary",
             axisYIndex: 1,
-            type: "spline",
+            type: "line",
             showInLegend: true,
             name: "Sum F2(x)",
             dataPoints: dataPointsOfF2Sum

@@ -18,11 +18,34 @@ export class EvolutionService {
         var bestCollectionByF1: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(true, population);
         var bestCollectionByF2: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(false, population);
 
-        //copy new population to model
-        let temp = this.shuffleshuffle(bestCollectionByF1.concat(bestCollectionByF2));
-        // let temp = bestCollectionByF1.concat(bestCollectionByF2);
+        for (let i = 0; i <  this.generateNumbers(bestCollectionByF1.length); i++) {
+            var rNumber = this.generateNumbers(bestCollectionByF1.length);
+            var lNumber = this.generateNumbers(bestCollectionByF1.length);
+            this.mutateChromosomeByOneNode(bestCollectionByF1[rNumber]);
+            this.mutateChromosomeByOneNode(bestCollectionByF2[lNumber]);
+            console.log("hmm rolig: "+ rNumber+" lNumber: "+lNumber)
+        }
+        
+        let temp = this.shufle(bestCollectionByF1.concat(bestCollectionByF2));
+
         population = temp;
         return population;
+    }
+
+    public mutateChromosomeByOneNode(chromosomeModel: ChromosomeModel): ChromosomeModel {
+        var temp: ChromosomeModel = chromosomeModel;
+        var randomNodeNumber: number = 0;
+        do {
+            temp = chromosomeModel;
+            do {
+                randomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
+            } while (chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber == 0)
+            chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber = 1 // mutate
+        } while (
+            this.populationService.checkDiffBetweenEdges(temp) &&
+            this.populationService.checkDiffBetweenNodesOnExistingChromosome(temp))
+        //check
+        return chromosomeModel;
     }
 
     public getBestChromosomeModelsBy(by: boolean, population: Array<ChromosomeModel>): Array<ChromosomeModel> {
@@ -37,7 +60,7 @@ export class EvolutionService {
                 result.push(this.selectBestBy(leftChromosome, rigthChromosome, true));
             }
 
-        } else { //else by F2 factor
+        } else {   //else by F2 factor
             for (let i = 0; i < this.numberOfTournamentRounds; i++) {
                 var { left, rigth } = this.generateTwoNumbers(halfOfElementsCount, halfOfElementsCount);
                 // console.log("left: " + left + " rigth: " + rigth)
@@ -46,6 +69,7 @@ export class EvolutionService {
                 result.push(this.selectBestBy(leftChromosome, rigthChromosome, false));
             }
         }
+
         if (result.length < this.numberOfTournamentRounds) {
             result = this.populationService.generatePopulationOrAddMissingIfPopulationSize(result, this.numberOfTournamentRounds);
             return Array.from(result);
@@ -73,7 +97,7 @@ export class EvolutionService {
     }
 
     private generateNumbers(to: number) {
-        return Math.floor((Math.random() * to) + 0);
+        return Math.floor((Math.random() * to));
     }
 
     private selectBestBy(leftChromosomeModel: ChromosomeModel, rigthChromosomeModel: ChromosomeModel, by: boolean): ChromosomeModel {
@@ -86,7 +110,7 @@ export class EvolutionService {
         }
     }
 
-    shuffleshuffle(array: Array<ChromosomeModel>): Array<ChromosomeModel> {
+    private shufle(array: Array<ChromosomeModel>): Array<ChromosomeModel> {
         var counter = array.length;
 
         // While there are elements in the array
