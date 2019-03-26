@@ -2,7 +2,7 @@
 export class Matrix {
     private weigthIfNoEdge: number = 0;
     private defaultWeigthIfHasEdge: number = 1;
-    private maxEdgeWeigth: number = 100;
+    private maxEdgeWeigth: number = 10;
     
     elements: Array<Array<number>>;
 

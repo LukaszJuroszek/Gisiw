@@ -35,13 +35,18 @@ export class PopulationService {
                     result.chromosome.push(new ChromosomeElement(i, this._chromosomeParts[1][0]));
                 }
             }
-            var connectedEdgeCountAndWegithCount = this.getConnectedEdgeCountAndWegithCount(result);
-            result.sumOfF1 = connectedEdgeCountAndWegithCount[0];
-            result.sumOfF2 = connectedEdgeCountAndWegithCount[1];
-            
+            result = this.setSumOfF1AndF2(result);
+
         } while (!this.isChromosomeValid(result))
 
         return result;
+    }
+
+    public setSumOfF1AndF2(chromosome: ChromosomeModel): ChromosomeModel {
+        var connectedEdgeCountAndWegithCount = this.getConnectedEdgeCountAndWegithCount(chromosome);
+        chromosome.sumOfF1 = connectedEdgeCountAndWegithCount[0];
+        chromosome.sumOfF2 = connectedEdgeCountAndWegithCount[1];
+        return chromosome;
     }
 
     public isChromosomeValid(chrmomosome: ChromosomeModel): boolean {

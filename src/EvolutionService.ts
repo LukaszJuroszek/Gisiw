@@ -34,7 +34,7 @@ export class EvolutionService {
         }
     }
 
-    public mutateChromosomeByOneNode(chromosomeModel: ChromosomeModel): ChromosomeModel {
+    private mutateChromosomeByOneNode(chromosomeModel: ChromosomeModel): ChromosomeModel {
         var temp: ChromosomeModel = chromosomeModel;
         var randomNodeNumber: number = 0;
         do {
@@ -42,18 +42,18 @@ export class EvolutionService {
             do {
                 randomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
             } while (chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber == 0)
+
             chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber = 1;
-            var connectedEdgeCountAndWegithCount = this.populationService.getConnectedEdgeCountAndWegithCount(chromosomeModel);
-            chromosomeModel.sumOfF1 = connectedEdgeCountAndWegithCount[0];
-            chromosomeModel.sumOfF2 = connectedEdgeCountAndWegithCount[1];
+            chromosomeModel = this.populationService.setSumOfF1AndF2(chromosomeModel);
+
         } while (!this.populationService.isEdgeCountValid(temp) &&
             !this.populationService.isNodeCountValid(temp))
 
-        
+
         return chromosomeModel;
     }
 
-    public getBestChromosomeModelsBy(by: boolean, population: Array<ChromosomeModel>): Array<ChromosomeModel> {
+    private getBestChromosomeModelsBy(by: boolean, population: Array<ChromosomeModel>): Array<ChromosomeModel> {
         var halfOfElementsCount: number = Math.floor(population.length / 2.0);
         var result: Array<ChromosomeModel> = new Array<ChromosomeModel>()
         if (by) { //if by F1 factor
