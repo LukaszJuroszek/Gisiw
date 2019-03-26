@@ -1,13 +1,12 @@
-import { Matrix } from './Matrix';
-import { GraphService } from './GraphService';
+import { Matrix } from './matrix';
+import { GraphService } from './graphService';
 import { EvolutionService } from './EvolutionService';
-import { PopulationService } from './PopulationService';
-import { ChromosomeModel } from './ChromosomeModel';
+import { PopulationService } from './populationService';
+import { ChromosomeModel } from './chromosomeModel';
 declare var CanvasJS: any
 
 //init
 window.onload = function () {
-
     //data charts init
     var dataPointsOfF1Sum = [];
     var dataPointsOfF2Sum = [];
@@ -25,29 +24,35 @@ window.onload = function () {
     //population settings
     var maxDiffBetweenEdges: number = 6;
     var maxDiffBetweenNode: number = 6;
-    var probabilityForChromosome: number = 0.1;
+    var probabilityForChromosome: number = 0.3; //optimal value is 0.5
     var populationSize: number = 100;
 
     //evolutions settings
     var numberOfTournamentRounds: number = populationSize / 2;
-    var numberOfIterations: number = 100;
+    var numberOfIterations: number = 20;
 
     //init of matrix
     var adjensceMatrix = new Matrix(nodeCount, probability);
     new GraphService(adjensceMatrix);
     var isConsistent = adjensceMatrix.DepthFirstSearch();
 
-
     //init population
-    var popService = new PopulationService(adjensceMatrix, probabilityForChromosome, maxDiffBetweenEdges, maxDiffBetweenNode)
-    var population = popService.generatePopulationOrAddMissingIfPopulationSize(new Array<ChromosomeModel>(), populationSize);
+    var popService = new PopulationService(adjensceMatrix, probabilityForChromosome, maxDiffBetweenEdges, maxDiffBetweenNode, logDebug)
+    var population;
+    //  = popService.generatePopulationOrAddMissingIfPopulationSize(new Array<ChromosomeModel>(), populationSize);
     //init evolution
     var ev = new EvolutionService(numberOfTournamentRounds, popService);
 
+    popService.setStatusString("Ready");
     document.getElementById("run").addEventListener("click", function (e) {
+        if (population === undefined)
+            population = popService.generatePopulationOrAddMissingIfPopulationSize(new Array<ChromosomeModel>(), populationSize);
+
+        popService.setStatusString("Running epic...");
         e.preventDefault();
         var x = 0;
         for (let i = 0; i < numberOfIterations; i++) {
+            popService.setStatusString("Running epic... " + iteractionCounter);
             population = ev.runIteration(population);
             var [sumF1, sumF2, paretoPoins] = popService.getF1SumF2SumAndParetoPairs(population);
             updateDataPointsOfF1AndF2Sum(sumF1, sumF2);
@@ -57,6 +62,7 @@ window.onload = function () {
                 x *= 10;
             }
         }
+        popService.setStatusString("Ready");
     }, false);
 
     function updateDataPointsOfF1AndF2Sum(sumF1: number, sumF2: number) {
@@ -109,6 +115,7 @@ window.onload = function () {
         isConsistent = adjensceMatrix.DepthFirstSearch();
         //init population
         population = popService.generatePopulationOrAddMissingIfPopulationSize(new Array<ChromosomeModel>(), populationSize);
+
         document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
 
         //clear charts data 
@@ -118,6 +125,7 @@ window.onload = function () {
         iteractionCounter = 1;
         sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
         paretoChart = generateParetoChart(dataPointsPareto);
+        popService.setStatusString("Ready");
     });
 
     document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;

@@ -7,88 +7,79 @@ export class PopulationService {
     constructor(private _matrix: Matrix,
         private _probability: number,
         private _maxDiffBetweenEdges: number,
-        private _maxDiffBetweenNode: number) {
+        private _maxDiffBetweenNode: number,
+        private _debug: boolean) {
     }
 
     public generatePopulationOrAddMissingIfPopulationSize(result: Array<ChromosomeModel>, populationSize: number): Array<ChromosomeModel> {
         var temp = new Set<ChromosomeModel>(result);
         if (temp.size < populationSize) {
             do {
-                temp.add(this.generateChromosomeBy(this._matrix));
+                temp.add(this.generateChromosome(this._matrix));
             }
             while (temp.size < populationSize);
         }
+
         result = Array.from(temp);
         return result;
     }
 
-    public generateChromosomeBy(matrix: Matrix): ChromosomeModel {
-        var result: ChromosomeModel;
-        do {
-            result = this.generateChromosome(matrix.elements.length);
-        } while (this.checkDiffBetweenEdges(result));
-        return result;
-    }
-
-    private generateChromosome(nodeNumbers: number): ChromosomeModel {
+    public generateChromosome(matrix: Matrix): ChromosomeModel {
         var result: ChromosomeModel = new ChromosomeModel();
-        var nodeSum: number = 0;
         do {
-            nodeSum = 0;
-            for (let i = 0; i < nodeNumbers; i++) {
-                var isFirstPart = Math.random() < this._probability ? true : false;
-                if (isFirstPart) {
+            result = new ChromosomeModel();
+            for (let i = 0; i < matrix.elements.length; i++) {
+                if (Math.random() < this._probability) {
                     result.chromosome.push(new ChromosomeElement(i, this._chromosomeParts[0][0]));
                 } else {
                     result.chromosome.push(new ChromosomeElement(i, this._chromosomeParts[1][0]));
                 }
-                nodeSum = isFirstPart ? nodeSum + 1 : nodeSum;
             }
-        } while (this.checkDiffBetweenNodes(result, nodeSum));
-
-        var we = this.getConnectedEdgeCountAndWegithCount(result, this._matrix);
-        result.sumOfF1 = we[0];
-        result.sumOfF2 = we[1];
+            var connectedEdgeCountAndWegithCount = this.getConnectedEdgeCountAndWegithCount(result);
+            result.sumOfF1 = connectedEdgeCountAndWegithCount[0];
+            result.sumOfF2 = connectedEdgeCountAndWegithCount[1];
+            
+        } while (!this.isChromosomeValid(result))
 
         return result;
     }
 
-    public checkDiffBetweenEdges(chrmomosomeModel: ChromosomeModel) {
-        return chrmomosomeModel.sumOfF1 <= this._maxDiffBetweenEdges;
+    public isChromosomeValid(chrmomosome: ChromosomeModel): boolean {
+        return this.isEdgeCountValid(chrmomosome) && this.isNodeCountValid(chrmomosome);
     }
 
-    private checkDiffBetweenNodes(chromosomeModel: ChromosomeModel, nodeSum: number) {
-        return Math.abs(chromosomeModel.chromosome.length - nodeSum) <= this._maxDiffBetweenNode;
+    public isEdgeCountValid(chrmomosome: ChromosomeModel): boolean {
+        return true
     }
 
-    public checkDiffBetweenNodesOnExistingChromosome(chromosomeModel: ChromosomeModel) {
+    public isNodeCountValid(chromosomeModel: ChromosomeModel) {
         var nodeSum: number = 0;
         for (let i = 0; i < chromosomeModel.chromosome.length; i++) {
             var isFirstPart = chromosomeModel.chromosome[i].chromosomePartNumber === this._chromosomeParts[0][0];
             nodeSum = isFirstPart ? nodeSum + 1 : nodeSum;
         }
-        return Math.abs(chromosomeModel.chromosome.length - nodeSum) <= this._maxDiffBetweenNode;
+        var firstPartSum = chromosomeModel.chromosome.length - nodeSum;
+        var secondPartSum = chromosomeModel.chromosome.length - firstPartSum;
+        return (Math.abs(firstPartSum - secondPartSum) <= this._maxDiffBetweenNode);
     }
 
-    public getConnectedEdgeCountAndWegithCount(chromosomeModel: ChromosomeModel, matrix: Matrix): [number, number] {
+    public getConnectedEdgeCountAndWegithCount(chromosomeModel: ChromosomeModel): [number, number] {
         var edgeCount: number = 0;
         var edgeWeigthCount: number = 0;
-
-        for (let i = 0; i < matrix.elements.length; i++) {
+        for (let i = 0; i < this._matrix.elements.length; i++) {
             var rowElem = chromosomeModel.chromosome.find(this.getPartOfGraphBy(i, this._chromosomeParts[0][0]));
             //first part is selected by user, second is not present, via row
             if (rowElem === undefined) {
-                for (let j = 0; j < matrix.elements[i].length; j++) {
+                for (let j = 0; j < this._matrix.elements[i].length; j++) {
                     //check if column is in first present
                     var element = chromosomeModel.chromosome.find(this.getPartOfGraphBy(j, this._chromosomeParts[1][0]));
-                    if (element !== undefined && matrix.elements[i][j] >= 1) {
+                    if (element !== undefined && this._matrix.elements[i][j] >= 1) {
                         edgeCount++;
-                        edgeWeigthCount += matrix.elements[i][j];
+                        edgeWeigthCount += this._matrix.elements[i][j];
                     }
                 }
             }
         }
-
         return [edgeCount, edgeWeigthCount];
     }
 
@@ -108,5 +99,9 @@ export class PopulationService {
             pairs.push([chromosomeModel.sumOfF1, chromosomeModel.sumOfF2]);
         });
         return [sumf1, sumf2, pairs];
+    }
+
+    public setStatusString(statusString: string) {
+        document.getElementById("currentStatus").textContent = "Current Status: " + statusString;
     }
 }

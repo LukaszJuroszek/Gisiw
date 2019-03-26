@@ -14,22 +14,24 @@ export class EvolutionService {
     // vi. Wydzielić front Pareto dla każdej populacji
     // vii. Graficznie przedstawiać populację Pi oraz Pi+1 
     public runIteration(population: Array<ChromosomeModel>): Array<ChromosomeModel> {
-
         var bestCollectionByF1: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(true, population);
         var bestCollectionByF2: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(false, population);
 
-        for (let i = 0; i <  this.generateNumbers(bestCollectionByF1.length); i++) {
-            var rNumber = this.generateNumbers(bestCollectionByF1.length);
-            var lNumber = this.generateNumbers(bestCollectionByF1.length);
-            this.mutateChromosomeByOneNode(bestCollectionByF1[rNumber]);
-            this.mutateChromosomeByOneNode(bestCollectionByF2[lNumber]);
-            console.log("hmm rolig: "+ rNumber+" lNumber: "+lNumber)
-        }
-        
+        this.oneNodeMutate(bestCollectionByF1, bestCollectionByF2);
+
         let temp = this.shufle(bestCollectionByF1.concat(bestCollectionByF2));
 
         population = temp;
         return population;
+    }
+
+    private oneNodeMutate(bestCollectionByF1: ChromosomeModel[], bestCollectionByF2: ChromosomeModel[]) {
+        for (let i = 0; i < this.generateNumbers(bestCollectionByF1.length); i++) {
+            var rNumber = this.generateNumbers(bestCollectionByF1.length);
+            var lNumber = this.generateNumbers(bestCollectionByF2.length);
+            this.mutateChromosomeByOneNode(bestCollectionByF1[rNumber]);
+            this.mutateChromosomeByOneNode(bestCollectionByF2[lNumber]);
+        }
     }
 
     public mutateChromosomeByOneNode(chromosomeModel: ChromosomeModel): ChromosomeModel {
@@ -40,11 +42,14 @@ export class EvolutionService {
             do {
                 randomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
             } while (chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber == 0)
-            chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber = 1 // mutate
-        } while (
-            this.populationService.checkDiffBetweenEdges(temp) &&
-            this.populationService.checkDiffBetweenNodesOnExistingChromosome(temp))
-        //check
+            chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber = 1;
+            var connectedEdgeCountAndWegithCount = this.populationService.getConnectedEdgeCountAndWegithCount(chromosomeModel);
+            chromosomeModel.sumOfF1 = connectedEdgeCountAndWegithCount[0];
+            chromosomeModel.sumOfF2 = connectedEdgeCountAndWegithCount[1];
+        } while (!this.populationService.isEdgeCountValid(temp) &&
+            !this.populationService.isNodeCountValid(temp))
+
+        
         return chromosomeModel;
     }
 
@@ -55,7 +60,6 @@ export class EvolutionService {
             for (let i = 0; i < this.numberOfTournamentRounds; i++) {
                 var { left, rigth } = this.generateTwoNumbers(halfOfElementsCount);
                 var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth, population);
-                // console.log("left: " + left + " rigth: " + rigth)
 
                 result.push(this.selectBestBy(leftChromosome, rigthChromosome, true));
             }
@@ -63,7 +67,6 @@ export class EvolutionService {
         } else {   //else by F2 factor
             for (let i = 0; i < this.numberOfTournamentRounds; i++) {
                 var { left, rigth } = this.generateTwoNumbers(halfOfElementsCount, halfOfElementsCount);
-                // console.log("left: " + left + " rigth: " + rigth)
                 var { leftChromosome, rigthChromosome } = this.getLeftAndRigthChromomosomeByNumber(left, rigth, population);
 
                 result.push(this.selectBestBy(leftChromosome, rigthChromosome, false));
