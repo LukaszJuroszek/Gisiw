@@ -1,5 +1,5 @@
 import { ChromosomeModel } from './ChromosomeModel';
-import { PopulationService } from './PopulationService';
+import { PopulationService } from './populationService';
 
 export class EvolutionService {
 
@@ -17,20 +17,33 @@ export class EvolutionService {
         var bestCollectionByF1: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(true, population);
         var bestCollectionByF2: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(false, population);
 
+        if (bestCollectionByF1.length != population.length / 2)
+            console.log("bestCollectionByF1.length is INVALID " + bestCollectionByF1.length);
+
+        if (bestCollectionByF2.length != population.length / 2)
+            console.log("bestCollectionByF2.length is INVALID " + bestCollectionByF2.length);
+
         this.oneNodeMutate(bestCollectionByF1, bestCollectionByF2);
 
         let temp = this.shufle(bestCollectionByF1.concat(bestCollectionByF2));
 
         population = temp;
+
         return population;
     }
 
     private oneNodeMutate(bestCollectionByF1: ChromosomeModel[], bestCollectionByF2: ChromosomeModel[]) {
-        for (let i = 0; i < this.generateNumbers(bestCollectionByF1.length); i++) {
+        var numberOfThimes: number = this.generateNumbers(bestCollectionByF1.length / 10);
+
+        for (let i = 0; i < numberOfThimes; i++) {
             var rNumber = this.generateNumbers(bestCollectionByF1.length);
             var lNumber = this.generateNumbers(bestCollectionByF2.length);
+
             this.mutateChromosomeByOneNode(bestCollectionByF1[rNumber]);
             this.mutateChromosomeByOneNode(bestCollectionByF2[lNumber]);
+
+            this.mutateChromosomeByFippingNode(bestCollectionByF1[rNumber]);
+            this.mutateChromosomeByFippingNode(bestCollectionByF2[lNumber]);
         }
     }
 
@@ -46,9 +59,28 @@ export class EvolutionService {
             chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber = 1;
             chromosomeModel = this.populationService.setSumOfF1AndF2(chromosomeModel);
 
-        } while (!this.populationService.isEdgeCountValid(temp) &&
-            !this.populationService.isNodeCountValid(temp))
+        } while (!this.populationService.isNodeCountValid(temp))
 
+        return chromosomeModel;
+    }
+
+    private mutateChromosomeByFippingNode(chromosomeModel: ChromosomeModel): ChromosomeModel {
+        var temp: ChromosomeModel = chromosomeModel;
+        var firstRandomNodeNumber: number = 0;
+        var secondRandomNodeNumber: number = 0;
+        do {
+            temp = chromosomeModel;
+            do {
+                firstRandomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
+                secondRandomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
+            } while (
+                chromosomeModel.chromosome[firstRandomNodeNumber].chromosomePartNumber == 0 &&
+                chromosomeModel.chromosome[secondRandomNodeNumber].chromosomePartNumber == 1)
+
+            chromosomeModel.chromosome[firstRandomNodeNumber].chromosomePartNumber = 1;
+            chromosomeModel.chromosome[secondRandomNodeNumber].chromosomePartNumber = 0;
+            chromosomeModel = this.populationService.setSumOfF1AndF2(chromosomeModel);
+        } while (!this.populationService.isNodeCountValid(temp))
 
         return chromosomeModel;
     }
@@ -74,10 +106,18 @@ export class EvolutionService {
         }
 
         if (result.length < this.numberOfTournamentRounds) {
-            result = this.populationService.generatePopulationOrAddMissingIfPopulationSize(result, this.numberOfTournamentRounds);
-            return Array.from(result);
+            var missingChromosomesCount = this.numberOfTournamentRounds - result.length
+            if (missingChromosomesCount < 0)
+                console.log("missingChromosomesCount is INVALID ! " + missingChromosomesCount)
+            var missingChromosomes = this.populationService.generateChromosomes(missingChromosomesCount);
+
+            missingChromosomes.forEach(element => {
+                result.push(element);
+            });
+
+            return result;
         } else {
-            return Array.from(result);
+            return result;
         }
     }
 

@@ -6,13 +6,13 @@ export class PopulationService {
 
     constructor(private _matrix: Matrix,
         private _probability: number,
-        private _maxDiffBetweenEdges: number,
         private _maxDiffBetweenNode: number,
         private _debug: boolean) {
     }
 
-    public generatePopulationOrAddMissingIfPopulationSize(result: Array<ChromosomeModel>, populationSize: number): Array<ChromosomeModel> {
+    public generatePopulation(result: Array<ChromosomeModel>, populationSize: number): Array<ChromosomeModel> {
         var temp = new Set<ChromosomeModel>(result);
+
         if (temp.size < populationSize) {
             do {
                 temp.add(this.generateChromosome(this._matrix));
@@ -23,6 +23,7 @@ export class PopulationService {
         result = Array.from(temp);
         return result;
     }
+
 
     public generateChromosome(matrix: Matrix): ChromosomeModel {
         var result: ChromosomeModel = new ChromosomeModel();
@@ -37,9 +38,19 @@ export class PopulationService {
             }
             result = this.setSumOfF1AndF2(result);
 
-        } while (!this.isChromosomeValid(result))
+        } while (!this.isNodeCountValid(result))
 
         return result;
+    }
+
+    public generateChromosomes(numberOfChromosomeToGenerate: number): Array<ChromosomeModel> {
+
+        var result: Set<ChromosomeModel> = new Set<ChromosomeModel>();
+        do {
+            result.add(this.generateChromosome(this._matrix));
+        } while (result.size == numberOfChromosomeToGenerate)
+
+        return Array.from(result);
     }
 
     public setSumOfF1AndF2(chromosome: ChromosomeModel): ChromosomeModel {
@@ -47,14 +58,6 @@ export class PopulationService {
         chromosome.sumOfF1 = connectedEdgeCountAndWegithCount[0];
         chromosome.sumOfF2 = connectedEdgeCountAndWegithCount[1];
         return chromosome;
-    }
-
-    public isChromosomeValid(chrmomosome: ChromosomeModel): boolean {
-        return this.isEdgeCountValid(chrmomosome) && this.isNodeCountValid(chrmomosome);
-    }
-
-    public isEdgeCountValid(chrmomosome: ChromosomeModel): boolean {
-        return true
     }
 
     public isNodeCountValid(chromosomeModel: ChromosomeModel) {

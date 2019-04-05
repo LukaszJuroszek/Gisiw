@@ -5,6 +5,8 @@ export class ChromosomeModel {
 
     constructor() {
         this.chromosome = new Array<ChromosomeElement>();
+        this.sumOfF1 = 99999999;
+        this.sumOfF2 = 99999999;
     }
 
     public getString(): string {
@@ -23,6 +25,10 @@ export class ChromosomeModel {
             result.push(node);
         }
         return result.toString() + " sumOfF1: " + this.sumOfF1 + " sumOfF2: " + this.sumOfF2;
+    }
+
+    public getSumOfF1AndF2(): number {
+        return this.sumOfF1 + this.sumOfF2;
     }
 }
 
