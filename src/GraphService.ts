@@ -21,6 +21,7 @@ export class GraphService {
 
         var data = {
             nodes: this.chromosomeToNode(currentBestChromosome),
+            edges: this.chromosomeToEdges(currentBestChromosome, this._adjensceMatrix)
         };
 
         this.createGraph(continerId, data, this.getOptionsForBestChromosome());
@@ -50,8 +51,6 @@ export class GraphService {
         // network.setOptions(o);
         return network;
     }
-
-
 
     public matrixToEdges(adjensceMatrix: Matrix) {
         var nodeNeighbors = adjensceMatrix.GetNodeNeighbors();
@@ -86,8 +85,18 @@ export class GraphService {
         return new vis.DataSet(nodes);
     }
 
-    public chromosomeToEdges(chromosome: ChromosomeModel) {
+    public chromosomeToEdges(chromosome: ChromosomeModel, matrix: Matrix) {
+        var nodeNeighbors = matrix.GetNodeNeighbors();
+        var edges = new Array();
 
+        for (var i = 0; i < nodeNeighbors.length; i++) {
+            for (var j = 0; j < nodeNeighbors[i].neighbors.length; j++) {
+                edges.push({ from: nodeNeighbors[i].id, to: nodeNeighbors[i].neighbors[j].num, label: nodeNeighbors[i].neighbors[j].edgeValue.toString(), font: { align: 'top' } })
+                edges.push({ from: nodeNeighbors[i].neighbors[j].num, to: nodeNeighbors[i].id })
+            }
+        }
+
+        return new vis.DataSet(edges);
     }
 
     private getOptionsForBestChromosome() {
@@ -95,9 +104,8 @@ export class GraphService {
             layout: {
                 hierarchical: {
                     enabled: true,
-                    // levelSeparation: 150,
-                    // nodeSpacing: 100,
-                    // treeSpacing: 200,
+                    levelSeparation: 300,
+                    nodeSpacing: 100,
                     blockShifting: true,
                     parentCentralization: true,
                     direction: 'DU',        // UD, DU, LR, RL

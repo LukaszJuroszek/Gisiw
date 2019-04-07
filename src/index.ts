@@ -21,7 +21,6 @@ window.onload = function () {
     var probabilityStep: number = 0.05;
     var nodeCount: number = 30;
     var mainContierId: string = "graphNetwork";
-    var bestContierId: string = "graphNetworkBest";
 
     //population settings
     var maxDiffBetweenNode: number = 6;
@@ -61,9 +60,10 @@ window.onload = function () {
             var [sumF1, sumF2, paretoPoins] = popService.getF1SumF2SumAndParetoPairs(population);
             updateDataPointsOfF1AndF2Sum(sumF1, sumF2);
             updateDataParetoChart(paretoPoins);
-            bestChromosome = graphService.CreateGraphForBestChromosome(bestContierId, population, bestChromosome);
+            bestChromosome = graphService.CreateGraphForBestChromosome(mainContierId, population, bestChromosome);
+
         }
-        popService.setStatusString("Ready");
+        popService.setStatusString("best chromosome: " + bestChromosome.getStringWithSums());
     }, false);
 
     function updateDataPointsOfF1AndF2Sum(sumF1: number, sumF2: number) {
