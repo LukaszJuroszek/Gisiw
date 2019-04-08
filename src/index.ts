@@ -17,29 +17,29 @@ window.onload = function () {
     var logDebug: boolean = false;
 
     //graph settings
-    var probability: number = 0.150;
+    var probability: number = 0.3;
     var probabilityStep: number = 0.05;
     var nodeCount: number = 30;
     var mainContierId: string = "graphNetwork";
 
     //population settings
     var maxDiffBetweenNode: number = 6;
-    var probabilityForChromosome: number = 0.3; //optimal value is 0.5
+    var probabilityForChromosome: number = 0.5; //optimal value is 0.5
     var populationSize: number = 100;
 
     //evolutions settings
     var numberOfTournamentRounds: number = populationSize / 2;
-    var numberOfIterations: number = 20;
+    var numberOfIterations: number = 10;
     var bestChromosome: ChromosomeModel = new ChromosomeModel();
 
     //init of matrix
     var adjensceMatrix = new Matrix(nodeCount, probability);
-    var graphService = new GraphService(adjensceMatrix, mainContierId);
+    var graphService = new GraphService(adjensceMatrix, mainContierId, logDebug);
     var isConsistent = adjensceMatrix.DepthFirstSearch();
 
     //init population
     var popService = new PopulationService(adjensceMatrix, probabilityForChromosome, maxDiffBetweenNode, logDebug)
-    var population;
+    var population = popService.generatePopulation(new Array<ChromosomeModel>(), populationSize);
 
     //init evolution
     var ev = new EvolutionService(numberOfTournamentRounds, popService);
@@ -47,26 +47,24 @@ window.onload = function () {
     popService.setStatusString("Ready");
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
-
-        if (population === undefined)
-            population = popService.generatePopulation(new Array<ChromosomeModel>(), populationSize);
-
+        
         popService.setStatusString("Running epic...");
-        for (let i = 0; i < numberOfIterations; i++) {
+        for (var i = 0; i < numberOfIterations; i++) {
             popService.setStatusString("Running epic... " + iteractionCounter);
+
+            bestChromosome = graphService.CreateGraphForBestChromosome(mainContierId, population, bestChromosome, iteractionCounter);
 
             population = ev.runIteration(population);
 
             var [sumF1, sumF2, paretoPoins] = popService.getF1SumF2SumAndParetoPairs(population);
-            updateDataPointsOfF1AndF2Sum(sumF1, sumF2);
-            updateDataParetoChart(paretoPoins);
-            bestChromosome = graphService.CreateGraphForBestChromosome(mainContierId, population, bestChromosome);
-
+            addDataPoins(sumF1, sumF2, paretoPoins);
         }
+        updateCharts();
         popService.setStatusString("best chromosome: " + bestChromosome.getStringWithSums());
-    }, false);
 
-    function updateDataPointsOfF1AndF2Sum(sumF1: number, sumF2: number) {
+    }, true);
+
+    function addDataPoins(sumF1: number, sumF2: number, paretoPoins: [number, number][]) {
         dataPointsOfF1Sum.push({
             x: iteractionCounter,
             y: sumF1
@@ -76,19 +74,21 @@ window.onload = function () {
             x: iteractionCounter,
             y: sumF2
         });
-        iteractionCounter++;
-        // updating legend text with  updated with y Value 
-        sumChart.render();
-    }
 
-    function updateDataParetoChart(paretoPoins: [number, number][]) {
         paretoPoins.forEach(pair => {
             dataPointsPareto.push({
                 x: pair[0],
                 y: pair[1],
-                color: perc2color(iteractionCounter / 10)
+                color: getRandomColor()
             });
         });
+
+        iteractionCounter++;
+    }
+
+    function updateCharts() {
+        // updating legend text with  updated with y Value 
+        sumChart.render();
         paretoChart.render();
     }
 
@@ -112,8 +112,16 @@ window.onload = function () {
     $('#generate').click(function (e) {
         e.preventDefault();
         adjensceMatrix = new Matrix(nodeCount, probability);
-        new GraphService(adjensceMatrix, mainContierId);
+        graphService = new GraphService(adjensceMatrix, mainContierId, logDebug);
         isConsistent = adjensceMatrix.DepthFirstSearch();
+
+        popService = new PopulationService(adjensceMatrix, probabilityForChromosome, maxDiffBetweenNode, logDebug)
+
+        //init evolution
+        ev = new EvolutionService(numberOfTournamentRounds, popService);
+
+        popService.setStatusString("Ready");
+
         //init population
         population = popService.generatePopulation(new Array<ChromosomeModel>(), populationSize);
 
@@ -124,8 +132,10 @@ window.onload = function () {
         dataPointsOfF2Sum = [];
         dataPointsPareto = [];
         iteractionCounter = 1;
+        bestChromosome = new ChromosomeModel();
         sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
         paretoChart = generateParetoChart(dataPointsPareto);
+
         popService.setStatusString("Ready");
     });
 

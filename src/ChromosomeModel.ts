@@ -1,4 +1,5 @@
 export class ChromosomeModel {
+    public iterationNumber: number;
     public sumOfF1: number;
     public sumOfF2: number;
     public chromosome: Array<ChromosomeElement>;
@@ -24,7 +25,8 @@ export class ChromosomeModel {
             var node = this.chromosome[i].chromosomePartNumber.toString();
             result.push(node);
         }
-        return result.toString() + " sumOfF1: " + this.sumOfF1 + " sumOfF2: " + this.sumOfF2;
+        return result.toString() + "\t sumOfF1: " + this.sumOfF1 + " sumOfF2: " + this.sumOfF2 + "\t iteration: " + this.iterationNumber + "\n" +
+            "sumOfF1AndF2: " + (this.sumOfF1 + this.sumOfF2);
     }
 
     public getSumOfF1AndF2(): number {

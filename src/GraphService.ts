@@ -4,7 +4,7 @@ import { ChromosomeModel } from "./chromosomeModel";
 
 export class GraphService {
     private _adjensceMatrix: Matrix;
-    constructor(adjensceMatrix: Matrix, private _continerId: string) {
+    constructor(adjensceMatrix: Matrix, private _continerId: string, private _debug: boolean) {
         this._adjensceMatrix = adjensceMatrix;
         var data = {
             nodes: this.matrixToNode(this._adjensceMatrix),
@@ -13,33 +13,30 @@ export class GraphService {
         this.createGraph(this._continerId, data, this.getOptions());
     }
 
-    public CreateGraphForBestChromosome(continerId: string, population: Array<ChromosomeModel>, currentBestChromosome: ChromosomeModel): ChromosomeModel {
-        var best = this.getBestChromosome(population);
-        if (best.getSumOfF1AndF2() < currentBestChromosome.getSumOfF1AndF2()) {
-            currentBestChromosome = best;
+    public CreateGraphForBestChromosome(continerId: string, population: Array<ChromosomeModel>,
+        bestChromosome: ChromosomeModel, iteractionCounter: number, ): ChromosomeModel {
+console.log(population);
+
+        for (var i = 0; i < population.length; i++) {
+            if (population[i].getSumOfF1AndF2() <= bestChromosome.getSumOfF1AndF2()) {
+                console.log("bestChromosome.getSumOfF1AndF2() "+bestChromosome.getSumOfF1AndF2())
+                console.log("population[i].getSumOfF1AndF2()  "+population[i].getSumOfF1AndF2() )
+                bestChromosome = population[i];
+            }
         }
 
+        bestChromosome.iterationNumber = iteractionCounter;
+
         var data = {
-            nodes: this.chromosomeToNode(currentBestChromosome),
-            edges: this.chromosomeToEdges(currentBestChromosome, this._adjensceMatrix)
+            nodes: this.chromosomeToNode(bestChromosome),
+            edges: this.chromosomeToEdges(bestChromosome, this._adjensceMatrix)
         };
 
         this.createGraph(continerId, data, this.getOptionsForBestChromosome());
 
-        return currentBestChromosome;
+        return bestChromosome;
     }
 
-    public getBestChromosome(population: Array<ChromosomeModel>): ChromosomeModel {
-        var currentBest = new ChromosomeModel();
-
-        population.forEach(element => {
-            if (element.getSumOfF1AndF2() < currentBest.getSumOfF1AndF2()) {
-                currentBest = element;
-            }
-        });
-
-        return currentBest;
-    }
     public createGraph(continerId: string, data: any, options: any) {
         // create a network
         var container = document.getElementById(continerId);
@@ -105,7 +102,7 @@ export class GraphService {
                 hierarchical: {
                     enabled: true,
                     levelSeparation: 300,
-                    nodeSpacing: 100,
+                    nodeSpacing: 150,
                     blockShifting: true,
                     parentCentralization: true,
                     direction: 'DU',        // UD, DU, LR, RL

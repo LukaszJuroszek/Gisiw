@@ -51,7 +51,6 @@ export class EvolutionService {
         var temp: ChromosomeModel = chromosomeModel;
         var randomNodeNumber: number = 0;
         do {
-            temp = chromosomeModel;
             do {
                 randomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
             } while (chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber == 0)
@@ -59,7 +58,12 @@ export class EvolutionService {
             chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber = 1;
             chromosomeModel = this.populationService.setSumOfF1AndF2(chromosomeModel);
 
-        } while (!this.populationService.isNodeCountValid(temp))
+            if (!this.populationService.isNodeCountValid(chromosomeModel)) {
+                chromosomeModel = temp
+            } else {
+                break;
+            }
+        } while (!this.populationService.isNodeCountValid(chromosomeModel))
 
         return chromosomeModel;
     }
@@ -69,17 +73,22 @@ export class EvolutionService {
         var firstRandomNodeNumber: number = 0;
         var secondRandomNodeNumber: number = 0;
         do {
-            temp = chromosomeModel;
             do {
                 firstRandomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
                 secondRandomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
-            } while (
-                chromosomeModel.chromosome[firstRandomNodeNumber].chromosomePartNumber == 0 &&
+            } while (chromosomeModel.chromosome[firstRandomNodeNumber].chromosomePartNumber == 0 &&
                 chromosomeModel.chromosome[secondRandomNodeNumber].chromosomePartNumber == 1)
 
             chromosomeModel.chromosome[firstRandomNodeNumber].chromosomePartNumber = 1;
             chromosomeModel.chromosome[secondRandomNodeNumber].chromosomePartNumber = 0;
             chromosomeModel = this.populationService.setSumOfF1AndF2(chromosomeModel);
+
+            if (!this.populationService.isNodeCountValid(chromosomeModel)) {
+                chromosomeModel = temp
+            } else {
+                break;
+            }
+
         } while (!this.populationService.isNodeCountValid(temp))
 
         return chromosomeModel;
