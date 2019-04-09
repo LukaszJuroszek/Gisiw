@@ -1,5 +1,6 @@
 import { ChromosomeModel } from './ChromosomeModel';
 import { PopulationService } from './populationService';
+import { Matrix } from './Matrix';
 
 export class EvolutionService {
 
@@ -13,9 +14,9 @@ export class EvolutionService {
     // v. Na kolejnej populacji (potomnej) przeprowadzać operacje genetyczne
     // vi. Wydzielić front Pareto dla każdej populacji
     // vii. Graficznie przedstawiać populację Pi oraz Pi+1 
-    public runIteration(population: Array<ChromosomeModel>): Array<ChromosomeModel> {
-        var bestCollectionByF1: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(true, population);
-        var bestCollectionByF2: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(false, population);
+    public runIteration(population: Array<ChromosomeModel>, probability: number, matrix: Matrix, maxDiffBetweenNode: number): Array<ChromosomeModel> {
+        var bestCollectionByF1: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(true, population, probability, matrix, maxDiffBetweenNode);
+        var bestCollectionByF2: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(false, population,probability, matrix, maxDiffBetweenNode);
 
         if (bestCollectionByF1.length != population.length / 2)
             console.log("bestCollectionByF1.length is INVALID " + bestCollectionByF1.length);
@@ -23,52 +24,52 @@ export class EvolutionService {
         if (bestCollectionByF2.length != population.length / 2)
             console.log("bestCollectionByF2.length is INVALID " + bestCollectionByF2.length);
 
-        this.oneNodeMutate(bestCollectionByF1, bestCollectionByF2);
+        this.mutateChromosomes(bestCollectionByF1, bestCollectionByF2, maxDiffBetweenNode);
 
-        let temp = this.shufle(bestCollectionByF1.concat(bestCollectionByF2));
+        var temp = this.shufle(bestCollectionByF1.concat(bestCollectionByF2));
 
         population = temp;
 
         return population;
     }
 
-    private oneNodeMutate(bestCollectionByF1: ChromosomeModel[], bestCollectionByF2: ChromosomeModel[]) {
+    private mutateChromosomes(bestCollectionByF1: ChromosomeModel[], bestCollectionByF2: ChromosomeModel[], maxDiffBetweenNode: number) {
         var numberOfThimes: number = this.generateNumbers(bestCollectionByF1.length / 10);
 
         for (let i = 0; i < numberOfThimes; i++) {
             var rNumber = this.generateNumbers(bestCollectionByF1.length);
             var lNumber = this.generateNumbers(bestCollectionByF2.length);
 
-            this.mutateChromosomeByOneNode(bestCollectionByF1[rNumber]);
-            this.mutateChromosomeByOneNode(bestCollectionByF2[lNumber]);
+            this.mutateChromosomeByOneNode(bestCollectionByF1[rNumber], maxDiffBetweenNode);
+            this.mutateChromosomeByOneNode(bestCollectionByF2[lNumber], maxDiffBetweenNode);
 
-            this.mutateChromosomeByFippingNode(bestCollectionByF1[rNumber]);
-            this.mutateChromosomeByFippingNode(bestCollectionByF2[lNumber]);
+            this.mutateChromosomeByFippingNode(bestCollectionByF1[rNumber], maxDiffBetweenNode);
+            this.mutateChromosomeByFippingNode(bestCollectionByF2[lNumber], maxDiffBetweenNode);
         }
     }
 
-    private mutateChromosomeByOneNode(chromosomeModel: ChromosomeModel): ChromosomeModel {
+    private mutateChromosomeByOneNode(chromosomeModel: ChromosomeModel, maxDiffBetweenNode: number): ChromosomeModel {
         var temp: ChromosomeModel = chromosomeModel;
         var randomNodeNumber: number = 0;
         do {
             do {
                 randomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
             } while (chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber == 0)
-
+            
             chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber = 1;
             chromosomeModel = this.populationService.setSumOfF1AndF2(chromosomeModel);
 
-            if (!this.populationService.isNodeCountValid(chromosomeModel)) {
+            if (!this.populationService.isNodeCountValid(chromosomeModel, maxDiffBetweenNode)) {
                 chromosomeModel = temp
             } else {
                 break;
             }
-        } while (!this.populationService.isNodeCountValid(chromosomeModel))
+        } while (!this.populationService.isNodeCountValid(chromosomeModel, maxDiffBetweenNode))
 
         return chromosomeModel;
     }
 
-    private mutateChromosomeByFippingNode(chromosomeModel: ChromosomeModel): ChromosomeModel {
+    private mutateChromosomeByFippingNode(chromosomeModel: ChromosomeModel, maxDiffBetweenNode: number): ChromosomeModel {
         var temp: ChromosomeModel = chromosomeModel;
         var firstRandomNodeNumber: number = 0;
         var secondRandomNodeNumber: number = 0;
@@ -83,18 +84,18 @@ export class EvolutionService {
             chromosomeModel.chromosome[secondRandomNodeNumber].chromosomePartNumber = 0;
             chromosomeModel = this.populationService.setSumOfF1AndF2(chromosomeModel);
 
-            if (!this.populationService.isNodeCountValid(chromosomeModel)) {
+            if (!this.populationService.isNodeCountValid(chromosomeModel, maxDiffBetweenNode)) {
                 chromosomeModel = temp
             } else {
                 break;
             }
 
-        } while (!this.populationService.isNodeCountValid(temp))
+        } while (!this.populationService.isNodeCountValid(chromosomeModel, maxDiffBetweenNode))
 
         return chromosomeModel;
     }
 
-    private getBestChromosomeModelsBy(by: boolean, population: Array<ChromosomeModel>): Array<ChromosomeModel> {
+    private getBestChromosomeModelsBy(by: boolean, population: Array<ChromosomeModel>, probability: number, matrix: Matrix, maxDiffBetweenNode: number): Array<ChromosomeModel> {
         var halfOfElementsCount: number = Math.floor(population.length / 2.0);
         var result: Array<ChromosomeModel> = new Array<ChromosomeModel>()
         if (by) { //if by F1 factor
@@ -118,7 +119,7 @@ export class EvolutionService {
             var missingChromosomesCount = this.numberOfTournamentRounds - result.length
             if (missingChromosomesCount < 0)
                 console.log("missingChromosomesCount is INVALID ! " + missingChromosomesCount)
-            var missingChromosomes = this.populationService.generateChromosomes(missingChromosomesCount);
+            var missingChromosomes = this.populationService.generateChromosomes(missingChromosomesCount, matrix, probability, maxDiffBetweenNode);
 
             missingChromosomes.forEach(element => {
                 result.push(element);

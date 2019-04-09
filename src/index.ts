@@ -3,6 +3,7 @@ import { GraphService } from './graphService';
 import { EvolutionService } from './EvolutionService';
 import { PopulationService } from './populationService';
 import { ChromosomeModel } from './chromosomeModel';
+import { max } from 'moment';
 declare var CanvasJS: any
 
 //init
@@ -30,37 +31,52 @@ window.onload = function () {
     //evolutions settings
     var numberOfTournamentRounds: number = populationSize / 2;
     var numberOfIterations: number = 10;
-    var bestChromosome: ChromosomeModel = new ChromosomeModel();
+    var bestChromosome: ChromosomeModel;
 
-    //init of matrix
-    var adjensceMatrix = new Matrix(nodeCount, probability);
-    var graphService = new GraphService(adjensceMatrix, mainContierId, logDebug);
-    var isConsistent = adjensceMatrix.DepthFirstSearch();
+    //declare
+    var adjensceMatrix: Matrix;
+    var graphService: GraphService;
+    var isConsistent: boolean;
+    var populationService: PopulationService;
+    var population: Array<ChromosomeModel>;
+    var evoltionService: EvolutionService;
 
-    //init population
-    var popService = new PopulationService(adjensceMatrix, probabilityForChromosome, maxDiffBetweenNode, logDebug)
-    var population = popService.generatePopulation(new Array<ChromosomeModel>(), populationSize);
+    function initialize() {
+        adjensceMatrix = new Matrix();
+        graphService = new GraphService(logDebug);
 
-    //init evolution
-    var ev = new EvolutionService(numberOfTournamentRounds, popService);
+        bestChromosome = new ChromosomeModel();
 
-    popService.setStatusString("Ready");
+        isConsistent = adjensceMatrix.initializeAdjensceMatrix(nodeCount, probability);
+
+        graphService.initializeGraph(adjensceMatrix, mainContierId);
+
+        populationService = new PopulationService(adjensceMatrix, logDebug)
+        evoltionService = new EvolutionService(numberOfTournamentRounds, populationService);
+
+        population = populationService.initializePopulation(populationSize, adjensceMatrix, probability, maxDiffBetweenNode);
+    }
+
+    //init services
+    initialize();
+
+    populationService.setStatusString("Ready");
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
-        
-        popService.setStatusString("Running epic...");
+
+        populationService.setStatusString("Running epic...");
         for (var i = 0; i < numberOfIterations; i++) {
-            popService.setStatusString("Running epic... " + iteractionCounter);
+            populationService.setStatusString("Running epic... " + iteractionCounter);
 
-            bestChromosome = graphService.CreateGraphForBestChromosome(mainContierId, population, bestChromosome, iteractionCounter);
+            bestChromosome = graphService.createGraphForBestChromosome(mainContierId, population, bestChromosome, iteractionCounter);
+            populationService.setStatusString("best chromosome: " + bestChromosome.getStringWithSums());
 
-            population = ev.runIteration(population);
+            population = evoltionService.runIteration(population, probabilityForChromosome, adjensceMatrix, maxDiffBetweenNode);
 
-            var [sumF1, sumF2, paretoPoins] = popService.getF1SumF2SumAndParetoPairs(population);
+            var [sumF1, sumF2, paretoPoins] = populationService.getF1SumF2SumAndParetoPairs(population);
             addDataPoins(sumF1, sumF2, paretoPoins);
         }
         updateCharts();
-        popService.setStatusString("best chromosome: " + bestChromosome.getStringWithSums());
 
     }, true);
 
@@ -111,19 +127,8 @@ window.onload = function () {
 
     $('#generate').click(function (e) {
         e.preventDefault();
-        adjensceMatrix = new Matrix(nodeCount, probability);
-        graphService = new GraphService(adjensceMatrix, mainContierId, logDebug);
-        isConsistent = adjensceMatrix.DepthFirstSearch();
 
-        popService = new PopulationService(adjensceMatrix, probabilityForChromosome, maxDiffBetweenNode, logDebug)
-
-        //init evolution
-        ev = new EvolutionService(numberOfTournamentRounds, popService);
-
-        popService.setStatusString("Ready");
-
-        //init population
-        population = popService.generatePopulation(new Array<ChromosomeModel>(), populationSize);
+        initialize();
 
         document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
 
@@ -136,7 +141,7 @@ window.onload = function () {
         sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
         paretoChart = generateParetoChart(dataPointsPareto);
 
-        popService.setStatusString("Ready");
+        populationService.setStatusString("Ready");
     });
 
     document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;

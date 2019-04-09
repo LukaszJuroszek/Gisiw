@@ -6,11 +6,10 @@ export class Matrix {
     
     elements: Array<Array<number>>;
 
-    constructor(node: number, probabilityForEdge: number) {
-        this.GenerateAdjensceMatrix(node, probabilityForEdge);
+    constructor() {
     }
 
-    private GenerateAdjensceMatrix(node: number, probabilityForEdge: number): void {
+    public initializeAdjensceMatrix(node: number, probabilityForEdge: number): boolean {
         this.elements = new Array<Array<number>>();
         for (var i = 0; i < node; i++) {
             this.elements[i] = new Array<number>(node);
@@ -32,9 +31,11 @@ export class Matrix {
                 this.elements[j][i] = this.weigthIfNoEdge
             }
         }
+
+        return this.depthFirstSearch();
     }
 
-    public GetNodeNeighbors() {
+    public getNodeNeighbors() {
         var result = new Array();
         for (var i = 0; i < this.elements.length; i++) {
             var tmp = new Array();
@@ -56,8 +57,8 @@ export class Matrix {
         return result;
     }
 
-    public DepthFirstSearch(): boolean {
-        var nodeNeighbors = this.GetNodeNeighbors();
+    private depthFirstSearch(): boolean {
+        var nodeNeighbors = this.getNodeNeighbors();
         var isCostistent: boolean = false;
         //this function take only two way directed graph
         var visited = new Set();

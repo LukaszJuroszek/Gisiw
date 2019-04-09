@@ -3,34 +3,31 @@ import { Matrix } from "./Matrix";
 
 export class PopulationService {
     private _chromosomeParts: Array<[number, string]> = [[0, "firstPart"], [1, "secondPart"]];
+    private matrix: Matrix;
 
-    constructor(private _matrix: Matrix,
-        private _probability: number,
-        private _maxDiffBetweenNode: number,
-        private _debug: boolean) {
+    constructor(private _matrix: Matrix, private _debug: boolean) {
     }
 
-    public generatePopulation(result: Array<ChromosomeModel>, populationSize: number): Array<ChromosomeModel> {
-        var temp = new Set<ChromosomeModel>(result);
+    public initializePopulation(populationSize: number, matrix: Matrix, probability: number, maxDiffBetweenNode: number): Array<ChromosomeModel> {
+        var result = new Set<ChromosomeModel>();
 
-        if (temp.size < populationSize) {
+        if (result.size < populationSize) {
             do {
-                temp.add(this.generateChromosome(this._matrix));
+                result.add(this.generateChromosome(matrix, probability, maxDiffBetweenNode));
             }
-            while (temp.size < populationSize);
+            while (result.size < populationSize);
         }
 
-        result = Array.from(temp);
-        return result;
+        return Array.from(result);
     }
 
 
-    public generateChromosome(matrix: Matrix): ChromosomeModel {
-        var result: ChromosomeModel = new ChromosomeModel();
+    public generateChromosome(matrix: Matrix, probability: number, maxDiffBetweenNode: number): ChromosomeModel {
+        var result: ChromosomeModel;
         do {
             result = new ChromosomeModel();
             for (let i = 0; i < matrix.elements.length; i++) {
-                if (Math.random() < this._probability) {
+                if (Math.random() < probability) {
                     result.chromosome.push(new ChromosomeElement(i, this._chromosomeParts[0][0]));
                 } else {
                     result.chromosome.push(new ChromosomeElement(i, this._chromosomeParts[1][0]));
@@ -38,16 +35,16 @@ export class PopulationService {
             }
             result = this.setSumOfF1AndF2(result);
 
-        } while (!this.isNodeCountValid(result))
+        } while (!this.isNodeCountValid(result, maxDiffBetweenNode))
 
         return result;
     }
 
-    public generateChromosomes(numberOfChromosomeToGenerate: number): Array<ChromosomeModel> {
+    public generateChromosomes(numberOfChromosomeToGenerate: number, matrix: Matrix, probability: number, maxDiffBetweenNode: number): Array<ChromosomeModel> {
 
         var result: Set<ChromosomeModel> = new Set<ChromosomeModel>();
         do {
-            result.add(this.generateChromosome(this._matrix));
+            result.add(this.generateChromosome(matrix, probability, maxDiffBetweenNode));
         } while (result.size == numberOfChromosomeToGenerate)
 
         return Array.from(result);
@@ -60,7 +57,7 @@ export class PopulationService {
         return chromosome;
     }
 
-    public isNodeCountValid(chromosomeModel: ChromosomeModel) {
+    public isNodeCountValid(chromosomeModel: ChromosomeModel, maxDiffBetweenNode: number) {
         var nodeSum: number = 0;
         for (let i = 0; i < chromosomeModel.chromosome.length; i++) {
             var isFirstPart = chromosomeModel.chromosome[i].chromosomePartNumber === this._chromosomeParts[0][0];
@@ -68,7 +65,7 @@ export class PopulationService {
         }
         var firstPartSum = chromosomeModel.chromosome.length - nodeSum;
         var secondPartSum = chromosomeModel.chromosome.length - firstPartSum;
-        return (Math.abs(firstPartSum - secondPartSum) <= this._maxDiffBetweenNode);
+        return (Math.abs(firstPartSum - secondPartSum) <= maxDiffBetweenNode);
     }
 
     public getConnectedEdgeCountAndWegithCount(chromosomeModel: ChromosomeModel): [number, number] {

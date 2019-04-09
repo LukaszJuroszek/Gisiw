@@ -4,23 +4,24 @@ import { ChromosomeModel } from "./chromosomeModel";
 
 export class GraphService {
     private _adjensceMatrix: Matrix;
-    constructor(adjensceMatrix: Matrix, private _continerId: string, private _debug: boolean) {
+    
+    constructor(private _debug: boolean) {
+    }
+
+    public initializeGraph(adjensceMatrix: Matrix, continerId: string) {
         this._adjensceMatrix = adjensceMatrix;
         var data = {
             nodes: this.matrixToNode(this._adjensceMatrix),
             edges: this.matrixToEdges(this._adjensceMatrix)
         };
-        this.createGraph(this._continerId, data, this.getOptions());
+        this.createGraph(continerId, data, this.getOptions());
     }
 
-    public CreateGraphForBestChromosome(continerId: string, population: Array<ChromosomeModel>,
+    public createGraphForBestChromosome(continerId: string, population: Array<ChromosomeModel>,
         bestChromosome: ChromosomeModel, iteractionCounter: number, ): ChromosomeModel {
-console.log(population);
 
         for (var i = 0; i < population.length; i++) {
             if (population[i].getSumOfF1AndF2() <= bestChromosome.getSumOfF1AndF2()) {
-                console.log("bestChromosome.getSumOfF1AndF2() "+bestChromosome.getSumOfF1AndF2())
-                console.log("population[i].getSumOfF1AndF2()  "+population[i].getSumOfF1AndF2() )
                 bestChromosome = population[i];
             }
         }
@@ -50,7 +51,7 @@ console.log(population);
     }
 
     public matrixToEdges(adjensceMatrix: Matrix) {
-        var nodeNeighbors = adjensceMatrix.GetNodeNeighbors();
+        var nodeNeighbors = adjensceMatrix.getNodeNeighbors();
         var edges = new Array();
 
         for (var i = 0; i < nodeNeighbors.length; i++) {
@@ -83,7 +84,7 @@ console.log(population);
     }
 
     public chromosomeToEdges(chromosome: ChromosomeModel, matrix: Matrix) {
-        var nodeNeighbors = matrix.GetNodeNeighbors();
+        var nodeNeighbors = matrix.getNodeNeighbors();
         var edges = new Array();
 
         for (var i = 0; i < nodeNeighbors.length; i++) {

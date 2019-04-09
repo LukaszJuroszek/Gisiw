@@ -18,7 +18,7 @@
             height: 45%;
         }
 
-        #graphNetwork{
+        #graphNetwork {
             height: 40%;
         }
 
@@ -26,7 +26,11 @@
             height: 40%;
             width: 100%;
         }
-        
+
+        #currentStatus {
+            font-size: 15px;
+        }
+
         h3,
         #s1,
         h2 {
@@ -38,25 +42,25 @@
 <body>
     <div class="container-fluid">
         <div class="row m-0 p-0">
-                <div class="row col-md-6 m-0 p-0">
-                    <div class="col-md-12 m-0 p-0" id="graphNetwork"></div>
-                </div>
-                <div class="col-md-6" id="paretoChart"></div>
+            <div class="row col-md-6 m-0 p-0">
+                <div class="col-md-12 m-0 p-0" id="graphNetwork"></div>
             </div>
-                <div class="col-md-12" id="sumChart"></div>
+            <div class="col-md-6" id="paretoChart"></div>
         </div>
-        <div class="row m-0 p-0">
-                <h4 class="col-md-2" id="dfsResult">Consistent: false</h2>
-                <h4 class="col-md-2" id="nodeCount">Nodes: 0</h2>
-                    <button class="btn btn-info col-md-3" id="generate">Generate</button>
-                    <h4 class="col-md-3" id="probability">Probability: 0</h2>
-                        <button class="btn btn-danger col-md-1" id="decreaseProbability">-</button>
-                        <button class="btn btn-success col-md-1" id="increaseProbability">+</button>
-        </div>
-        <div class="row m-0 p-0">
-                <button class="btn btn-info col-md-3" id="run">Run evolution</button>
-            <h4 class="col-md-3" id="currentStatus">Current Status: Waiting</h2>
-        </div>
+        <div class="col-md-12" id="sumChart"></div>
+    </div>
+    <div class="row m-0 p-0">
+        <h4 class="col-md-2" id="dfsResult">Consistent: false</h2>
+            <h4 class="col-md-2" id="nodeCount">Nodes: 0</h2>
+                <button class="btn btn-info col-md-3" id="generate">Generate</button>
+                <h4 class="col-md-3" id="probability">Probability: 0</h2>
+                    <button class="btn btn-danger col-md-1" id="decreaseProbability">-</button>
+                    <button class="btn btn-success col-md-1" id="increaseProbability">+</button>
+    </div>
+    <div class="row m-0 p-0">
+        <button class="btn btn-info col-md-3 m-0 p-0" id="run">Run evolution</button>
+        <h4 class="col-md-9 m-0 p-0" id="currentStatus">Current Status: Waiting</h2>
+    </div>
 </body>
 
 </html>
