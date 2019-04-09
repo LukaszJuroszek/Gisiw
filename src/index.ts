@@ -3,8 +3,8 @@ import { GraphService } from './graphService';
 import { EvolutionService } from './EvolutionService';
 import { PopulationService } from './populationService';
 import { ChromosomeModel } from './chromosomeModel';
-import { max } from 'moment';
 declare var CanvasJS: any
+var bestChromosome: ChromosomeModel;
 
 //init
 window.onload = function () {
@@ -31,7 +31,6 @@ window.onload = function () {
     //evolutions settings
     var numberOfTournamentRounds: number = populationSize / 2;
     var numberOfIterations: number = 10;
-    var bestChromosome: ChromosomeModel;
 
     //declare
     var adjensceMatrix: Matrix;
@@ -63,13 +62,19 @@ window.onload = function () {
     populationService.setStatusString("Ready");
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
-
+        var currentBest: ChromosomeModel = new ChromosomeModel();
+        console.log("----------------------------------------------------------------");
+        console.log("currentBest.getSumOfF1AndF2(): " + currentBest.getSumOfF1AndF2());
+        console.log("bestChromosome.getSumOfF1AndF2() " + bestChromosome.getSumOfF1AndF2());
         populationService.setStatusString("Running epic...");
         for (var i = 0; i < numberOfIterations; i++) {
             populationService.setStatusString("Running epic... " + iteractionCounter);
 
-            bestChromosome = graphService.createGraphForBestChromosome(mainContierId, population, bestChromosome, iteractionCounter);
-            populationService.setStatusString("best chromosome: " + bestChromosome.getStringWithSums());
+            var tempBest = graphService.createGraphForBestChromosome(mainContierId, population, iteractionCounter);
+            if (tempBest.getSumOfF1AndF2() < currentBest.getSumOfF1AndF2()) {
+                currentBest = tempBest;
+            }
+            console.log("currentBest.getSumOfF1AndF2(): " + currentBest.getSumOfF1AndF2());
 
             population = evoltionService.runIteration(population, probabilityForChromosome, adjensceMatrix, maxDiffBetweenNode);
 
@@ -77,8 +82,20 @@ window.onload = function () {
             addDataPoins(sumF1, sumF2, paretoPoins);
         }
         updateCharts();
+        console.log("++++++++++++++++++++++++++++++++++++++++++++++++");
+        console.log("currentBest.getSumOfF1AndF2(): " + currentBest.getSumOfF1AndF2());
+        console.log("bestChromosome.getSumOfF1AndF2() " + bestChromosome.getSumOfF1AndF2());
 
-    }, true);
+        if (currentBest.getSumOfF1AndF2() < bestChromosome.getSumOfF1AndF2()) {
+            bestChromosome = currentBest;
+        }
+
+        populationService.setStatusString("best chromosome: " + bestChromosome.getStringWithSums());
+        console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        console.log("currentBest.getSumOfF1AndF2(): " + currentBest.getSumOfF1AndF2());
+        console.log("bestChromosome.getSumOfF1AndF2() " + bestChromosome.getSumOfF1AndF2());
+
+    }, false);
 
     function addDataPoins(sumF1: number, sumF2: number, paretoPoins: [number, number][]) {
         dataPointsOfF1Sum.push({
@@ -140,7 +157,6 @@ window.onload = function () {
         bestChromosome = new ChromosomeModel();
         sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
         paretoChart = generateParetoChart(dataPointsPareto);
-
         populationService.setStatusString("Ready");
     });
 

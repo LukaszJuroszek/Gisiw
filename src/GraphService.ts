@@ -4,7 +4,7 @@ import { ChromosomeModel } from "./chromosomeModel";
 
 export class GraphService {
     private _adjensceMatrix: Matrix;
-    
+
     constructor(private _debug: boolean) {
     }
 
@@ -18,24 +18,28 @@ export class GraphService {
     }
 
     public createGraphForBestChromosome(continerId: string, population: Array<ChromosomeModel>,
-        bestChromosome: ChromosomeModel, iteractionCounter: number, ): ChromosomeModel {
+        iteractionCounter: number, ): ChromosomeModel {
+        var result: ChromosomeModel = new ChromosomeModel();
 
         for (var i = 0; i < population.length; i++) {
-            if (population[i].getSumOfF1AndF2() <= bestChromosome.getSumOfF1AndF2()) {
-                bestChromosome = population[i];
+            if (population[i].getSumOfF1AndF2() < result.getSumOfF1AndF2()) {
+                result = population[i];
             }
         }
 
-        bestChromosome.iterationNumber = iteractionCounter;
+        result.iterationNumber = iteractionCounter;
 
+        this.drawBestGraph(result, continerId);
+
+        return result;
+    }
+
+    private drawBestGraph(result: ChromosomeModel, continerId: string) {
         var data = {
-            nodes: this.chromosomeToNode(bestChromosome),
-            edges: this.chromosomeToEdges(bestChromosome, this._adjensceMatrix)
+            nodes: this.chromosomeToNode(result),
+            edges: this.chromosomeToEdges(result, this._adjensceMatrix)
         };
-
         this.createGraph(continerId, data, this.getOptionsForBestChromosome());
-
-        return bestChromosome;
     }
 
     public createGraph(continerId: string, data: any, options: any) {
