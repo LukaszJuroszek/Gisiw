@@ -16,7 +16,7 @@ export class EvolutionService {
     // vii. Graficznie przedstawiać populację Pi oraz Pi+1 
     public runIteration(population: Array<ChromosomeModel>, probability: number, matrix: Matrix, maxDiffBetweenNode: number): Array<ChromosomeModel> {
         var bestCollectionByF1: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(true, population, probability, matrix, maxDiffBetweenNode);
-        var bestCollectionByF2: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(false, population,probability, matrix, maxDiffBetweenNode);
+        var bestCollectionByF2: Array<ChromosomeModel> = this.getBestChromosomeModelsBy(false, population, probability, matrix, maxDiffBetweenNode);
 
         if (bestCollectionByF1.length != population.length / 2)
             console.log("bestCollectionByF1.length is INVALID " + bestCollectionByF1.length);
@@ -34,7 +34,7 @@ export class EvolutionService {
     }
 
     private mutateChromosomes(bestCollectionByF1: ChromosomeModel[], bestCollectionByF2: ChromosomeModel[], maxDiffBetweenNode: number) {
-        var numberOfThimes: number = this.generateNumbers(bestCollectionByF1.length / 10);
+        var numberOfThimes: number = 10// this.generateNumbers(bestCollectionByF1.length / 20);
 
         for (let i = 0; i < numberOfThimes; i++) {
             var rNumber = this.generateNumbers(bestCollectionByF1.length);
@@ -55,7 +55,7 @@ export class EvolutionService {
             do {
                 randomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
             } while (chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber == 0)
-            
+
             chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber = 1;
             chromosomeModel = this.populationService.setSumOfF1AndF2(chromosomeModel);
 

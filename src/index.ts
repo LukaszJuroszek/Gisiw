@@ -30,7 +30,7 @@ $(document).ready(function () {
 
     //evolutions settings
     var numberOfTournamentRounds: number = populationSize / 2;
-    var numberOfIterations: number = 10;
+    var numberOfIterations: number = 50;
 
     //declare
     var adjensceMatrix: Matrix;
