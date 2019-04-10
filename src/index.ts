@@ -2,12 +2,12 @@ import { Matrix } from './matrix';
 import { GraphService } from './graphService';
 import { EvolutionService } from './EvolutionService';
 import { PopulationService } from './populationService';
-import { ChromosomeModel } from './chromosomeModel';
+import { ChromosomeModel, ChromosomeElement } from './chromosomeModel';
 declare var CanvasJS: any
 var bestChromosome: ChromosomeModel;
+$(document).ready(function () {
+    console.log("ready!");
 
-//init
-window.onload = function () {
     //data charts init
     var dataPointsOfF1Sum = [];
     var dataPointsOfF2Sum = [];
@@ -63,37 +63,26 @@ window.onload = function () {
     document.getElementById("run").addEventListener("click", function (e) {
         e.preventDefault();
         var currentBest: ChromosomeModel = new ChromosomeModel();
-        console.log("----------------------------------------------------------------");
-        console.log("currentBest.getSumOfF1AndF2(): " + currentBest.getSumOfF1AndF2());
-        console.log("bestChromosome.getSumOfF1AndF2() " + bestChromosome.getSumOfF1AndF2());
         populationService.setStatusString("Running epic...");
+
         for (var i = 0; i < numberOfIterations; i++) {
             populationService.setStatusString("Running epic... " + iteractionCounter);
 
-            var tempBest = graphService.createGraphForBestChromosome(mainContierId, population, iteractionCounter);
-            if (tempBest.getSumOfF1AndF2() < currentBest.getSumOfF1AndF2()) {
-                currentBest = tempBest;
-            }
-            console.log("currentBest.getSumOfF1AndF2(): " + currentBest.getSumOfF1AndF2());
+            var currentBest = graphService.calculateBestChromosome(population, iteractionCounter).getCopy();
 
             population = evoltionService.runIteration(population, probabilityForChromosome, adjensceMatrix, maxDiffBetweenNode);
 
             var [sumF1, sumF2, paretoPoins] = populationService.getF1SumF2SumAndParetoPairs(population);
             addDataPoins(sumF1, sumF2, paretoPoins);
         }
-        updateCharts();
-        console.log("++++++++++++++++++++++++++++++++++++++++++++++++");
-        console.log("currentBest.getSumOfF1AndF2(): " + currentBest.getSumOfF1AndF2());
-        console.log("bestChromosome.getSumOfF1AndF2() " + bestChromosome.getSumOfF1AndF2());
 
         if (currentBest.getSumOfF1AndF2() < bestChromosome.getSumOfF1AndF2()) {
             bestChromosome = currentBest;
+            graphService.drawBestChromosome(bestChromosome, mainContierId);
         }
-
+        
         populationService.setStatusString("best chromosome: " + bestChromosome.getStringWithSums());
-        console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        console.log("currentBest.getSumOfF1AndF2(): " + currentBest.getSumOfF1AndF2());
-        console.log("bestChromosome.getSumOfF1AndF2() " + bestChromosome.getSumOfF1AndF2());
+        updateCharts();
 
     }, false);
 
@@ -187,7 +176,8 @@ window.onload = function () {
         }
         return color;
     }
-}
+
+});
 
 function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[]) {
     var sumChart = new CanvasJS.Chart("sumChart", {

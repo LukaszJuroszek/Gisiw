@@ -17,21 +17,23 @@ export class GraphService {
         this.createGraph(continerId, data, this.getOptions());
     }
 
-    public createGraphForBestChromosome(continerId: string, population: Array<ChromosomeModel>,
+    public calculateBestChromosome(population: Array<ChromosomeModel>,
         iteractionCounter: number, ): ChromosomeModel {
         var result: ChromosomeModel = new ChromosomeModel();
-
+        
         for (var i = 0; i < population.length; i++) {
             if (population[i].getSumOfF1AndF2() < result.getSumOfF1AndF2()) {
-                result = population[i];
+                //Copy object for not assing the reference.
+                result = population[i].getCopy()
             }
         }
-
         result.iterationNumber = iteractionCounter;
-
-        this.drawBestGraph(result, continerId);
-
         return result;
+    }
+
+
+    public drawBestChromosome(result: ChromosomeModel, continerId: string) {
+        this.drawBestGraph(result, continerId);
     }
 
     private drawBestGraph(result: ChromosomeModel, continerId: string) {

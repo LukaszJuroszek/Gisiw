@@ -32,6 +32,20 @@ export class ChromosomeModel {
     public getSumOfF1AndF2(): number {
         return this.sumOfF1 + this.sumOfF2;
     }
+
+    public getCopy(): ChromosomeModel {
+        var copy = new ChromosomeModel();
+        copy.iterationNumber = this.iterationNumber;
+        copy.sumOfF1 = this.sumOfF1;
+        copy.sumOfF2 = this.sumOfF2;
+        for (let i = 0; i < this.chromosome.length; i++) {
+            var temp: ChromosomeElement = new ChromosomeElement(
+                this.chromosome[i].nodeNumber,
+                this.chromosome[i].chromosomePartNumber);
+                copy.chromosome.push(temp);
+        }
+        return copy;
+    }
 }
 
 export class ChromosomeElement {
