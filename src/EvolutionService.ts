@@ -82,7 +82,7 @@ export class EvolutionService {
             }
         } while (!this.populationService.isNodeCountValid(chromosomeModel, maxDiffBetweenNode))
 
-        return chromosomeModel.getCopy();
+        return this.populationService.setSumOfF1AndF2(chromosomeModel).getCopy();
     }
 
     private canChangeChromosomeByOneNode(chromosomeModel: ChromosomeModel, maxDiffBetweenNode: number): boolean {
@@ -133,7 +133,7 @@ export class EvolutionService {
             }
         } while (!this.populationService.isNodeCountValid(chromosomeModel, maxDiffBetweenNode))
 
-        return chromosomeModel.getCopy();
+        return this.populationService.setSumOfF1AndF2(chromosomeModel).getCopy();
     }
 
     private areChromosomePartsNotEqualAnd(chromosomeModel: ChromosomeModel, firstRandomNodeNumber: number, secondRandomNodeNumber: number) {

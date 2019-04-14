@@ -71,7 +71,6 @@ $(document).ready(function () {
         e.preventDefault();
         var currentBest: ChromosomeModel = new ChromosomeModel();
         populationService.setStatusString("Running epic...");
-
         for (var i = 0; i < numberOfIterations; i++) {
             populationService.setStatusString("Running epic... " + iteractionCounter);
 
@@ -171,7 +170,7 @@ $(document).ready(function () {
 
 function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[], dataPointsOfF1AndF2SumOfBestChromosome: any[]) {
     var sumChart = new CanvasJS.Chart("sumChart", {
-        animationEnabled: false,
+        animationEnabled: true,
         theme: "light2",
         zoomEnabled: true,
       
@@ -180,7 +179,8 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[], da
 		},
 		{
 			title: "Logarithmic Scale",
-		}],
+        }],
+        
 		axisY2:[{
 			title: "Linear Scale",
 		},
@@ -204,8 +204,8 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[], da
             dataPoints: dataPointsOfF1Sum
         },
         {
-            axisYIndex: 1,
             type: "line",
+            axisYIndex: 1,
             showInLegend: true,
             name: "Sum F2(x)",
             dataPoints: dataPointsOfF2Sum
