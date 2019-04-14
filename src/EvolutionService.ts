@@ -24,7 +24,9 @@ export class EvolutionService {
         if (bestCollectionByF2.length != population.length / 2)
             console.log("bestCollectionByF2.length is INVALID " + bestCollectionByF2.length);
 
-        this.mutateChromosomes(bestCollectionByF1, bestCollectionByF2, maxDiffBetweenNode);
+        console.log("runIteration...");
+
+        this.mutateChromosomes(bestCollectionByF1, bestCollectionByF2, maxDiffBetweenNode, true, true);
 
         var temp = this.shufle(bestCollectionByF1.concat(bestCollectionByF2));
 
@@ -33,18 +35,32 @@ export class EvolutionService {
         return population;
     }
 
-    private mutateChromosomes(bestCollectionByF1: ChromosomeModel[], bestCollectionByF2: ChromosomeModel[], maxDiffBetweenNode: number) {
+    private mutateChromosomes(bestCollectionByF1: ChromosomeModel[], bestCollectionByF2: ChromosomeModel[], maxDiffBetweenNode: number, oneNodeMutate: boolean, flipNodeMutate: boolean) {
         var numberOfThimes: number = 10// this.generateNumbers(bestCollectionByF1.length / 20);
 
         for (let i = 0; i < numberOfThimes; i++) {
             var rNumber = this.generateNumbers(bestCollectionByF1.length);
             var lNumber = this.generateNumbers(bestCollectionByF2.length);
 
-            this.mutateChromosomeByOneNode(bestCollectionByF1[rNumber], maxDiffBetweenNode);
-            this.mutateChromosomeByOneNode(bestCollectionByF2[lNumber], maxDiffBetweenNode);
 
-            this.mutateChromosomeByFippingNode(bestCollectionByF1[rNumber], maxDiffBetweenNode);
-            this.mutateChromosomeByFippingNode(bestCollectionByF2[lNumber], maxDiffBetweenNode);
+            if (oneNodeMutate) {
+                if (this.canChangeChromosomeByOneNode(bestCollectionByF1[rNumber], maxDiffBetweenNode)) {
+                    bestCollectionByF1[rNumber] = this.mutateChromosomeByOneNode(bestCollectionByF1[rNumber], maxDiffBetweenNode);
+                }
+
+                if (this.canChangeChromosomeByOneNode(bestCollectionByF2[lNumber], maxDiffBetweenNode)) {
+                    bestCollectionByF2[lNumber] = this.mutateChromosomeByOneNode(bestCollectionByF2[lNumber], maxDiffBetweenNode);
+                }
+            }
+
+            if (flipNodeMutate) {
+                bestCollectionByF1[rNumber] = this.mutateChromosomeByFippingNode(bestCollectionByF1[rNumber], maxDiffBetweenNode);
+                bestCollectionByF2[lNumber] = this.mutateChromosomeByFippingNode(bestCollectionByF2[lNumber], maxDiffBetweenNode);
+            }
+
+            if (!oneNodeMutate && !flipNodeMutate) {
+                console.log("Wrong mutateChromosomes arguments!");
+            }
         }
     }
 
@@ -54,45 +70,81 @@ export class EvolutionService {
         do {
             do {
                 randomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
-            } while (chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber == 0)
+            } while (chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber != 0)
 
             chromosomeModel.chromosome[randomNodeNumber].chromosomePartNumber = 1;
             chromosomeModel = this.populationService.setSumOfF1AndF2(chromosomeModel);
 
             if (!this.populationService.isNodeCountValid(chromosomeModel, maxDiffBetweenNode)) {
-                chromosomeModel = temp
+                chromosomeModel = temp.getCopy()
             } else {
                 break;
             }
         } while (!this.populationService.isNodeCountValid(chromosomeModel, maxDiffBetweenNode))
 
-        return chromosomeModel;
+        return chromosomeModel.getCopy();
+    }
+
+    private canChangeChromosomeByOneNode(chromosomeModel: ChromosomeModel, maxDiffBetweenNode: number): boolean {
+        var result: boolean = false;
+        var [firstPartSum, secondPartSum] = this.populationService.getNodeChromosomePartCount(chromosomeModel);
+
+        if (Math.abs(firstPartSum - secondPartSum) < maxDiffBetweenNode)
+            result = true;
+
+        return result;
     }
 
     private mutateChromosomeByFippingNode(chromosomeModel: ChromosomeModel, maxDiffBetweenNode: number): ChromosomeModel {
         var temp: ChromosomeModel = chromosomeModel;
         var firstRandomNodeNumber: number = 0;
         var secondRandomNodeNumber: number = 0;
+        var maxIteration: number = 20;
+        var currentIteration: number = 0;
         do {
             do {
-                firstRandomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
-                secondRandomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
-            } while (chromosomeModel.chromosome[firstRandomNodeNumber].chromosomePartNumber == 0 &&
-                chromosomeModel.chromosome[secondRandomNodeNumber].chromosomePartNumber == 1)
+                do {
+                    firstRandomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
+                    secondRandomNodeNumber = this.generateNumbers(chromosomeModel.chromosome.length);
+                } while ((firstRandomNodeNumber != secondRandomNodeNumber) == false)
+
+            } while (this.areChromosomePartsNotEqualAnd(
+                chromosomeModel,
+                firstRandomNodeNumber,
+                secondRandomNodeNumber) == false)
 
             chromosomeModel.chromosome[firstRandomNodeNumber].chromosomePartNumber = 1;
             chromosomeModel.chromosome[secondRandomNodeNumber].chromosomePartNumber = 0;
+
             chromosomeModel = this.populationService.setSumOfF1AndF2(chromosomeModel);
 
+            currentIteration += 1;
+
             if (!this.populationService.isNodeCountValid(chromosomeModel, maxDiffBetweenNode)) {
-                chromosomeModel = temp
+                chromosomeModel = temp.getCopy()
             } else {
                 break;
             }
 
+            if (currentIteration > maxIteration) {
+                console.log("Max iteration occurd ! error");
+                chromosomeModel = temp.getCopy()
+                break;
+            }
         } while (!this.populationService.isNodeCountValid(chromosomeModel, maxDiffBetweenNode))
 
-        return chromosomeModel;
+        return chromosomeModel.getCopy();
+    }
+
+    private areChromosomePartsNotEqualAnd(chromosomeModel: ChromosomeModel, firstRandomNodeNumber: number, secondRandomNodeNumber: number) {
+        var firstChromosomePartNumber = chromosomeModel.chromosome[firstRandomNodeNumber].chromosomePartNumber;
+        var secondChromosomePartNumber = chromosomeModel.chromosome[secondRandomNodeNumber].chromosomePartNumber;
+
+        if (firstRandomNodeNumber == secondChromosomePartNumber) {
+            return false;
+        }
+
+        return firstChromosomePartNumber == 0 && secondChromosomePartNumber == 1
     }
 
     private getBestChromosomeModelsBy(by: boolean, population: Array<ChromosomeModel>, probability: number, matrix: Matrix, maxDiffBetweenNode: number): Array<ChromosomeModel> {

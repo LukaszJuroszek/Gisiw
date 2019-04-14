@@ -11,6 +11,7 @@ $(document).ready(function () {
     //data charts init
     var dataPointsOfF1Sum = [];
     var dataPointsOfF2Sum = [];
+    var dataPointsOfF1AndF2SumOfBestChromosome = [];
     var dataPointsPareto = [];
     var iteractionCounter = 1;
 
@@ -30,7 +31,7 @@ $(document).ready(function () {
 
     //evolutions settings
     var numberOfTournamentRounds: number = populationSize / 2;
-    var numberOfIterations: number = 50;
+    var numberOfIterations: number = 10;
 
     //declare
     var adjensceMatrix: Matrix;
@@ -41,6 +42,12 @@ $(document).ready(function () {
     var evoltionService: EvolutionService;
 
     function initialize() {
+        dataPointsOfF1Sum = [];
+        dataPointsOfF2Sum = [];
+        dataPointsOfF1AndF2SumOfBestChromosome = [];
+        dataPointsPareto = [];
+        iteractionCounter = 1;
+
         adjensceMatrix = new Matrix();
         graphService = new GraphService(logDebug);
 
@@ -69,24 +76,22 @@ $(document).ready(function () {
             populationService.setStatusString("Running epic... " + iteractionCounter);
 
             var currentBest = graphService.calculateBestChromosome(population, iteractionCounter).getCopy();
+            if (currentBest.getSumOfF1AndF2() < bestChromosome.getSumOfF1AndF2())
+                bestChromosome = currentBest.getCopy();
 
             population = evoltionService.runIteration(population, probabilityForChromosome, adjensceMatrix, maxDiffBetweenNode);
 
             var [sumF1, sumF2, paretoPoins] = populationService.getF1SumF2SumAndParetoPairs(population);
-            addDataPoins(sumF1, sumF2, paretoPoins);
+            addDataPoins(sumF1, sumF2, paretoPoins, bestChromosome.getSumOfF1AndF2());
         }
+        graphService.drawBestChromosome(bestChromosome, mainContierId);
 
-        if (currentBest.getSumOfF1AndF2() < bestChromosome.getSumOfF1AndF2()) {
-            bestChromosome = currentBest;
-            graphService.drawBestChromosome(bestChromosome, mainContierId);
-        }
-        
         populationService.setStatusString("best chromosome: " + bestChromosome.getStringWithSums());
         updateCharts();
 
     }, false);
 
-    function addDataPoins(sumF1: number, sumF2: number, paretoPoins: [number, number][]) {
+    function addDataPoins(sumF1: number, sumF2: number, paretoPoins: [number, number][], sumF1AndF2OfBestChromosome: number) {
         dataPointsOfF1Sum.push({
             x: iteractionCounter,
             y: sumF1
@@ -95,6 +100,11 @@ $(document).ready(function () {
         dataPointsOfF2Sum.push({
             x: iteractionCounter,
             y: sumF2
+        });
+
+        dataPointsOfF1AndF2SumOfBestChromosome.push({
+            x: iteractionCounter,
+            y: sumF1AndF2OfBestChromosome
         });
 
         paretoPoins.forEach(pair => {
@@ -138,35 +148,15 @@ $(document).ready(function () {
 
         document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
 
-        //clear charts data 
-        dataPointsOfF1Sum = [];
-        dataPointsOfF2Sum = [];
-        dataPointsPareto = [];
-        iteractionCounter = 1;
-        bestChromosome = new ChromosomeModel();
-        sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
+        sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum, dataPointsOfF1AndF2SumOfBestChromosome);
         paretoChart = generateParetoChart(dataPointsPareto);
         populationService.setStatusString("Ready");
     });
 
     document.getElementById("dfsResult").textContent = ("Consistent: ") + isConsistent;
 
-    var sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum);
+    var sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum, dataPointsOfF1AndF2SumOfBestChromosome);
     var paretoChart = generateParetoChart(dataPointsPareto);
-
-    function perc2color(perc) {
-        var r, g, b = 0;
-        if (perc < 50) {
-            r = 255;
-            g = Math.round(5.1 * perc);
-        }
-        else {
-            g = 255;
-            r = Math.round(510 - 5.10 * perc);
-        }
-        var h = r * 0x10000 + g * 0x100 + b * 0x1;
-        return '#' + ('000000' + h.toString(16)).slice(-6);
-    }
 
     function getRandomColor() {
         var letters = '0123456789ABCDEF';
@@ -179,23 +169,34 @@ $(document).ready(function () {
 
 });
 
-function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[]) {
+function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[], dataPointsOfF1AndF2SumOfBestChromosome: any[]) {
     var sumChart = new CanvasJS.Chart("sumChart", {
         animationEnabled: false,
         theme: "light2",
         zoomEnabled: true,
-        axisY: {
-            includeZero: false
-        },
+      
+		axisY:[{
+			title: "Linear Scale",
+		},
+		{
+			title: "Logarithmic Scale",
+		}],
+		axisY2:[{
+			title: "Linear Scale",
+		},
+		],
+
         legend: {
             cursor: "pointer",
             verticalAlign: "top",
             fontSize: 22,
             fontColor: "black",
         },
+
         toolTip: {
-            shared: true
+            shared: false
         },
+
         data: [{
             type: "line",
             showInLegend: true,
@@ -203,12 +204,18 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[]) {
             dataPoints: dataPointsOfF1Sum
         },
         {
-            axisYType: "secondary",
             axisYIndex: 1,
             type: "line",
             showInLegend: true,
             name: "Sum F2(x)",
             dataPoints: dataPointsOfF2Sum
+        },
+        {
+            axisYType: "secondary",
+            type: "line",
+            showInLegend: true,
+            name: "Sum F1(x) and F2(x)",
+            dataPoints: dataPointsOfF1AndF2SumOfBestChromosome
         }]
     });
     sumChart.render();

@@ -31,7 +31,6 @@ export class GraphService {
         return result;
     }
 
-
     public drawBestChromosome(result: ChromosomeModel, continerId: string) {
         this.drawBestGraph(result, continerId);
     }
@@ -108,10 +107,10 @@ export class GraphService {
             layout: {
                 hierarchical: {
                     enabled: true,
-                    levelSeparation: 300,
-                    nodeSpacing: 150,
-                    blockShifting: true,
-                    parentCentralization: true,
+                    // levelSeparation: 200,
+                    // nodeSpacing: 50,
+                    blockShifting: false,
+                    parentCentralization: false,
                     direction: 'DU',        // UD, DU, LR, RL
                     sortMethod: 'directed'   // hubsize, directed
                 }
@@ -132,6 +131,7 @@ export class GraphService {
                     enabled: true
                 }
             },
+            physics: false,
             nodes: {
                 borderWidth: 1,
                 borderWidthSelected: 2,

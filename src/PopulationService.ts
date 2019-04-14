@@ -2,8 +2,8 @@ import { ChromosomeModel, ChromosomeElement } from "./ChromosomeModel";
 import { Matrix } from "./Matrix";
 
 export class PopulationService {
-    private _chromosomeParts: Array<[number, string]> = [[0, "firstPart"], [1, "secondPart"]];
-    private matrix: Matrix;
+    //0 - first part, 1 - secondp part
+    private _chromosomeParts: Array<number> = [0, 1];
 
     constructor(private _matrix: Matrix, private _debug: boolean) {
     }
@@ -28,9 +28,9 @@ export class PopulationService {
             result = new ChromosomeModel();
             for (let i = 0; i < matrix.elements.length; i++) {
                 if (Math.random() < probability) {
-                    result.chromosome.push(new ChromosomeElement(i, this._chromosomeParts[0][0]));
+                    result.chromosome.push(new ChromosomeElement(i, this._chromosomeParts[0]));
                 } else {
-                    result.chromosome.push(new ChromosomeElement(i, this._chromosomeParts[1][0]));
+                    result.chromosome.push(new ChromosomeElement(i, this._chromosomeParts[1]));
                 }
             }
             result = this.setSumOfF1AndF2(result);
@@ -58,26 +58,38 @@ export class PopulationService {
     }
 
     public isNodeCountValid(chromosomeModel: ChromosomeModel, maxDiffBetweenNode: number) {
+        var [firstPartSum, secondPartSum] = this.getNodeChromosomePartCount(chromosomeModel);
+        if (this._debug) {
+            console.log("firstPartSum: " + firstPartSum);
+            console.log("secondPartSum: " + secondPartSum);
+            console.log("Math.abs(firstPartSum - secondPartSum): " + Math.abs(firstPartSum - secondPartSum));
+            console.log("Math.abs(firstPartSum - secondPartSum) <= maxDiffBetweenNode: " + (Math.abs(firstPartSum - secondPartSum) <= maxDiffBetweenNode));
+        }
+        return (Math.abs(firstPartSum - secondPartSum) <= maxDiffBetweenNode);
+    }
+
+    public getNodeChromosomePartCount(chromosomeModel: ChromosomeModel): [number, number] {
         var nodeSum: number = 0;
         for (let i = 0; i < chromosomeModel.chromosome.length; i++) {
-            var isFirstPart = chromosomeModel.chromosome[i].chromosomePartNumber === this._chromosomeParts[0][0];
+            var isFirstPart = chromosomeModel.chromosome[i].chromosomePartNumber == this._chromosomeParts[0];
             nodeSum = isFirstPart ? nodeSum + 1 : nodeSum;
         }
         var firstPartSum = chromosomeModel.chromosome.length - nodeSum;
         var secondPartSum = chromosomeModel.chromosome.length - firstPartSum;
-        return (Math.abs(firstPartSum - secondPartSum) <= maxDiffBetweenNode);
+
+        return [firstPartSum, secondPartSum];
     }
 
     public getConnectedEdgeCountAndWegithCount(chromosomeModel: ChromosomeModel): [number, number] {
         var edgeCount: number = 0;
         var edgeWeigthCount: number = 0;
         for (let i = 0; i < this._matrix.elements.length; i++) {
-            var rowElem = chromosomeModel.chromosome.find(this.getPartOfGraphBy(i, this._chromosomeParts[0][0]));
+            var rowElem = chromosomeModel.chromosome.find(this.getPartOfGraphBy(i, this._chromosomeParts[0]));
             //first part is selected by user, second is not present, via row
             if (rowElem === undefined) {
                 for (let j = 0; j < this._matrix.elements[i].length; j++) {
                     //check if column is in first present
-                    var element = chromosomeModel.chromosome.find(this.getPartOfGraphBy(j, this._chromosomeParts[1][0]));
+                    var element = chromosomeModel.chromosome.find(this.getPartOfGraphBy(j, this._chromosomeParts[1]));
                     if (element !== undefined && this._matrix.elements[i][j] >= 1) {
                         edgeCount++;
                         edgeWeigthCount += this._matrix.elements[i][j];
