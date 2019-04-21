@@ -118,7 +118,7 @@ $(document).ready(function () {
     }
 
     function updateCharts() {
-        // updating legend text with  updated with y Value 
+        // updating legend text with  updated with y Value
         sumChart.render();
         paretoChart.render();
     }
@@ -171,52 +171,52 @@ $(document).ready(function () {
 function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[], dataPointsOfF1AndF2SumOfBestChromosome: any[]) {
     var sumChart = new CanvasJS.Chart("sumChart", {
         animationEnabled: true,
-        theme: "light2",
         zoomEnabled: true,
-      
-		axisY:[{
-			title: "Linear Scale",
-		},
-		{
-			title: "Logarithmic Scale",
+
+        axisY: {
+            includeZero: false,
+        },
+
+        axisY2: [{
+            includeZero: false,
+        },
+        {
+            includeZero: false,
         }],
-        
-		axisY2:[{
-			title: "Linear Scale",
-		},
-		],
+        // legend: {
+        //     cursor: "pointer",
+        //     verticalAlign: "top",
+        //     fontSize: 22,
+        //     fontColor: "black",
+        // },
 
-        legend: {
-            cursor: "pointer",
-            verticalAlign: "top",
-            fontSize: 22,
-            fontColor: "black",
-        },
+        // toolTip: {
+        //     shared: false
+        // },
 
-        toolTip: {
-            shared: false
-        },
-
-        data: [{
-            type: "line",
-            showInLegend: true,
-            name: "Sum F1(x)",
-            dataPoints: dataPointsOfF1Sum
-        },
-        {
-            type: "line",
-            axisYIndex: 1,
-            showInLegend: true,
-            name: "Sum F2(x)",
-            dataPoints: dataPointsOfF2Sum
-        },
-        {
-            axisYType: "secondary",
-            type: "line",
-            showInLegend: true,
-            name: "Sum F1(x) and F2(x)",
-            dataPoints: dataPointsOfF1AndF2SumOfBestChromosome
-        }]
+        data: [
+            {
+                type: "line",
+                // showInLegend: true,
+                // name: "Sum F1(x) and F2(x)",
+                dataPoints: dataPointsOfF1AndF2SumOfBestChromosome
+            },
+            {
+                type: "line",
+                axisYType: "secondary",
+                // showInLegend: true,
+                // name: "Sum F1(x)",
+                dataPoints: dataPointsOfF1Sum
+            },
+            {
+                type: "line",
+                axisYType: "secondary",
+                axisYIndex: 1,
+                // showInLegend: true,
+                // name: "Sum F2(x)",
+                dataPoints: dataPointsOfF2Sum
+            }
+        ]
     });
     sumChart.render();
     return sumChart;
