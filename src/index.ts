@@ -81,6 +81,11 @@ $(document).ready(function () {
             population = evoltionService.runIteration(population, probabilityForChromosome, adjensceMatrix, maxDiffBetweenNode);
 
             var [sumF1, sumF2, paretoPoins] = populationService.getF1SumF2SumAndParetoPairs(population);
+            console.log( iteractionCounter % 100 == 0)
+            if(iteractionCounter % 100 == 0){
+                dataPointsPareto = [];
+                 paretoChart = generateParetoChart(dataPointsPareto);
+            }
             addDataPoins(sumF1, sumF2, paretoPoins, bestChromosome.getSumOfF1AndF2());
         }
         graphService.drawBestChromosome(bestChromosome, mainContierId);
@@ -183,37 +188,38 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[], da
         {
             includeZero: false,
         }],
-        // legend: {
-        //     cursor: "pointer",
-        //     verticalAlign: "top",
-        //     fontSize: 22,
-        //     fontColor: "black",
-        // },
 
-        // toolTip: {
-        //     shared: false
-        // },
+        legend: {
+            cursor: "pointer",
+            verticalAlign: "top",
+            fontSize: 22,
+            fontColor: "black",
+        },
+
+        toolTip: {
+            shared: false
+        },
 
         data: [
             {
                 type: "line",
-                // showInLegend: true,
-                // name: "Sum F1(x) and F2(x)",
+                 showInLegend: true,
+                 name: "Sum F1(x) and F2(x)",
                 dataPoints: dataPointsOfF1AndF2SumOfBestChromosome
             },
             {
                 type: "line",
                 axisYType: "secondary",
-                // showInLegend: true,
-                // name: "Sum F1(x)",
+                 showInLegend: true,
+                 name: "Sum F1(x)",
                 dataPoints: dataPointsOfF1Sum
             },
             {
                 type: "line",
                 axisYType: "secondary",
                 axisYIndex: 1,
-                // showInLegend: true,
-                // name: "Sum F2(x)",
+                 showInLegend: true,
+                 name: "Sum F2(x)",
                 dataPoints: dataPointsOfF2Sum
             }
         ]

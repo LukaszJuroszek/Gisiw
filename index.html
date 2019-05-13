@@ -12,54 +12,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
     <style type="text/css">
-         #paretoChart {
-            width: 100%;
-            height: 45%;
-        }
-
-        #graphNetwork {
-            height: 40%;
-        }
-
+        #paretoChart,
         #sumChart {
-            height: 40%;
-            width: 99%;
+            height: 80%;
+            width: 100%;
         }
 
-         #currentStatus {
-            font-size: 15px;
-        }  
 
-        h3,
         #s1,
-        h2 {
+        h4,
+        h3,
+        h2 #currentStatus {
             text-align: center;
+            font-size: 25px;
         }
     </style>
 </head>
 
 <body>
     <div class="container-fluid">
-        <div class="row m-0 p-0">
-            <div class="row col-md-6 m-0 p-0">
-                <div class="col-md-12 m-0 p-0" id="graphNetwork"></div>
-            </div>
-            <div class="col-md-6" id="paretoChart"></div>
+        <div class="row m-0 p-0 h-50">
+            <div class="col-md-6 m-0 p-0" id="graphNetwork"></div>
+            <div class="col-md-6 m-0 p-0 h-100" id="paretoChart"></div>
+            <div class="col-md-12 m-0 p-0 " id="sumChart"></div>
+            <h4 class="col-md-2 col-sm-3" id="dfsResult">Consistent: false</h2>
+                <h4 class="col-md-2 col-sm-3" id="nodeCount">Nodes: 0</h2>
+                    <h4 class="col-md-2 col-sm-3" id="probability">Probability: 0</h2>
+                        <button class="btn btn-danger col-md-1" id="decreaseProbability">-</button>
+                        <button class="btn btn-success col-md-1" id="increaseProbability">+</button>
+                        <button class="btn btn-info col-md-1" id="generate">Generate</button>
+                        <button class="btn btn-info col-md-3" id="run">Run evolution</button>
+                        <h4 class="col-md-12" id="currentStatus">Current Status: Waiting</h2>
         </div>
-        <div class="col-md-12" id="sumChart"></div>
-    </div>
-    <div class="row m-0 p-0">
-        <h4 class="col-md-2" id="dfsResult">Consistent: false</h2>
-            <h4 class="col-md-2" id="nodeCount">Nodes: 0</h2>
-                <button class="btn btn-info col-md-3" id="generate">Generate</button>
-                <h4 class="col-md-3" id="probability">Probability: 0</h2>
-                    <button class="btn btn-danger col-md-1" id="decreaseProbability">-</button>
-                    <button class="btn btn-success col-md-1" id="increaseProbability">+</button>
-    </div>
-    <div class="row m-0 p-0">
-        <button class="btn btn-info col-md-3 m-0 p-0" id="run">Run evolution</button>
-        <h4 class="col-md-9 m-0 p-0" id="currentStatus">Current Status: Waiting</h2>
-    </div>
 </body>
 
 </html>
