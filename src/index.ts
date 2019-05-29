@@ -203,13 +203,8 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[], da
         data: [
             {
                 type: "line",
-<<<<<<< HEAD
                 showInLegend: true,
                 name: "Sum F1(x) and F2(x) of best chromosome",
-=======
-                 showInLegend: true,
-                 name: "Sum F1(x) and F2(x)",
->>>>>>> 9c6fd863a5f73f91c9d31d63277f8aa58bf41b3b
                 dataPoints: dataPointsOfF1AndF2SumOfBestChromosome
             },
             {
