@@ -4,7 +4,7 @@
   "description": "",
   "main": "./src/index.ts",
   "scripts": {
-    "build": "browserify ./src/index.ts -p [ tsify ] > bundle.js"
+    "build": "browserify ./src/index.ts -p [ tsify --noImplicitAny ] > bundle.js"
   },
   "babel": {
     "presets": [

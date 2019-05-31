@@ -12,10 +12,10 @@ $(document).ready(function () {
     console.log("ready!");
 
     //data charts init
-    var dataPointsOfF1Sum = [];
-    var dataPointsOfF2Sum = [];
-    var dataPointsOfF1AndF2SumOfBestChromosome = [];
-    var dataPointsPareto = [];
+    var dataPointsOfF1Sum:any[] = [];
+    var dataPointsOfF2Sum:any[] = [];
+    var dataPointsOfF1AndF2SumOfBestChromosome:any[] = [];
+    var dataPointsPareto:any[] = [];
     var iteractionCounter = 1;
 
     //debug settings

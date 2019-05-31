@@ -70,7 +70,7 @@ export class Matrix {
             var node = nodeNeighbors.find(function checkId(n) {
                 return n.id === vertex;
             });
-            node.neighbors.forEach(function (neighbor) {
+            node.neighbors.forEach(function (neighbor:any) {
                 if (!visited.has(neighbor.num)) {
                     stack.push(neighbor.num);
                 }
