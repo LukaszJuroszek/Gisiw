@@ -2,7 +2,10 @@ import { Matrix } from './matrix';
 import { GraphService } from './graphService';
 import { EvolutionService } from './EvolutionService';
 import { PopulationService } from './populationService';
-import { ChromosomeModel, ChromosomeElement } from './chromosomeModel';
+import { ChromosomeModel } from './chromosomeModel';
+import * as chroma from 'chroma-js';
+import * as paretoService from 'pareto-frontier';
+
 declare var CanvasJS: any
 var bestChromosome: ChromosomeModel;
 $(document).ready(function () {
@@ -30,8 +33,8 @@ $(document).ready(function () {
     var populationSize: number = 100;
 
     //evolutions settings
-    var numberOfTournamentRounds: number = populationSize / 2;
-    var numberOfIterations: number = 10;
+    var numberOfTournamentRounds: number = populationSize;
+    var numberOfIterations: number = 5;
 
     //declare
     var adjensceMatrix: Matrix;
@@ -81,19 +84,31 @@ $(document).ready(function () {
             population = evoltionService.runIteration(population, probabilityForChromosome, adjensceMatrix, maxDiffBetweenNode);
 
             var [sumF1, sumF2, paretoPoins] = populationService.getF1SumF2SumAndParetoPairs(population);
-            console.log( iteractionCounter % 100 == 0)
-            if(iteractionCounter % 100 == 0){
+            if (iteractionCounter % 1000 == 0) {
                 dataPointsPareto = [];
-                 paretoChart = generateParetoChart(dataPointsPareto);
+                paretoChart = generateParetoChart(dataPointsPareto);
             }
             addDataPoins(sumF1, sumF2, paretoPoins, bestChromosome.getSumOfF1AndF2());
         }
         graphService.drawBestChromosome(bestChromosome, mainContierId);
-
         populationService.setStatusString("best chromosome: " + bestChromosome.getStringWithSums());
+        var paretoPairs = dataPointsPareto.map(point => [point.x, point.y]);
+        var paretoOptimalPairs = paretoService.getParetoFrontier(paretoPairs, { optimize: 'bottomLeft' });
+        dataPointsPareto.forEach(paretoPair => {
+            for (let index = 0; index < paretoOptimalPairs.length; index++) {
+                var element = paretoOptimalPairs[index];
+                if (paretoPair.x === element[0] && paretoPair.y === element[1]) {
+                    paretoPair.markerType = "triangle";
+                    paretoPair.markerSize = 20;
+                } else {
+                    paretoPair.markerType = "circle";
+                    paretoPair.markerSize = 5;
+                }
+            }
+        });
         updateCharts();
 
-    }, false);
+    }, false)
 
     function addDataPoins(sumF1: number, sumF2: number, paretoPoins: [number, number][], sumF1AndF2OfBestChromosome: number) {
         dataPointsOfF1Sum.push({
@@ -115,7 +130,7 @@ $(document).ready(function () {
             dataPointsPareto.push({
                 x: pair[0],
                 y: pair[1],
-                color: getRandomColor()
+                color: getColor()
             });
         });
 
@@ -162,12 +177,9 @@ $(document).ready(function () {
     var sumChart = generateSumChart(dataPointsOfF1Sum, dataPointsOfF2Sum, dataPointsOfF1AndF2SumOfBestChromosome);
     var paretoChart = generateParetoChart(dataPointsPareto);
 
-    function getRandomColor() {
-        var letters = '0123456789ABCDEF';
-        var color = '#';
-        for (var i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
+    function getColor() {
+        var scale = chroma.scale(['blue', 'red']);
+        var color = scale(iteractionCounter / 100).hex();
         return color;
     }
 
@@ -177,7 +189,7 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[], da
     var sumChart = new CanvasJS.Chart("sumChart", {
         animationEnabled: true,
         zoomEnabled: true,
-        
+
         axisY: {
             includeZero: false,
         },
@@ -210,8 +222,8 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[], da
             {
                 type: "line",
                 axisYType: "secondary",
-                 showInLegend: true,
-                 name: "Sum F1(x)",
+                showInLegend: true,
+                name: "Sum F1(x)",
                 dataPoints: dataPointsOfF1Sum
             },
             {
@@ -230,6 +242,17 @@ function generateSumChart(dataPointsOfF1Sum: any[], dataPointsOfF2Sum: any[], da
 
 function generateParetoChart(dataPointsPareto: any[]) {
     var paretoChart = new CanvasJS.Chart("paretoChart", {
+        animationEnabled: true,
+        zoomEnabled: true,
+        theme: "light2",
+        axisX: {
+            gridColor: "black",
+            gridThickness: 1,
+        },
+        axisY: {
+            gridColor: "black",
+            gridThickness: 1
+        },
         data: [
             {
                 type: "scatter",

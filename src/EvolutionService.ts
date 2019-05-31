@@ -24,9 +24,7 @@ export class EvolutionService {
         if (bestCollectionByF2.length != population.length / 2)
             console.log("bestCollectionByF2.length is INVALID " + bestCollectionByF2.length);
 
-        console.log("runIteration...");
-
-        this.mutateChromosomes(bestCollectionByF1, bestCollectionByF2, maxDiffBetweenNode, true, true);
+        this.mutateChromosomes(bestCollectionByF1, bestCollectionByF2, maxDiffBetweenNode, false, true);
 
         var temp = this.shufle(bestCollectionByF1.concat(bestCollectionByF2));
 
@@ -35,7 +33,11 @@ export class EvolutionService {
         return population;
     }
 
-    private mutateChromosomes(bestCollectionByF1: ChromosomeModel[], bestCollectionByF2: ChromosomeModel[], maxDiffBetweenNode: number, oneNodeMutate: boolean, flipNodeMutate: boolean) {
+    private mutateChromosomes(bestCollectionByF1: ChromosomeModel[],
+        bestCollectionByF2: ChromosomeModel[],
+        maxDiffBetweenNode: number,
+        oneNodeMutate: boolean,
+        flipNodeMutate: boolean) {
         var numberOfThimes: number = 10// this.generateNumbers(bestCollectionByF1.length / 20);
 
         for (let i = 0; i < numberOfThimes; i++) {
