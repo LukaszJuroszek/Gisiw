@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graph", "Graph.csproj", "{F95CF6A1-46D6-476A-AC7A-54FF0474037C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graph.Core", "..\Graph.Core\Graph.Core.csproj", "{6E95F099-13A1-4CEC-BBB0-1DE6A5CB2054}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorGraph", "..\BlazorGraph\BlazorGraph.csproj", "{CF8119E2-5E6E-4FC6-B114-D1DEB097C005}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F95CF6A1-46D6-476A-AC7A-54FF0474037C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F95CF6A1-46D6-476A-AC7A-54FF0474037C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F95CF6A1-46D6-476A-AC7A-54FF0474037C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F95CF6A1-46D6-476A-AC7A-54FF0474037C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6E95F099-13A1-4CEC-BBB0-1DE6A5CB2054}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6E95F099-13A1-4CEC-BBB0-1DE6A5CB2054}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E95F099-13A1-4CEC-BBB0-1DE6A5CB2054}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E95F099-13A1-4CEC-BBB0-1DE6A5CB2054}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF8119E2-5E6E-4FC6-B114-D1DEB097C005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF8119E2-5E6E-4FC6-B114-D1DEB097C005}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF8119E2-5E6E-4FC6-B114-D1DEB097C005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF8119E2-5E6E-4FC6-B114-D1DEB097C005}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
