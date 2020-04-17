@@ -3,12 +3,13 @@ import { GraphService } from './graphService';
 import { EvolutionService } from './EvolutionService';
 import { PopulationService } from './populationService';
 import { ChromosomeModel } from './chromosomeModel';
+import * as jquery from 'jquery';
 import * as chroma from 'chroma-js';
 import * as paretoService from 'pareto-frontier';
 
 declare var CanvasJS: any
 var bestChromosome: ChromosomeModel;
-$(document).ready(function () {
+jquery(document).ready(function () {
     console.log("ready!");
 
     //data charts init
@@ -160,7 +161,7 @@ $(document).ready(function () {
         }
     }, false);
 
-    $('#generate').click(function (e) {
+    jquery('#generate').click(function (e) {
         e.preventDefault();
 
         initialize();
