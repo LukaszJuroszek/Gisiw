@@ -20,7 +20,7 @@ namespace Graph.Core.Tests
         {
             //Arange
             //Act
-            _sut.Initialize(1, new MatrixModel(30, 1), 1d, 1);
+            //_sut.Initialize(1, new MatrixModel(), 1d, 1);
             //Assert
             Assert.Pass();
         }

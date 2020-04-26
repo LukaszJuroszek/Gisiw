@@ -1,6 +1,5 @@
 ﻿using Graph.Core.Models;
 using Graph.Core.Services;
-using NSubstitute;
 using NUnit.Framework;
 
 namespace Graph.Core.Tests
@@ -12,7 +11,8 @@ namespace Graph.Core.Tests
         [SetUp]
         public void Setup()
         {
-            _sut = Substitute.For<IMatrixService>();
+            _sut = new MatrixService();
+            //_sut = Substitute.For<IMatrixService>();
         }
 
         [Test]
@@ -20,9 +20,24 @@ namespace Graph.Core.Tests
         {
             //Arange
             //Act
-            _sut.GenerateMatrix(1, 1d);
+            var result = _sut.GenerateMatrix(30, .5);
+            Log2dArray(result.Elements);
+
             //Assert
+            Assert.IsNotNull(result);
             Assert.Pass();
+        }
+
+        private static void Log2dArray(int[][] elements)
+        {
+            for (var i = 0; i < elements.Length; i++)
+            {
+                for (var j = 0; j < elements[i].Length; j++)
+                {
+                    TestContext.Out.Write($"{elements[i][j]} ");
+                }
+                TestContext.Out.WriteLine();
+            }
         }
     }
 }
