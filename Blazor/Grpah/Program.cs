@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Graph.Core.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,10 @@ namespace Graph
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddSingleton<IGraphChartService, GraphChartService>();
+            builder.Services.AddSingleton<IGraphConsistentService, GraphConsistentService>();
+            builder.Services.AddSingleton<IMatrixService, MatrixService>();
+            builder.Services.AddSingleton<IPopulationService, PopulationService>();
 
             await builder.Build().RunAsync();
         }

@@ -4,7 +4,6 @@ using System.Text;
 
 namespace Graph.Core.Services
 {
-
     public interface IEvolutionService
     {
         void mutateChromosomes();
@@ -17,11 +16,9 @@ namespace Graph.Core.Services
         {
         }
 
-
         public void mutateChromosomes()
         {
         }
-
 
         private void mutateChromosomeByOneNode()
         {

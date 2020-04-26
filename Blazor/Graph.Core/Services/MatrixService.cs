@@ -6,8 +6,8 @@ namespace Graph.Core.Services
 {
     public interface IMatrixService
     {
-        IEnumerable<int> GetNodeNeighbors();
         MatrixModel GenerateMatrix(int nodeCount, double edgeProbability);
+        List<NodeNeighborsModel> GetNodeNeighbors(MatrixModel matrix);
     }
 
     public class MatrixService : IMatrixService
@@ -44,6 +44,35 @@ namespace Graph.Core.Services
             }
 
             return new MatrixModel(result);
+        }
+
+        public List<NodeNeighborsModel> GetNodeNeighbors(MatrixModel matrix)
+        {
+            var result = new List<NodeNeighborsModel>();
+            //Copy matrix by diagonal (DFS need two way graph for searching)
+            for (var i = 0; i < matrix.Elements.Length; i++)
+            {
+                for (var j = (i + 1); j < matrix.Elements.Length; j++)
+                {
+                    matrix.Elements[j][i] = matrix.Elements[i][j];
+                }
+            }
+
+            for (var i = 0; i < matrix.Elements.Length; i++)
+            {
+                var tmp = new List<NodeNeighborModel>();
+                for (var j = 0; j < matrix.Elements[i].Length; j++)
+                {
+                    if (matrix.Elements[i][j] >= 1)
+                    {
+                        tmp.Add(new NodeNeighborModel { NeighborNumber = j, EdgeValue = matrix.Elements[i][j] });
+                    }
+                }
+                tmp.Sort((a, b) => b.NeighborNumber - a.NeighborNumber);
+
+                result.Add(new NodeNeighborsModel { Id = i, Neighbors = tmp });
+            }
+            return result;
         }
     }
 }
