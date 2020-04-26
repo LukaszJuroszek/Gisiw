@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-
-namespace Graph.Component.Models.Options
+﻿namespace Graph.Component.Models.Options
 {
     public class EdgeOptions
     {
         public bool Shadow { get; set; }
         public SmoothOption Smooth { get; set; }
-        public IEnumerable<ColorOption> Colors { get; set; }
+        public ColorOption Color { get; set; }
     }
 
     public class ColorOption

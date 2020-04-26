@@ -1,32 +1,35 @@
 ﻿@page "/"
 @inject IMatrixService MatrixService
 @inject IGraphChartService GraphChartService
+@inject IGraphConsistentService GraphConsistentService
 <h1>Hello, world!</h1>
+<div> is consistent: @GraphConsistentService.IsConsistent(_matrix)</div>
+<button class="btn btn-primary" @onclick="GenerateGraph">Generate Graph</button>
 
 <GraphChart @ref="_graphChart"
-            Probability="_probability"
+            EdgeProbability="_edgeProbability"
             NodeCount="_nodeCount"
-            NodeCountDecreaseChanged="DecrementNodeCount"
-            NodeCountIncreaseChanged="IncrementNodeCount"
-            GraphData="_graphData" 
-            GraphOptions="_graphOptions"/>
-
+            GraphData="_graphData"
+            GraphOptions="_graphOptions" />
 @code {
-    private int _nodeCount = 10;
-    private double _probability = 0.5d;
+    private int _nodeCount;
+    private double _edgeProbability;
     private GraphData _graphData;
     private GraphOptions _graphOptions;
+    private MatrixModel _matrix;
     private GraphChart _graphChart;
 
-    private void IncrementNodeCount()
+    protected override void OnInitialized()
     {
-        _nodeCount++;
+        _nodeCount = 10;
+        _edgeProbability = 0.5d;
+        GenerateGraph();
     }
 
-    private void DecrementNodeCount()
+    private void GenerateGraph()
     {
-        _nodeCount--;
+        _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, edgeProbability: _edgeProbability);
+        _graphData = GraphChartService.GraphDataFromMatrix(_matrix);
+        _graphOptions = GraphChartService.GetDefaultGraphOptions();
     }
-
-  
 }
