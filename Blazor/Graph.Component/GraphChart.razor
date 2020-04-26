@@ -1,4 +1,6 @@
-﻿<div class="my-component">
+﻿@inject IJSRuntime JSRuntime
+
+<div class="my-component">
     <div>
         <span>
             Node count:
@@ -11,20 +13,25 @@
         <span> Node count: @Probability</span>
     </div>
 
-
+    <button class="btn btn-primary" @onclick="Render">Render</button>
 </div>
 
 
 @code {
-    [Parameter]
-    public int NodeCount { get; set; } = 1;
+    [Parameter] public int NodeCount { get; set; } = 1;
 
-    [Parameter]
-    public double Probability { get; set; } = 0.5d;
+    [Parameter] public double Probability { get; set; } = 0.5d;
 
-    [Parameter]
-    public EventCallback NodeCountIncreaseChanged { get; set; }
+    [Parameter] public EventCallback NodeCountIncreaseChanged { get; set; }
 
-    [Parameter]
-    public EventCallback NodeCountDecreaseChanged { get; set; }
+    [Parameter] public EventCallback NodeCountDecreaseChanged { get; set; }
+
+    private string _cointainerId = "graphCointainerId";
+    private async void Render()
+    {
+        var data = new GraphData();
+        var options = new GraphOptions();
+
+        GraphChartJsInterop.CreateGraph(_cointainerId: _cointainerId, data: data, options: options)
+    }
 }
