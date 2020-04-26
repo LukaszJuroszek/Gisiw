@@ -1,5 +1,6 @@
 ﻿using Graph.Core.Services;
 using NUnit.Framework;
+
 namespace Graph.Core.Tests
 {
     public class GraphConsistentServiceUt

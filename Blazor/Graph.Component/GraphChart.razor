@@ -1,3 +1,30 @@
 ﻿<div class="my-component">
-    This Blazor component is defined in the <strong>Graph.Component</strong> package.
+    <div>
+        <span>
+            Node count:
+        </span>
+        <button class="btn btn-primary" @onclick="NodeCountIncreaseChanged">+</button>
+        <span>
+            @NodeCount
+        </span>
+        <button class="btn btn-primary" @onclick="NodeCountDecreaseChanged">-</button>
+        <span> Node count: @Probability</span>
+    </div>
+
+
 </div>
+
+
+@code {
+    [Parameter]
+    public int NodeCount { get; set; } = 1;
+
+    [Parameter]
+    public double Probability { get; set; } = 0.5d;
+
+    [Parameter]
+    public EventCallback NodeCountIncreaseChanged { get; set; }
+
+    [Parameter]
+    public EventCallback NodeCountDecreaseChanged { get; set; }
+}

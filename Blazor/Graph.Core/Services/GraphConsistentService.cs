@@ -40,8 +40,7 @@ namespace Graph.Core.Services
         private List<NodeNeighborsModel> GetNodeNeighbors(MatrixModel matrix)
         {
             var result = new List<NodeNeighborsModel>();
-
-            //Copy Matrix by diagonal
+            //Copy matrix by diagonal (DFS need two way graph for searching)
             for (var i = 0; i < matrix.Elements.Length; i++)
             {
                 for (var j = (i + 1); j < matrix.Elements.Length; j++)
