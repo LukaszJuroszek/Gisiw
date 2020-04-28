@@ -1,41 +1,16 @@
 ﻿@inject IJSRuntime JSRuntime
 
-<div class="h-100">
-    <div>
-        <span>Node count: </span>
-        <button class="btn btn-primary" @onclick="IncrementNodeCount">+</button>
-        <span> @NodeCount </span>
-        <button class="btn btn-primary" @onclick="DecrementNodeCount">-</button>
-        <span> Edge Probability: @EdgeProbability</span>
-    </div>
-
-    <button class="btn btn-primary" @onclick="Render">Render</button>
-    <div class="h-100" id="@_containerId"></div>
-</div>
+<div class="h-100" id="@_containerId"></div>
 
 @code {
     private string _containerId = "graphCointainerId";
-
-    [Parameter] public int NodeCount { get; set; }
-
-    [Parameter] public double EdgeProbability { get; set; }
 
     [Parameter] public GraphData GraphData { get; set; }
 
     [Parameter] public GraphOptions GraphOptions { get; set; }
 
-    private async void Render()
+    public async void Render()
     {
         await GraphChartJsInterop.CreateGraph(jsRuntime: JSRuntime, containerId: _containerId, data: GraphData, options: GraphOptions);
-    }
-
-    private void IncrementNodeCount()
-    {
-        NodeCount++;
-    }
-
-    private void DecrementNodeCount()
-    {
-        NodeCount--;
     }
 }

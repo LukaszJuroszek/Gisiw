@@ -2,15 +2,42 @@
 @inject IMatrixService MatrixService
 @inject IGraphChartService GraphChartService
 @inject IGraphConsistentService GraphConsistentService
-<h1>Hello, world!</h1>
-<div> is consistent: @GraphConsistentService.IsConsistent(_matrix)</div>
-<button class="btn btn-primary" @onclick="GenerateGraph">Generate Graph</button>
-
-<GraphChart @ref="_graphChart"
-            EdgeProbability="_edgeProbability"
-            NodeCount="_nodeCount"
-            GraphData="_graphData"
-            GraphOptions="_graphOptions" />
+<h5 class="card-header">Graph</h5>
+<div class="card-body h-100 d-flex flex-column">
+    <div class="row">
+        <div class="col-sm-3">
+            Node count:
+            <button class="btn btn-primary" @onclick="DecrementNodeCount">-</button>
+            @_nodeCount
+            <button class="btn btn-primary" @onclick="IncrementNodeCount">+</button>
+        </div>
+        <div class="col-sm-2">
+            <span> Edge Probability: @_edgeProbability</span>
+        </div>
+        <div class="col-sm">
+            <div> is consistent: @GraphConsistentService.IsConsistent(_matrix)</div>
+            <button class="btn btn-primary" @onclick="GenerateGraph">Generate Graph</button>
+        </div>
+        <div class="col-sm">
+            <button class="btn btn-primary" @onclick="OnRender">Render</button>
+        </div>
+    </div>
+    <div class="row h-50">
+        <div class="col-sm h-100">
+            <GraphChart @ref="_graphChart"
+                        GraphData="_graphData"
+                        GraphOptions="_graphOptions" />
+        </div>
+        <div class="col-sm h-100">
+        </div>
+    </div>
+    <div class="row h-50">
+        <div class="col-sm h-100">
+        </div>
+        <div class="col-sm h-100">
+        </div>
+    </div>
+</div>
 @code {
     private int _nodeCount;
     private double _edgeProbability;
@@ -31,5 +58,20 @@
         _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, edgeProbability: _edgeProbability);
         _graphData = GraphChartService.GraphDataFromMatrix(_matrix);
         _graphOptions = GraphChartService.GetDefaultGraphOptions();
+    }
+
+    private void IncrementNodeCount()
+    {
+        _nodeCount++;
+    }
+
+    private void DecrementNodeCount()
+    {
+        _nodeCount--;
+    }
+
+    private async void OnRender()
+    {
+        await Task.Run(() => _graphChart.Render());
     }
 }
