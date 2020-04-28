@@ -2,6 +2,7 @@
 @inject IMatrixService MatrixService
 @inject IGraphChartService GraphChartService
 @inject IGraphConsistentService GraphConsistentService
+@inject IPopulationService PopulationService
 <h5 class="card-header">Graph</h5>
 <div class="card-body h-100 d-flex flex-column">
     <div class="row">
@@ -45,12 +46,16 @@
     private GraphOptions _graphOptions;
     private MatrixModel _matrix;
     private GraphChart _graphChart;
+    private IEnumerable<ChromosomeModel> _population;
+    private int _populationSize = 100;
+    private int _maxDiffBetweenNode = 6;
 
     protected override void OnInitialized()
     {
         _nodeCount = 10;
         _edgeProbability = 0.5d;
         GenerateGraph();
+        OnRender();
     }
 
     private void GenerateGraph()
@@ -58,6 +63,8 @@
         _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, edgeProbability: _edgeProbability);
         _graphData = GraphChartService.GraphDataFromMatrix(_matrix);
         _graphOptions = GraphChartService.GetDefaultGraphOptions();
+        _population = PopulationService.Initialize(_matrix, _populationSize, _edgeProbability, _maxDiffBetweenNode);
+        OnRender();
     }
 
     private void IncrementNodeCount()

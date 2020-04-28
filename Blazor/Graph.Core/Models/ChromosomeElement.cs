@@ -2,7 +2,7 @@
 {
     public class ChromosomeElement
     {
-        private readonly int nodeNumber = 0;
-        private readonly int chromosomePartNumber = 0;
+        public int NodeNumber { get; set; }
+        public int ChromosomePartNumber { get; set; }
     }
 }
