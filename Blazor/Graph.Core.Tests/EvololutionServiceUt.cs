@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 namespace Graph.Core.Tests
 {
+    [TestFixture]
     public class EvololutionServiceUt
     {
         private IEvolutionService _sut;

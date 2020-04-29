@@ -1,9 +1,9 @@
-﻿using Graph.Core.Models;
-using Graph.Core.Services;
+﻿using Graph.Core.Services;
 using NUnit.Framework;
 
 namespace Graph.Core.Tests
 {
+    [TestFixture]
     public class MatrixServiceUt
     {
         private IMatrixService _sut;
@@ -15,12 +15,16 @@ namespace Graph.Core.Tests
             //_sut = Substitute.For<IMatrixService>();
         }
 
-        [Test]
-        public void Initialize_Should_Pass()
+        [TestCase(5)]
+        [TestCase(4)]
+        [TestCase(3)]
+        [TestCase(2)]
+        [TestCase(1)]
+        public void Initialize_Should_Pass(int nodeCount)
         {
             //Arange
             //Act
-            var result = _sut.GenerateMatrix(30, .5);
+            var result = _sut.GenerateMatrix(nodeCount, .5);
             Log2dArray(result.Elements);
 
             //Assert

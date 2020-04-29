@@ -3,6 +3,7 @@ using NUnit.Framework;
 
 namespace Graph.Core.Tests
 {
+    [TestFixture]
     public class GraphConsistentServiceUt
     {
         private IGraphConsistentService _sut;

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Graph.Core.Services
+﻿namespace Graph.Core.Services
 {
     public interface IEvolutionService
     {
