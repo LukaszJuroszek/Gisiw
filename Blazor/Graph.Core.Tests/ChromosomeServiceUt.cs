@@ -10,6 +10,7 @@ namespace Graph.Core.Tests
     public class ChromosomeServiceUt
     {
         private IChromosomeService _sut;
+
         [SetUp]
         public void Setup()
         {

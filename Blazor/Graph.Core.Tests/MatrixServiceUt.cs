@@ -15,7 +15,6 @@ namespace Graph.Core.Tests
         {
             _graphConsistentService = new GraphConsistentService();
             _sut = new MatrixService(_graphConsistentService);
-            //_sut = Substitute.For<IMatrixService>();
         }
 
         [TestCase(5)]

@@ -20,7 +20,7 @@ namespace Graph.Core.Tests
         {
             //Arange
             //Act
-            _sut.mutateChromosomes();
+            //_sut.();
             //Assert
             Assert.Pass();
         }

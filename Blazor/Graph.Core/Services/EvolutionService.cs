@@ -1,52 +1,15 @@
-﻿namespace Graph.Core.Services
+﻿using Graph.Core.Models;
+
+namespace Graph.Core.Services
 {
     public interface IEvolutionService
     {
-        void mutateChromosomes();
-        void runIteration();
+        void RunIteration(IPopulation population, IMatrix matrix);
     }
     public class EvolutionService : IEvolutionService
     {
 
-        public void runIteration()
-        {
-        }
-
-        public void mutateChromosomes()
-        {
-        }
-
-        private void mutateChromosomeByOneNode()
-        {
-        }
-
-        private void canChangeChromosomeByOneNode()
-        {
-        }
-        private void mutateChromosomeByFippingNode()
-        {
-        }
-        private void areChromosomePartsNotEqualAnd()
-        {
-        }
-
-        private void getBestChromosomeModelsBy()
-        {
-        }
-
-        private void generateTwoNumbers()
-        {
-        }
-        private void getLeftAndRigthChromomosomeByNumber()
-        {
-        }
-        private void generateNumbers()
-        {
-        }
-        private void selectBestBy()
-        {
-        }
-        private void shufle()
+        public void RunIteration(IPopulation population, IMatrix matrix)
         {
         }
     }

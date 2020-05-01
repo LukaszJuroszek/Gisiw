@@ -22,11 +22,6 @@ namespace Graph.Core.Services
             _graphConsistentService = graphConsistentService;
         }
 
-        public IEnumerable<int> GetNodeNeighbors()
-        {
-            throw new NotImplementedException();
-        }
-
         public IMatrix GenerateMatrix(int nodeCount, double probability)
         {
             var tryCount = 0;

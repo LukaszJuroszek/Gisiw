@@ -8,21 +8,24 @@
     <div class="row">
         <div class="col-sm-3">
             Node count:
-            <button class="btn btn-primary" @onclick="DecrementNodeCount" @ondblclick="DecrementDoubleNodeCount">-</button>
+            <button class="btn btn-primary" @onclick="OnDecrementNodeCount" @ondblclick="OnDecrementDoubleNodeCount">-</button>
             @_nodeCount
-            <button class="btn btn-primary" @onclick="IncrementNodeCount" @ondblclick="IncrementDoubleNodeCount">+</button>
-        </div>
+            <button class="btn btn-primary" @onclick="OnIncrementNodeCount" @ondblclick="OnIncrementDoubleNodeCount">+</button>
+        </div>  
         <div class="col-sm-3">
             Edge Probability:
-            <button class="btn btn-primary" @onclick="DecrementEdgeProbability">-</button>
+            <button class="btn btn-primary" @onclick="OnDecrementEdgeProbability">-</button>
             @_edgeProbability
-            <button class="btn btn-primary" @onclick="IncrementEdgeProbability">+</button>
+            <button class="btn btn-primary" @onclick="OnIncrementEdgeProbability">+</button>
         </div>
         <div class="col-sm">
-            <button class="btn btn-primary" @onclick="GenerateGraph">Generate Graph</button>
+            <button class="btn btn-primary" @onclick="OnGenerateGraph">Generate Graph</button>
         </div>
         <div class="col-sm">
             <button class="btn btn-primary" @onclick="OnRender">Render</button>
+        </div>
+        <div class="col-sm">
+            <button class="btn btn-primary" @onclick="OnStart">Start</button>
         </div>
     </div>
     <div class="row h-50">
@@ -56,11 +59,11 @@
     {
         _nodeCount = 10;
         _edgeProbability = 0.55d;
-        GenerateGraph();
+        OnGenerateGraph();
         OnRender();
     }
 
-    private void GenerateGraph()
+    private void OnGenerateGraph()
     {
         _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, probability: _edgeProbability);
         _graphData = GraphChartService.GraphDataFromMatrix(_matrix);
@@ -69,38 +72,42 @@
         OnRender();
     }
 
-    private void IncrementNodeCount()
+    private void OnIncrementNodeCount()
     {
         _nodeCount++;
     }
 
-    private void IncrementDoubleNodeCount()
+    private void OnIncrementDoubleNodeCount()
     {
         _nodeCount += 10;
     }
 
-    private void DecrementNodeCount()
+    private void OnDecrementNodeCount()
     {
         _nodeCount = _nodeCount - 1 <= 0 ? 1 : _nodeCount - 1;
     }
 
-    private void DecrementDoubleNodeCount()
+    private void OnDecrementDoubleNodeCount()
     {
         _nodeCount = _nodeCount - 10 <= 0 ? 1 : _nodeCount - 10;
     }
 
-
-    private void IncrementEdgeProbability()
+    private void OnIncrementEdgeProbability()
     {
         _edgeProbability = _edgeProbability + 0.1d > 1d ? 1d : _edgeProbability + 0.1d;
     }
 
-    private void DecrementEdgeProbability()
+    private void OnDecrementEdgeProbability()
     {
         _edgeProbability = Math.Round(_edgeProbability - 0.1d < 0d ? 0.1d : _edgeProbability - 0.1d, 1);
     }
 
     private async void OnRender()
+    {
+        await Task.Run(() => _graphChart.Render());
+    }
+
+    private async void OnStart()
     {
         await Task.Run(() => _graphChart.Render());
     }

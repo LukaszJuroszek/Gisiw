@@ -2,6 +2,7 @@
 using Graph.Core.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Graph.Core.Services
 {
@@ -9,6 +10,7 @@ namespace Graph.Core.Services
     {
         IPopulation Initialize(IMatrix matrix, int populationSize, int maxDiffBetweenNode);
         IChromosome GenerateChromosome(IMatrix matrix, int maxDiffBetweenNode);
+        IChromosome GetBestChromosome(IPopulation population);
     }
     public class PopulationService : IPopulationService
     {
@@ -31,6 +33,7 @@ namespace Graph.Core.Services
                 }
                 while (result.Count < populationSize);
             }
+          
             return new Population { Members = result };
         }
 
@@ -45,6 +48,7 @@ namespace Graph.Core.Services
 
                 result = new Chromosome
                 {
+                    Id = Guid.NewGuid(),
                     Distribution = new Dictionary<int, ChromosomePart>()
                 };
 
@@ -60,7 +64,13 @@ namespace Graph.Core.Services
             var (edgeCount, edgeWeigthCount) = _chromosomeService.GetConnectedEdgeCountAndWegithCount(result, matrix);
             result.FactorSum1 = edgeCount;
             result.FactorSum2 = edgeWeigthCount;
+
             return result;
+        }
+
+        public IChromosome GetBestChromosome(IPopulation population)
+        {
+            return population.Members.Aggregate((current, next) => current.FactorSums > next.FactorSums ? current : next);
         }
     }
 }
