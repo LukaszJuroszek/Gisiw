@@ -8,7 +8,6 @@ namespace Graph.Core.Tests
     {
         private IPopulationService _sut;
         private IChromosomeService _chromosomeService;
-        private readonly double _probability = 0.9d;
         private readonly int _maxDiffBetweenNode = 3;
 
         [SetUp]
@@ -18,12 +17,13 @@ namespace Graph.Core.Tests
             _sut = new PopulationService(_chromosomeService);
         }
 
-        [Test, Timeout(2000)]
+        [Test, Timeout(200)]
+        [Repeat(100)]
         public void GenerateChromosome_Should_Pass()
         {
             //Arange
             //Act
-            var result = _sut.GenerateChromosome(new MatrixModel(MatrixHelper.BasicMatrix5By5), _probability, _maxDiffBetweenNode);
+            var result = _sut.GenerateChromosome(new Matrix(MatrixHelper.BasicMatrix5By5), _maxDiffBetweenNode);
             //Assert
             Assert.That(_chromosomeService.IsNodeCountValid(result, _maxDiffBetweenNode) == true);
         }

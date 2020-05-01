@@ -6,12 +6,15 @@ namespace Graph.Core.Tests
     [TestFixture]
     public class MatrixServiceUt
     {
+        private double _probability = 0.5d;
         private IMatrixService _sut;
+        private IGraphConsistentService _graphConsistentService;
 
         [SetUp]
         public void Setup()
         {
-            _sut = new MatrixService();
+            _graphConsistentService = new GraphConsistentService();
+            _sut = new MatrixService(_graphConsistentService);
             //_sut = Substitute.For<IMatrixService>();
         }
 
@@ -24,7 +27,7 @@ namespace Graph.Core.Tests
         {
             //Arange
             //Act
-            var result = _sut.GenerateMatrix(nodeCount, .5);
+            var result = _sut.GenerateMatrix(nodeCount, _probability);
             Log2dArray(result.Elements);
 
             //Assert
@@ -39,15 +42,6 @@ namespace Graph.Core.Tests
                 for (var j = 0; j < elements[i].Length; j++)
                 {
                     TestContext.Out.Write($"{elements[i][j]} ");
-                }
-                TestContext.Out.WriteLine();
-            }
-
-            for (var i = 0; i < MatrixHelper.BasicMatrix5By5.Length; i++)
-            {
-                for (var j = 0; j < MatrixHelper.BasicMatrix5By5[i].Length; j++)
-                {
-                    TestContext.Out.Write($"{ MatrixHelper.BasicMatrix5By5[i][j]} ");
                 }
                 TestContext.Out.WriteLine();
             }

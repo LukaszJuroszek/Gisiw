@@ -2,8 +2,13 @@
 
 namespace Graph.Core.Models
 {
-    public class Population
+    public interface IPopulation
     {
-        public IEnumerable<ChromosomeModel> Members { get; set; }
+        IEnumerable<IChromosome> Members { get; set; }
+    }
+
+    public class Population : IPopulation
+    {
+        public IEnumerable<IChromosome> Members { get; set; }
     }
 }

@@ -8,15 +8,17 @@
     <div class="row">
         <div class="col-sm-3">
             Node count:
-            <button class="btn btn-primary" @onclick="DecrementNodeCount">-</button>
+            <button class="btn btn-primary" @onclick="DecrementNodeCount" @ondblclick="DecrementDoubleNodeCount">-</button>
             @_nodeCount
-            <button class="btn btn-primary" @onclick="IncrementNodeCount">+</button>
+            <button class="btn btn-primary" @onclick="IncrementNodeCount" @ondblclick="IncrementDoubleNodeCount">+</button>
         </div>
-        <div class="col-sm-2">
-            <span> Edge Probability: @_edgeProbability</span>
+        <div class="col-sm-3">
+            Edge Probability:
+            <button class="btn btn-primary" @onclick="DecrementEdgeProbability">-</button>
+            @_edgeProbability
+            <button class="btn btn-primary" @onclick="IncrementEdgeProbability">+</button>
         </div>
         <div class="col-sm">
-            <div> is consistent: @GraphConsistentService.IsConsistent(_matrix)</div>
             <button class="btn btn-primary" @onclick="GenerateGraph">Generate Graph</button>
         </div>
         <div class="col-sm">
@@ -44,26 +46,26 @@
     private double _edgeProbability;
     private GraphData _graphData;
     private GraphOptions _graphOptions;
-    private MatrixModel _matrix;
+    private IMatrix _matrix;
     private GraphChart _graphChart;
-    private IEnumerable<ChromosomeModel> _population;
+    private IPopulation _population;
     private int _populationSize = 100;
     private int _maxDiffBetweenNode = 6;
 
     protected override void OnInitialized()
     {
         _nodeCount = 10;
-        _edgeProbability = 0.5d;
+        _edgeProbability = 0.55d;
         GenerateGraph();
         OnRender();
     }
 
     private void GenerateGraph()
     {
-        _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, edgeProbability: _edgeProbability);
+        _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, probability: _edgeProbability);
         _graphData = GraphChartService.GraphDataFromMatrix(_matrix);
         _graphOptions = GraphChartService.GetDefaultGraphOptions();
-        _population = PopulationService.Initialize(_matrix, _populationSize, _edgeProbability, _maxDiffBetweenNode);
+        _population = PopulationService.Initialize(_matrix, _populationSize, _maxDiffBetweenNode);
         OnRender();
     }
 
@@ -72,9 +74,30 @@
         _nodeCount++;
     }
 
+    private void IncrementDoubleNodeCount()
+    {
+        _nodeCount += 10;
+    }
+
     private void DecrementNodeCount()
     {
-        _nodeCount--;
+        _nodeCount = _nodeCount - 1 <= 0 ? 1 : _nodeCount - 1;
+    }
+
+    private void DecrementDoubleNodeCount()
+    {
+        _nodeCount = _nodeCount - 10 <= 0 ? 1 : _nodeCount - 10;
+    }
+
+
+    private void IncrementEdgeProbability()
+    {
+        _edgeProbability = _edgeProbability + 0.1d > 1d ? 1d : _edgeProbability + 0.1d;
+    }
+
+    private void DecrementEdgeProbability()
+    {
+        _edgeProbability = Math.Round(_edgeProbability - 0.1d < 0d ? 0.1d : _edgeProbability - 0.1d, 1);
     }
 
     private async void OnRender()

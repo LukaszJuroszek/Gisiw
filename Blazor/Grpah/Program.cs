@@ -15,6 +15,8 @@ namespace Graph
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddSingleton<IChromosomeService,ChromosomeService>();
+            builder.Services.AddSingleton<IEvolutionService, EvolutionService>();
             builder.Services.AddSingleton<IGraphChartService, GraphChartService>();
             builder.Services.AddSingleton<IGraphConsistentService, GraphConsistentService>();
             builder.Services.AddSingleton<IMatrixService, MatrixService>();

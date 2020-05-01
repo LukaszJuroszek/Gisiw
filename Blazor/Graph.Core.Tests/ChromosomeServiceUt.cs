@@ -18,14 +18,14 @@ namespace Graph.Core.Tests
 
         [Test]
         [TestCaseSource(typeof(ChrpomosoeDistributionData), nameof(ChrpomosoeDistributionData.TestCases))]
-        public bool IsNodeCountValid_Should_Count_Nodes_As_Expected(ChromosomeModel chromosome, int maxDiffBetweenNode)
+        public bool IsNodeCountValid_Should_Count_Nodes_As_Expected(Chromosome chromosome, int maxDiffBetweenNode)
         {
             return _sut.IsNodeCountValid(chromosome, maxDiffBetweenNode);
         }
 
         [Test]
         [TestCaseSource(typeof(ChrpomosoeDistributionDataWithMatrix), nameof(ChrpomosoeDistributionData.TestCases))]
-        public (int edgeCount, int edgeWeigthCount) GetConnectedEdgeCountAndWegithCount_Should_Count_Nodes_As_Expected(ChromosomeModel chromosome, MatrixModel matrix)
+        public (int edgeCount, int edgeWeigthCount) GetConnectedEdgeCountAndWegithCount_Should_Count_Nodes_As_Expected(Chromosome chromosome, Matrix matrix)
         {
             return _sut.GetConnectedEdgeCountAndWegithCount(chromosome, matrix);
         }
@@ -36,7 +36,7 @@ namespace Graph.Core.Tests
             {
                 get
                 {
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -47,7 +47,7 @@ namespace Graph.Core.Tests
                             [4] = ChromosomePart.First,
                         }
                     }, 3).Returns(false);
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -58,7 +58,7 @@ namespace Graph.Core.Tests
                             [4] = ChromosomePart.Second,
                         }
                     }, 3).Returns(false);
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -69,7 +69,7 @@ namespace Graph.Core.Tests
                             [4] = ChromosomePart.Second,
                         }
                     }, 3).Returns(true);
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -80,7 +80,7 @@ namespace Graph.Core.Tests
                             [4] = ChromosomePart.Second,
                         }
                     }, 3).Returns(true);
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -91,7 +91,7 @@ namespace Graph.Core.Tests
                             [4] = ChromosomePart.Second,
                         }
                     }, 3).Returns(false);
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -102,7 +102,7 @@ namespace Graph.Core.Tests
                             [4] = ChromosomePart.Second,
                         }
                     }, 3).Returns(false);
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -112,7 +112,7 @@ namespace Graph.Core.Tests
                             [3] = ChromosomePart.First,
                         }
                     }, 3).Returns(false);
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -122,7 +122,7 @@ namespace Graph.Core.Tests
                             [3] = ChromosomePart.Second,
                         }
                     }, 3).Returns(true);
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -132,7 +132,7 @@ namespace Graph.Core.Tests
                             [3] = ChromosomePart.Second,
                         }
                     }, 3).Returns(true);
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -142,7 +142,7 @@ namespace Graph.Core.Tests
                             [3] = ChromosomePart.Second,
                         }
                     }, 3).Returns(true);
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -162,7 +162,7 @@ namespace Graph.Core.Tests
             {
                 get
                 {
-                    yield return new TestCaseData(new ChromosomeModel
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -171,8 +171,8 @@ namespace Graph.Core.Tests
                             [2] = ChromosomePart.First,
                             [3] = ChromosomePart.First,
                         }
-                    }, new MatrixModel(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((0, 0));
-                    yield return new TestCaseData(new ChromosomeModel
+                    }, new Matrix(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((0, 0));
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -181,8 +181,8 @@ namespace Graph.Core.Tests
                             [2] = ChromosomePart.First,
                             [3] = ChromosomePart.Second,
                         }
-                    }, new MatrixModel(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((3, 3));
-                    yield return new TestCaseData(new ChromosomeModel
+                    }, new Matrix(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((3, 3));
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -191,8 +191,8 @@ namespace Graph.Core.Tests
                             [2] = ChromosomePart.Second,
                             [3] = ChromosomePart.Second,
                         }
-                    }, new MatrixModel(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((4, 4));
-                    yield return new TestCaseData(new ChromosomeModel
+                    }, new Matrix(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((4, 4));
+                    yield return new TestCaseData(new Chromosome
                     {
                         Distribution = new Dictionary<int, ChromosomePart>
                         {
@@ -201,7 +201,7 @@ namespace Graph.Core.Tests
                             [2] = ChromosomePart.Second,
                             [3] = ChromosomePart.Second,
                         }
-                    }, new MatrixModel(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((0, 0));
+                    }, new Matrix(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((0, 0));
                 }
             }
         }

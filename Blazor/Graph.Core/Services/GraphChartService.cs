@@ -7,22 +7,22 @@ namespace Graph.Core.Services
 {
     public interface IGraphChartService
     {
-        GraphData GraphDataFromMatrix(MatrixModel matrix);
-        IList<GraphEdges> GraphEdgesFromMatrix(MatrixModel matrix);
-        IList<GraphNodes> GraphNodesFromMatrix(MatrixModel matrix);
+        GraphData GraphDataFromMatrix(IMatrix matrix);
+        IList<GraphEdges> GraphEdgesFromMatrix(IMatrix matrix);
+        IList<GraphNodes> GraphNodesFromMatrix(IMatrix matrix);
         GraphOptions GetDefaultGraphOptions();
     }
 
     public class GraphChartService : IGraphChartService
     {
-        private readonly IMatrixService _matrixService;
+        private readonly IGraphConsistentService _graphConsistentService;
 
-        public GraphChartService(IMatrixService matrixService)
+        public GraphChartService(IGraphConsistentService graphConsistentService)
         {
-            _matrixService = matrixService;
+            _graphConsistentService = graphConsistentService;
         }
 
-        public GraphData GraphDataFromMatrix(MatrixModel matrix)
+        public GraphData GraphDataFromMatrix(IMatrix matrix)
         {
             return new GraphData
             {
@@ -31,15 +31,15 @@ namespace Graph.Core.Services
             };
         }
 
-        public IList<GraphEdges> GraphEdgesFromMatrix(MatrixModel matrix)
+        public IList<GraphEdges> GraphEdgesFromMatrix(IMatrix matrix)
         {
-            var nodeNeighbors = _matrixService.GetNodeNeighbors(matrix);
+            var nodeNeighbors = _graphConsistentService.GetNodeNeighbors(matrix);
 
             var result = new List<GraphEdges>();
 
             for (var i = 0; i < nodeNeighbors.Count; i++)
             {
-                for (var j = 0; j < nodeNeighbors[i].Neighbors.Count; j++)
+                for (var j = 0; j < nodeNeighbors[i].Neighbors.Length; j++)
                 {
                     result.Add(new GraphEdges
                     {
@@ -58,7 +58,7 @@ namespace Graph.Core.Services
             return result;
         }
 
-        public IList<GraphNodes> GraphNodesFromMatrix(MatrixModel matrix)
+        public IList<GraphNodes> GraphNodesFromMatrix(IMatrix matrix)
         {
             var result = new List<GraphNodes>();
 
@@ -94,35 +94,42 @@ namespace Graph.Core.Services
                 {
                     ForceAtlas2Based = new ForceAtlas2Based
                     {
-                        GravitationalConstant = -30,
-                        CentralGravity = 0.005d,
-                        SpringLength = 135,
-                        SpringConstant = 0,
-                        Damping = 1
+                        GravitationalConstant = -50,
+                        CentralGravity = 0.01d,
+                        SpringLength = 50,
+                        SpringConstant = 0d,
+                        Damping = 0.4d
                     },
-                    MaxVelocity = 40,
-                    MinVelocity = 0.3d,
+                    MaxVelocity = 50,
+                    MinVelocity = 0.7d,
                     Solver = "forceAtlas2Based",
-                    Timestep = 1
+                    Timestep = 1d,
+                    Stabilization = new Stabilization
+                    {
+                        Enabled = true,
+                        Iterations = 200,
+                        UpdateInterval = 25
+                    }
                 },
                 Nodes = new NodeOptions
                 {
+                    Shape = "circle",
                     BorderWidth = 1,
                     BorderWidthSelected = 2,
                     Chosen = true,
                     Color = new NodeColorOption
                     {
                         Border = "green",
-                        Background = "withe",
+                        Background = "white",
                         Highlight = new HighlightOption
                         {
                             Background = "#D2E5FF",
-                            Border = "2B7CE9"
+                            Border = "#2B7CE9"
                         },
                         Hover = new HoverOption
                         {
                             Background = "#D2E5FF",
-                            Border = "2B7CE9"
+                            Border = "#2B7CE9"
                         }
                     }
                 }

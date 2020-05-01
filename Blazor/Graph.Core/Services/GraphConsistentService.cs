@@ -5,26 +5,55 @@ namespace Graph.Core.Services
 {
     public interface IGraphConsistentService
     {
-        bool IsConsistent(MatrixModel matrix);
+        bool IsConsistent(int[][] elements);
+        List<INodeNeighbors> GetNodeNeighbors(int[][] elements);
+        List<INodeNeighbors> GetNodeNeighbors(IMatrix matrix);
     }
 
     public class GraphConsistentService : IGraphConsistentService
     {
-        private readonly IMatrixService _matrixService;
-
-        public GraphConsistentService(IMatrixService matrixService)
+        public bool IsConsistent(int[][] elements)
         {
-            _matrixService = matrixService;
+            return DepthFirstSearch(elements);
         }
 
-        public bool IsConsistent(MatrixModel matrix)
+        public List<INodeNeighbors> GetNodeNeighbors(int[][] elements)
         {
-            return DepthFirstSearch(matrix);
+            var result = new List<INodeNeighbors>();
+            //Copy matrix by diagonal (DFS need two way graph for searching)
+            for (var i = 0; i < elements.Length; i++)
+            {
+                for (var j = (i + 1); j < elements.Length; j++)
+                {
+                    elements[j][i] = elements[i][j];
+                }
+            }
+
+            for (var i = 0; i < elements.Length; i++)
+            {
+                var tmp = new List<INodeNeighbor>();
+                for (var j = 0; j < elements[i].Length; j++)
+                {
+                    if (elements[i][j] >= 1)
+                    {
+                        tmp.Add(new NodeNeighbor { NeighborNumber = j, EdgeValue = elements[i][j] });
+                    }
+                }
+                tmp.Sort((a, b) => b.NeighborNumber - a.NeighborNumber);
+
+                result.Add(new NodeNeighbors { Id = i, Neighbors = tmp.ToArray() });
+            }
+            return result;
         }
 
-        private bool DepthFirstSearch(MatrixModel matrix)
+        public List<INodeNeighbors> GetNodeNeighbors(IMatrix matrix)
         {
-            var nodeNeighbors = _matrixService.GetNodeNeighbors(matrix);
+            return GetNodeNeighbors(matrix.Elements);
+        }
+
+        private bool DepthFirstSearch(int[][] elements)
+        {
+            var nodeNeighbors = GetNodeNeighbors(elements);
             var stack = new Stack<int>();
             var visited = new HashSet<int>();
             stack.Push(0);
@@ -41,7 +70,7 @@ namespace Graph.Core.Services
                     }
                 }
             }
-            return visited.Count == matrix.Elements.Length;
+            return visited.Count == elements.Length;
         }
     }
 }

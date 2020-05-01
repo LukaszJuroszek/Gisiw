@@ -1,17 +1,18 @@
 ﻿using Graph.Core.Models;
+using Graph.Core.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Graph.Core.Services
 {
     public interface IPopulationService
     {
-        IEnumerable<ChromosomeModel> Initialize(MatrixModel matrix, int populationSize, double probability, int maxDiffBetweenNode);
-        ChromosomeModel GenerateChromosome(MatrixModel matrix, double startProbability, int maxDiffBetweenNode);
+        IPopulation Initialize(IMatrix matrix, int populationSize, int maxDiffBetweenNode);
+        IChromosome GenerateChromosome(IMatrix matrix, int maxDiffBetweenNode);
     }
     public class PopulationService : IPopulationService
     {
+        private double _probability = 0.5d;
         private readonly IChromosomeService _chromosomeService;
 
         public PopulationService(IChromosomeService chromosomeService)
@@ -19,50 +20,41 @@ namespace Graph.Core.Services
             _chromosomeService = chromosomeService;
         }
 
-        public IEnumerable<ChromosomeModel> Initialize(MatrixModel matrix, int populationSize, double startProbability, int maxDiffBetweenNode)
+        public IPopulation Initialize(IMatrix matrix, int populationSize, int maxDiffBetweenNode)
         {
-            var result = new HashSet<ChromosomeModel>();
+            var result = new HashSet<IChromosome>();
             if (result.Count < populationSize)
             {
                 do
                 {
-                    result.Add(GenerateChromosome(matrix, startProbability, maxDiffBetweenNode));
+                    result.Add(GenerateChromosome(matrix, maxDiffBetweenNode));
                 }
                 while (result.Count < populationSize);
             }
-            return result;
+            return new Population { Members = result };
         }
 
-        public ChromosomeModel GenerateChromosome(MatrixModel matrix, double startProbability, int maxDiffBetweenNode)
+        public IChromosome GenerateChromosome(IMatrix matrix, int maxDiffBetweenNode)
         {
             var tryCount = 0;
-            ChromosomeModel result;
+            Chromosome result;
             var random = new Random();
             do
             {
-                if (tryCount % 10 == 0 && tryCount != 0)
-                {
-                    if (startProbability < 0.5d && startProbability + 0.1d < 1d)
-                    {
-                        startProbability += 0.1d;
-                    }
-                    else if (startProbability > 0.5d && startProbability - 0.1d > 0d)
-                    {
-                        startProbability -= 0.1d;
-                    }
-                }
+                _probability = ProbabilityUtils.AdaptProbability(_probability, tryCount);
 
-                result = new ChromosomeModel
+                result = new Chromosome
                 {
                     Distribution = new Dictionary<int, ChromosomePart>()
                 };
 
                 for (var i = 0; i < matrix.Elements.Length; i++)
                 {
-                    result.Distribution.Add(i, random.NextDouble() < startProbability ? ChromosomePart.First : ChromosomePart.Second);
+                    result.Distribution.Add(i, random.NextDouble() < _probability ? ChromosomePart.First : ChromosomePart.Second);
                 }
 
                 tryCount++;
+
             } while (_chromosomeService.IsNodeCountValid(result, maxDiffBetweenNode) == false);
 
             var (edgeCount, edgeWeigthCount) = _chromosomeService.GetConnectedEdgeCountAndWegithCount(result, matrix);

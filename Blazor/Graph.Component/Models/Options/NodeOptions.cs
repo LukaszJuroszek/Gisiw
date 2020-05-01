@@ -5,6 +5,7 @@
         public double BorderWidth { get; set; }
         public double BorderWidthSelected { get; set; }
         public bool Chosen { get; set; }
+        public string Shape { get; set; }
         public NodeColorOption Color { get; set; }
     }
 
