@@ -21,14 +21,15 @@ namespace Graph.Core.Tests
         [TestCaseSource(typeof(ChrpomosoeDistributionData), nameof(ChrpomosoeDistributionData.TestCases))]
         public bool IsNodeCountValid_Should_Count_Nodes_As_Expected(Chromosome chromosome, int maxDiffBetweenNode)
         {
-            return _sut.IsNodeCountValid(chromosome, maxDiffBetweenNode);
+            return _sut.IsNodeCountValid(chromosome.Distribution, maxDiffBetweenNode);
         }
 
         [Test]
         [TestCaseSource(typeof(ChrpomosoeDistributionDataWithMatrix), nameof(ChrpomosoeDistributionData.TestCases))]
-        public (int edgeCount, int edgeWeigthCount) GetConnectedEdgeCountAndWegithCount_Should_Count_Nodes_As_Expected(Chromosome chromosome, Matrix matrix)
+        public (int edgeCount, int connectedEdgeWeigthSum) GetConnectedEdgeCountAndWegithCount_Should_Count_Nodes_As_Expected(Chromosome chromosome, Matrix matrix)
         {
-            return _sut.GetConnectedEdgeCountAndWegithCount(chromosome, matrix);
+            var result = _sut.GetChromosomeFactors(chromosome.Distribution, matrix);
+            return (result[ChromosomeFactor.EdgeCount], result[ChromosomeFactor.ConnectedEdgeWeigthSum]);
         }
 
         public class ChrpomosoeDistributionData

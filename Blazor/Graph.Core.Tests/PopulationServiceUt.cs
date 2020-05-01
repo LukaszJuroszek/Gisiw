@@ -25,7 +25,7 @@ namespace Graph.Core.Tests
             //Act
             var result = _sut.GenerateChromosome(new Matrix(MatrixHelper.BasicMatrix5By5), _maxDiffBetweenNode);
             //Assert
-            Assert.That(_chromosomeService.IsNodeCountValid(result, _maxDiffBetweenNode) == true);
+            Assert.That(_chromosomeService.IsNodeCountValid(result.Distribution, _maxDiffBetweenNode) == true);
         }
 
     }

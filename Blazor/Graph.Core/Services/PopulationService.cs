@@ -33,44 +33,40 @@ namespace Graph.Core.Services
                 }
                 while (result.Count < populationSize);
             }
-          
+
             return new Population { Members = result };
         }
 
         public IChromosome GenerateChromosome(IMatrix matrix, int maxDiffBetweenNode)
         {
             var tryCount = 0;
-            Chromosome result;
+            var distribution = new Dictionary<int, ChromosomePart>();
             var random = new Random();
             do
             {
                 _probability = ProbabilityUtils.AdaptProbability(_probability, tryCount);
-
-                result = new Chromosome
-                {
-                    Id = Guid.NewGuid(),
-                    Distribution = new Dictionary<int, ChromosomePart>()
-                };
+                distribution.Clear();
 
                 for (var i = 0; i < matrix.Elements.Length; i++)
                 {
-                    result.Distribution.Add(i, random.NextDouble() < _probability ? ChromosomePart.First : ChromosomePart.Second);
+                    distribution.Add(i, random.NextDouble() < _probability ? ChromosomePart.First : ChromosomePart.Second);
                 }
 
                 tryCount++;
 
-            } while (_chromosomeService.IsNodeCountValid(result, maxDiffBetweenNode) == false);
+            } while (_chromosomeService.IsNodeCountValid(distribution, maxDiffBetweenNode) == false);
 
-            var (edgeCount, edgeWeigthCount) = _chromosomeService.GetConnectedEdgeCountAndWegithCount(result, matrix);
-            result.FactorSum1 = edgeCount;
-            result.FactorSum2 = edgeWeigthCount;
-
-            return result;
+            return new Chromosome
+            {
+                Id = Guid.NewGuid(),
+                Distribution = distribution,
+                Factors = _chromosomeService.GetChromosomeFactors(distribution, matrix)
+            };
         }
 
         public IChromosome GetBestChromosome(IPopulation population)
         {
-            return population.Members.Aggregate((current, next) => current.FactorSums > next.FactorSums ? current : next);
+            return population.Members.Aggregate((current, next) => current.FactorsSum > next.FactorsSum ? current : next);
         }
     }
 }

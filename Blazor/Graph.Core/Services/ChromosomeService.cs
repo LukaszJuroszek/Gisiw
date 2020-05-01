@@ -1,34 +1,35 @@
 ﻿using Graph.Core.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Graph.Core.Services
 {
     public interface IChromosomeService
     {
-        bool IsNodeCountValid(IChromosome chromosome, int maxDiffBetweenNode);
-        (int edgeCount, int edgeWeigthCount) GetConnectedEdgeCountAndWegithCount(IChromosome chromosome, IMatrix matrix);
+        bool IsNodeCountValid(Dictionary<int, ChromosomePart> distribution, int maxDiffBetweenNode);
+        Dictionary<ChromosomeFactor, int> GetChromosomeFactors(Dictionary<int, ChromosomePart> distribution, IMatrix matrix);
     }
 
     public class ChromosomeService : IChromosomeService
     {
-        public bool IsNodeCountValid(IChromosome chromosome, int maxDiffBetweenNode)
+        public bool IsNodeCountValid(Dictionary<int, ChromosomePart> distribution, int maxDiffBetweenNode)
         {
-            var nodeSum = chromosome.Distribution.Count(x => x.Value == ChromosomePart.First);
-            var firstPart = chromosome.Distribution.Count - nodeSum;
-            var secondPart = chromosome.Distribution.Count - firstPart;
+            var nodeSum = distribution.Count(x => x.Value == ChromosomePart.First);
+            var firstPart = distribution.Count - nodeSum;
+            var secondPart = distribution.Count - firstPart;
             return Math.Abs(firstPart - secondPart) < maxDiffBetweenNode;
         }
 
-        public (int edgeCount, int edgeWeigthCount) GetConnectedEdgeCountAndWegithCount(IChromosome chromosome, IMatrix matrix)
+        public Dictionary<ChromosomeFactor, int> GetChromosomeFactors(Dictionary<int, ChromosomePart> distribution, IMatrix matrix)
         {
             var edgeCount = 0;
             var edgeWeigthCount = 0;
 
-            var rows = chromosome.Distribution.Where(x => x.Value == ChromosomePart.First)
+            var rows = distribution.Where(x => x.Value == ChromosomePart.First)
                                               .Select(x => x.Key);
 
-            var cols = chromosome.Distribution.Where(x => x.Value == ChromosomePart.Second)
+            var cols = distribution.Where(x => x.Value == ChromosomePart.Second)
                                               .Select(x => x.Key);
             foreach (var row in rows)
             {
@@ -42,7 +43,11 @@ namespace Graph.Core.Services
                 }
             }
 
-            return (edgeCount, edgeWeigthCount);
+            return new Dictionary<ChromosomeFactor, int>
+            {
+                [ChromosomeFactor.EdgeCount] = edgeCount,
+                [ChromosomeFactor.ConnectedEdgeWeigthSum] = edgeWeigthCount
+            };
         }
     }
 }
