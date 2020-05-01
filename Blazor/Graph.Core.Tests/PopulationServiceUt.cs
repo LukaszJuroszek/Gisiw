@@ -1,6 +1,4 @@
-﻿using Graph.Core.Models;
-using Graph.Core.Services;
-using NSubstitute;
+﻿using Graph.Core.Services;
 using NUnit.Framework;
 
 namespace Graph.Core.Tests
@@ -9,25 +7,25 @@ namespace Graph.Core.Tests
     public class PopulationServiceUt
     {
         private IPopulationService _sut;
-        private IChromosomeService chromosomeService;
-        private readonly double probability = 0.5d;
-        private readonly int maxDiffBetweenNode = 3;
+        private IChromosomeService _chromosomeService;
+        private readonly double _probability = 0.9d;
+        private readonly int _maxDiffBetweenNode = 3;
 
         [SetUp]
         public void Setup()
         {
-            chromosomeService =  Substitute.For<IChromosomeService>();
-            _sut = new PopulationService(chromosomeService);
+            _chromosomeService = new ChromosomeService();
+            _sut = new PopulationService(_chromosomeService);
         }
 
-        [Test]
+        [Test, Timeout(2000)]
         public void GenerateChromosome_Should_Pass()
         {
             //Arange
             //Act
-            _sut.GenerateChromosome(new MatrixModel(MatrixHelper.BasicMatrix), probability, maxDiffBetweenNode);
+            var result = _sut.GenerateChromosome(new MatrixModel(MatrixHelper.BasicMatrix5By5), _probability, _maxDiffBetweenNode);
             //Assert
-            Assert.Pass();
+            Assert.That(_chromosomeService.IsNodeCountValid(result, _maxDiffBetweenNode) == true);
         }
 
     }

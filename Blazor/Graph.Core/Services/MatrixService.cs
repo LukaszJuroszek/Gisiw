@@ -23,7 +23,7 @@ namespace Graph.Core.Services
 
         public MatrixModel GenerateMatrix(int nodeCount, double edgeProbability)
         {
-            var result = new int[nodeCount][];
+            var result = new int[nodeCount][];  
             for (var i = 0; i < nodeCount; i++)
             {
                 result[i] = new int[nodeCount];

@@ -4,6 +4,6 @@ namespace Graph.Core.Models
 {
     public class Population
     {
-        public IEnumerable<ChromosomeModel> Member { get; set; }
+        public IEnumerable<ChromosomeModel> Members { get; set; }
     }
 }

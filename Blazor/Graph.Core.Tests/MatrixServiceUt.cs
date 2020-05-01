@@ -42,6 +42,15 @@ namespace Graph.Core.Tests
                 }
                 TestContext.Out.WriteLine();
             }
+
+            for (var i = 0; i < MatrixHelper.BasicMatrix5By5.Length; i++)
+            {
+                for (var j = 0; j < MatrixHelper.BasicMatrix5By5[i].Length; j++)
+                {
+                    TestContext.Out.Write($"{ MatrixHelper.BasicMatrix5By5[i][j]} ");
+                }
+                TestContext.Out.WriteLine();
+            }
         }
     }
 }

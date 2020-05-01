@@ -1,5 +1,8 @@
-﻿using Graph.Core.Services;
+﻿using Graph.Core.Models;
+using Graph.Core.Services;
 using NUnit.Framework;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Graph.Core.Tests
 {
@@ -7,7 +10,6 @@ namespace Graph.Core.Tests
     public class ChromosomeServiceUt
     {
         private IChromosomeService _sut;
-
         [SetUp]
         public void Setup()
         {
@@ -15,13 +17,193 @@ namespace Graph.Core.Tests
         }
 
         [Test]
-        public void IsNodeCountValid_Should_Count_Nodes_As_Expected()
+        [TestCaseSource(typeof(ChrpomosoeDistributionData), nameof(ChrpomosoeDistributionData.TestCases))]
+        public bool IsNodeCountValid_Should_Count_Nodes_As_Expected(ChromosomeModel chromosome, int maxDiffBetweenNode)
         {
-            //Arange
-            //Act
-            //_sut.IsNodeCountValid();
-            //Assert
-            Assert.Pass();
+            return _sut.IsNodeCountValid(chromosome, maxDiffBetweenNode);
+        }
+
+        [Test]
+        [TestCaseSource(typeof(ChrpomosoeDistributionDataWithMatrix), nameof(ChrpomosoeDistributionData.TestCases))]
+        public (int edgeCount, int edgeWeigthCount) GetConnectedEdgeCountAndWegithCount_Should_Count_Nodes_As_Expected(ChromosomeModel chromosome, MatrixModel matrix)
+        {
+            return _sut.GetConnectedEdgeCountAndWegithCount(chromosome, matrix);
+        }
+
+        public class ChrpomosoeDistributionData
+        {
+            public static IEnumerable TestCases
+            {
+                get
+                {
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.First,
+                            [2] = ChromosomePart.First,
+                            [3] = ChromosomePart.First,
+                            [4] = ChromosomePart.First,
+                        }
+                    }, 3).Returns(false);
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.First,
+                            [2] = ChromosomePart.First,
+                            [3] = ChromosomePart.First,
+                            [4] = ChromosomePart.Second,
+                        }
+                    }, 3).Returns(false);
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.First,
+                            [2] = ChromosomePart.First,
+                            [3] = ChromosomePart.Second,
+                            [4] = ChromosomePart.Second,
+                        }
+                    }, 3).Returns(true);
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.First,
+                            [2] = ChromosomePart.Second,
+                            [3] = ChromosomePart.Second,
+                            [4] = ChromosomePart.Second,
+                        }
+                    }, 3).Returns(true);
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.Second,
+                            [2] = ChromosomePart.Second,
+                            [3] = ChromosomePart.Second,
+                            [4] = ChromosomePart.Second,
+                        }
+                    }, 3).Returns(false);
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.Second,
+                            [1] = ChromosomePart.Second,
+                            [2] = ChromosomePart.Second,
+                            [3] = ChromosomePart.Second,
+                            [4] = ChromosomePart.Second,
+                        }
+                    }, 3).Returns(false);
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.First,
+                            [2] = ChromosomePart.First,
+                            [3] = ChromosomePart.First,
+                        }
+                    }, 3).Returns(false);
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.First,
+                            [2] = ChromosomePart.First,
+                            [3] = ChromosomePart.Second,
+                        }
+                    }, 3).Returns(true);
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.First,
+                            [2] = ChromosomePart.Second,
+                            [3] = ChromosomePart.Second,
+                        }
+                    }, 3).Returns(true);
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.Second,
+                            [2] = ChromosomePart.Second,
+                            [3] = ChromosomePart.Second,
+                        }
+                    }, 3).Returns(true);
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.Second,
+                            [0] = ChromosomePart.Second,
+                            [1] = ChromosomePart.Second,
+                            [2] = ChromosomePart.Second,
+                        }
+                    }, 3).Returns(false);
+                }
+            }
+        }
+
+        public class ChrpomosoeDistributionDataWithMatrix
+        {
+            public static IEnumerable TestCases
+            {
+                get
+                {
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.First,
+                            [2] = ChromosomePart.First,
+                            [3] = ChromosomePart.First,
+                        }
+                    }, new MatrixModel(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((0, 0));
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.First,
+                            [2] = ChromosomePart.First,
+                            [3] = ChromosomePart.Second,
+                        }
+                    }, new MatrixModel(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((3, 3));
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.First,
+                            [1] = ChromosomePart.First,
+                            [2] = ChromosomePart.Second,
+                            [3] = ChromosomePart.Second,
+                        }
+                    }, new MatrixModel(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((4, 4));
+                    yield return new TestCaseData(new ChromosomeModel
+                    {
+                        Distribution = new Dictionary<int, ChromosomePart>
+                        {
+                            [0] = ChromosomePart.Second,
+                            [1] = ChromosomePart.Second,
+                            [2] = ChromosomePart.Second,
+                            [3] = ChromosomePart.Second,
+                        }
+                    }, new MatrixModel(MatrixHelper.BasicHalfIdentityMatrix4By4)).Returns((0, 0));
+                }
+            }
         }
     }
 }

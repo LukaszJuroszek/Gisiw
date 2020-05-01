@@ -12,8 +12,8 @@ namespace Graph.Core.Tests
         [SetUp]
         public void Setup()
         {
-            _sut = new GraphConsistentService(_matrixService);
             _matrixService = new MatrixService();
+            _sut = new GraphConsistentService(_matrixService);
         }
 
         [Test]

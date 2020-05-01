@@ -1,5 +1,6 @@
 ﻿using Graph.Core.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Graph.Core.Services
@@ -15,31 +16,33 @@ namespace Graph.Core.Services
         public bool IsNodeCountValid(ChromosomeModel chromosome, int maxDiffBetweenNode)
         {
             var nodeSum = chromosome.Distribution.Count(x => x.Value == ChromosomePart.First);
-
-            return Math.Abs(chromosome.Distribution.Count - nodeSum) <= maxDiffBetweenNode;
+            var firstPart = chromosome.Distribution.Count - nodeSum;
+            var secondPart = chromosome.Distribution.Count - firstPart;
+            return Math.Abs(firstPart - secondPart) < maxDiffBetweenNode;
         }
 
         public (int edgeCount, int edgeWeigthCount) GetConnectedEdgeCountAndWegithCount(ChromosomeModel chromosome, MatrixModel matrix)
         {
             var edgeCount = 0;
             var edgeWeigthCount = 0;
-            for (var nodeNumberByRow = 0; nodeNumberByRow < chromosome.Distribution.Count; nodeNumberByRow++)
+
+            var rows = chromosome.Distribution.Where(x => x.Value == ChromosomePart.First)
+                                              .Select(x => x.Key);
+
+            var cols = chromosome.Distribution.Where(x => x.Value == ChromosomePart.Second)
+                                              .Select(x => x.Key);
+            foreach (var row in rows)
             {
-                //first part is selected by user, second is not present, via row
-                if ((chromosome.Distribution[nodeNumberByRow] == ChromosomePart.First) == false)
+                foreach (var col in cols)
                 {
-                    for (var nodeNumberByColumn = 0; nodeNumberByColumn < matrix.Elements[nodeNumberByRow].Length; nodeNumberByColumn++)
+                    if (matrix.Elements[row][col] >= 1)
                     {
-                        //check if column is in first present
-                        if (chromosome.Distribution[nodeNumberByColumn] == ChromosomePart.Second &&
-                            matrix.Elements[nodeNumberByRow][nodeNumberByColumn] >= 1)
-                        {
-                            edgeCount++;
-                            edgeWeigthCount += matrix.Elements[nodeNumberByRow][nodeNumberByColumn];
-                        }
+                        edgeCount++;
+                        edgeWeigthCount += matrix.Elements[row][col];
                     }
                 }
             }
+
             return (edgeCount, edgeWeigthCount);
         }
     }
