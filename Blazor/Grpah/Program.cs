@@ -21,7 +21,8 @@ namespace Graph
             builder.Services.AddSingleton<IGraphConsistentService, GraphConsistentService>();
             builder.Services.AddSingleton<IMatrixService, MatrixService>();
             builder.Services.AddSingleton<IPopulationService, PopulationService>();
-
+            builder.Services.AddSingleton<ICanvasJsChartService, CanvasJsChartService>();
+            
             await builder.Build().RunAsync();
         }
     }

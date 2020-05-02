@@ -1,5 +1,5 @@
-using Graph.Component.Models.Data;
-using Graph.Component.Models.Options;
+using Graph.Component.Models.Graph.Data;
+using Graph.Component.Models.Graph.Options;
 using Microsoft.JSInterop;
 using System.Threading.Tasks;
 
@@ -10,7 +10,7 @@ namespace Graph.Component.JsInterop
         public static ValueTask<string> CreateGraph(IJSRuntime jsRuntime, string containerId, GraphData data, GraphOptions options)
         {
             return jsRuntime.InvokeAsync<string>(
-                "graphChart.createGraph",
+                "graphComponents.createGraph",
                 containerId,
                 data,
                 options);

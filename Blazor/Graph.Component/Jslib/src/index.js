@@ -1,5 +1,5 @@
 ﻿import vis from 'vis';
-import CanvasJS from 'canvasjs';
+import CanvasJS  from './canvasjs.min';
 
 export function createGraph(continerId, data, options) {
     var container = document.getElementById(continerId);
@@ -8,6 +8,7 @@ export function createGraph(continerId, data, options) {
 }
 
 export function createCanvasJsChart(continerId, config) {
+    console.log(CanvasJS);
     var iterationChart = new CanvasJS.Chart(continerId, config);
     iterationChart.render();
     return iterationChart;

@@ -5,7 +5,7 @@
 @code {
     [Parameter] public string ContainerId { get; set; }
 
-    [Parameter] public CanvasJsConfig Config { get; set; }
+    [Parameter] public ICanvasJsConfig Config { get; set; }
 
     public async void Render()
     {

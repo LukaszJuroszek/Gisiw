@@ -1,140 +1,111 @@
-﻿using Graph.Component.Models.CanvasJs.Data;
-using Graph.Component.Models.Graph.Data;
-using Graph.Component.Models.Graph.Options;
+﻿using Graph.Component.Models.CanvasJs;
+using Graph.Component.Models.CanvasJs.Data;
+using Graph.Component.Models.CanvasJs.Options;
 using Graph.Core.Models;
-using System.Collections.Generic;
+using System;
+using System.Linq;
 
 namespace Graph.Core.Services
 {
     public interface ICanvasJsChartService
     {
-        CanvasJSDataPoint[] GetDataPoint(IMatrix matrix);
-        IList<GraphEdges> GraphEdgesFromMatrix(IMatrix matrix);
-        IList<GraphNodes> GraphNodesFromMatrix(IMatrix matrix);
-        GraphOptions GetDefaultGraphOptions();
+        ICanvasJSDataPoint[] GetDataPoint(IPopulation population);
+        ICanvasJsConfig GetBasicOptionsForEvolutionChart();
+        ICanvasJsConfig GetDefaultCanvasJSConfigs(ICanvasJsData[] data, ICanvasJsConfig config);
+        ICanvasJsData[] GetEvolutionChartData(IPopulation population, int iteration = 0);
     }
 
     public class CanvasJsChartService : ICanvasJsChartService
     {
-        private readonly IGraphConsistentService _graphConsistentService;
-
-        public CanvasJsChartService(IGraphConsistentService graphConsistentService)
+        public ICanvasJsConfig GetBasicOptionsForEvolutionChart()
         {
-            _graphConsistentService = graphConsistentService;
-        }
-
-        public GraphData GraphDataFromMatrix(IMatrix matrix)
-        {
-            return new GraphData
+            return new CanvasJsConfig
             {
-                Edges = GraphEdgesFromMatrix(matrix),
-                Nodes = GraphNodesFromMatrix(matrix)
-            };
-        }
-
-        public IList<GraphEdges> GraphEdgesFromMatrix(IMatrix matrix)
-        {
-            var nodeNeighbors = _graphConsistentService.GetNodeNeighbors(matrix);
-
-            var result = new List<GraphEdges>();
-
-            for (var i = 0; i < nodeNeighbors.Count; i++)
-            {
-                for (var j = 0; j < nodeNeighbors[i].Neighbors.Length; j++)
+                AnimationEnabled = true,
+                ZoomEnabled = true,
+                ExportEnabled = true,
+                AxisY = new AxisOptions
                 {
-                    result.Add(new GraphEdges
-                    {
-                        From = nodeNeighbors[i].Id.ToString(),
-                        To = nodeNeighbors[i].Neighbors[j].NeighborNumber.ToString(),
-                        Label = nodeNeighbors[i].Neighbors[j].EdgeValue.ToString(),
-                        Font = new Font { Align = "top" }
-                    });
-                    result.Add(new GraphEdges
-                    {
-                        From = nodeNeighbors[i].Neighbors[j].NeighborNumber.ToString(),
-                        To = nodeNeighbors[i].Id.ToString(),
-                    });
-                }
-            }
-            return result;
-        }
-
-        public IList<GraphNodes> GraphNodesFromMatrix(IMatrix matrix)
-        {
-            var result = new List<GraphNodes>();
-
-            for (var i = 0; i < matrix.Elements.Length; i++)
-            {
-                result.Add(new GraphNodes { Id = i, Label = i.ToString() });
-            }
-
-            return result;
-        }
-
-        public GraphOptions GetDefaultGraphOptions()
-        {
-            return new GraphOptions
-            {
-                AutoResize = true,
-                Height = "100%",
-                Width = "100%",
-                ClickToUse = false,
-                Edges = new EdgeOptions
-                {
-                    Color = new ColorOption { Color = "3E89D" },
-                    Shadow = false,
-                    Smooth = new SmoothOption
-                    {
-                        Type = "vertical",
-                        ForceDirection = "none",
-                        Roundness = 0d,
-                        Enabled = true
-                    }
+                    IncludeZero = true
                 },
-                Physics = new PhysicsOptions
+                AxisY2 = new IAxisOptions[]
                 {
-                    ForceAtlas2Based = new ForceAtlas2Based
+                    new AxisOptions
                     {
-                        GravitationalConstant = -50,
-                        CentralGravity = 0.01d,
-                        SpringLength = 50,
-                        SpringConstant = 0d,
-                        Damping = 0.4d
+                        IncludeZero = true
                     },
-                    MaxVelocity = 50,
-                    MinVelocity = 0.7d,
-                    Solver = "forceAtlas2Based",
-                    Timestep = 1d,
-                    Stabilization = new Stabilization
+                     new AxisOptions
                     {
-                        Enabled = true,
-                        Iterations = 200,
-                        UpdateInterval = 25
-                    }
+                        IncludeZero = true
+                    },
                 },
-                Nodes = new NodeOptions
+                Legend = new LegendOptions
                 {
-                    Shape = "circle",
-                    BorderWidth = 1,
-                    BorderWidthSelected = 2,
-                    Chosen = true,
-                    Color = new NodeColorOption
-                    {
-                        Border = "green",
-                        Background = "white",
-                        Highlight = new HighlightOption
-                        {
-                            Background = "#D2E5FF",
-                            Border = "#2B7CE9"
-                        },
-                        Hover = new HoverOption
-                        {
-                            Background = "#D2E5FF",
-                            Border = "#2B7CE9"
-                        }
-                    }
+                    Cursor = "pointer",
+                    VerticalAlign = "top",
+                    FontSize = 22,
+                    FontColor = "black",
+                },
+                ToolTip = new ToolTipOptions
+                {
+                    Shared = false
                 }
             };
+        }
+
+        public ICanvasJSDataPoint[] GetDataPoint(IPopulation population)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICanvasJsConfig GetDefaultCanvasJSConfigs(ICanvasJsData[] data, ICanvasJsConfig config)
+        {
+            if (config == null)
+            {
+                throw new Exception("config is null");
+            }
+            config.Data = data;
+            return config;
+        }
+
+        public ICanvasJsData[] GetEvolutionChartData(IPopulation population, int iteration = 0)
+        {
+            return new ICanvasJsData[3]
+            {
+                new CanvasJsData
+                {
+                    Type = "line",
+                    ShowLegend = true,
+                    Name = "Edge Count and Connected Edge",
+                    DataPoints = GetEdgeCountData(population, ChromosomeFactor.EdgeCount | ChromosomeFactor.ConnectedEdgeWeigthSum, iteration)
+                },
+                new CanvasJsData
+                {
+                    Type = "line",
+                    AxisYType = "secondary",
+                    ShowLegend = true,
+                    Name = "Edge Count Sum",
+                    DataPoints = GetEdgeCountData(population, ChromosomeFactor.EdgeCount, iteration)
+                },
+                new CanvasJsData
+                {
+                    Type = "line",
+                    AxisYType = "secondary",
+                    AxisYIndex = 1,
+                    ShowLegend = true,
+                    Name = "Edge Count and Connected Edge",
+                    DataPoints = GetEdgeCountData(population, ChromosomeFactor.ConnectedEdgeWeigthSum, iteration)
+                },
+            };
+        }
+
+        public ICanvasJSDataPoint[] GetEdgeCountData(IPopulation population, ChromosomeFactor factor, int iteration)
+        {
+            return population.Members.Select(x => new CanvasJSDataPoint
+            {
+                X = iteration,
+                Y = x.Factors.Where(y => y.Key.HasFlag(factor)).Sum(x => x.Value)
+            }).ToArray();
         }
     }
 }

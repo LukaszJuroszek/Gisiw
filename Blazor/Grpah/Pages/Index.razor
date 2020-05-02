@@ -23,7 +23,7 @@
             <button class="btn btn-primary" @onclick="OnGenerateGraph">Generate Graph</button>
         </div>
         <div class="col-sm">
-            <button class="btn btn-primary" @onclick="OnRender">Render</button>
+            <button class="btn btn-primary" @onclick="OnGraphRender">Render</button>
         </div>
         <div class="col-sm">
             <button class="btn btn-primary" @onclick="OnStart">Start</button>
@@ -37,7 +37,8 @@
                         GraphOptions="_graphOptions" />
         </div>
         <div class="col-sm h-100">
-            <CanvasJsChart Config="_evolutionConfig"
+            <CanvasJsChart @ref="_evolutionChart"
+                           Config="_evolutionConfig"
                            ContainerId="CanvasJsChart" />
         </div>
     </div>
@@ -49,13 +50,15 @@
     </div>
 </div>
 @code {
+    private GraphChart _graphChart;
+    private CanvasJsChart _evolutionChart;
     private int _nodeCount;
     private double _edgeProbability;
     private GraphData _graphData;
     private GraphOptions _graphOptions;
-    private CanvasJsConfig _evolutionConfig;
+    private ICanvasJsConfig _evolutionConfig;
+    private ICanvasJsData[] _evolutionData;
     private IMatrix _matrix;
-    private GraphChart _graphChart;
     private IPopulation _population;
     private int _populationSize = 100;
     private int _maxDiffBetweenNode = 6;
@@ -65,7 +68,6 @@
         _nodeCount = 10;
         _edgeProbability = 0.55d;
         OnGenerateGraph();
-        OnRender();
     }
 
     private void OnGenerateGraph()
@@ -73,9 +75,16 @@
         _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, probability: _edgeProbability);
         _graphData = GraphChartService.GraphDataFromMatrix(_matrix);
         _graphOptions = GraphChartService.GetDefaultGraphOptions();
-        _evolutionConfig = CanvasJsChartService.GetDefaultGraphOptions();
+        OnGraphRender();
+    }
+
+    private void OnStart()
+    {
         _population = PopulationService.Initialize(_matrix, _populationSize, _maxDiffBetweenNode);
-        OnRender();
+        var defaultEvolutionChartOptions = CanvasJsChartService.GetBasicOptionsForEvolutionChart();
+        var dataPoints = CanvasJsChartService.GetEvolutionChartData(_population);
+        _evolutionConfig = CanvasJsChartService.GetDefaultCanvasJSConfigs(dataPoints, defaultEvolutionChartOptions);
+        OnEvolutionChartRender();
     }
 
     private void OnIncrementNodeCount()
@@ -110,11 +119,22 @@
 
     private async void OnRender()
     {
+        await Task.Run(() =>
+        {
+            OnGraphRender();
+            OnEvolutionChartRender();
+        });
+
+    }
+
+    private async void OnGraphRender()
+    {
         await Task.Run(() => _graphChart.Render());
     }
 
-    private async void OnStart()
+
+    private async void OnEvolutionChartRender()
     {
-        await Task.Run(() => _graphChart.Render());
+        await Task.Run(() => _evolutionChart.Render());
     }
 }

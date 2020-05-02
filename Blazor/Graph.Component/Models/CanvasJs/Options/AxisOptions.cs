@@ -8,7 +8,7 @@
         int Interval { get; set; }
     }
 
-    public class AxisXOptions : IAxisOptions
+    public class AxisOptions : IAxisOptions
     {
         public bool IncludeZero { get; set; }
         public string GridColor { get; set; }

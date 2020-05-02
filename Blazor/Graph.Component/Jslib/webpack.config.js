@@ -16,5 +16,5 @@ module.exports = {
         path: path.resolve(__dirname, '../wwwroot/js'),
         filename: "graphComponents.js",
         library: "graphComponents"
-    }
+    },
 };
