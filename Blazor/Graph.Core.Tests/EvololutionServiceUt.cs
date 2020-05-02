@@ -11,15 +11,17 @@ namespace Graph.Core.Tests
     {
         private const int numberOfTournamentRounds = 100;
         private IEvolutionService _sut;
+        private IChromosomeService _chromosomeService;
         private IMatrixService _matrixService;
         private IPopulationService _populationService;
 
         [SetUp]
         public void Setup()
         {
-            _populationService = new PopulationService(new ChromosomeService());
+            _chromosomeService = new ChromosomeService();
+            _populationService = new PopulationService(_chromosomeService);
             _matrixService = new MatrixService(new GraphConsistentService());
-            _sut = new EvolutionService();
+            _sut = new EvolutionService(_chromosomeService);
         }
 
         [Test]
