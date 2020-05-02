@@ -1,9 +1,9 @@
 ﻿@inject IJSRuntime JSRuntime
 
-<div class="h-100" id="@_containerId"></div>
+<div class="h-100" id="@ContainerId"></div>
 
 @code {
-    private string _containerId = "graphCointainerId";
+    [Parameter] public string ContainerId { get; set; }
 
     [Parameter] public GraphData GraphData { get; set; }
 
@@ -11,6 +11,6 @@
 
     public async void Render()
     {
-        await GraphChartJsInterop.CreateGraph(jsRuntime: JSRuntime, containerId: _containerId, data: GraphData, options: GraphOptions);
+        await GraphChartJsInterop.CreateGraph(jsRuntime: JSRuntime, containerId: ContainerId, data: GraphData, options: GraphOptions);
     }
 }

@@ -3,6 +3,7 @@
 @inject IGraphChartService GraphChartService
 @inject IGraphConsistentService GraphConsistentService
 @inject IPopulationService PopulationService
+@inject ICanvasJsChartService CanvasJsChartService
 <h5 class="card-header">Graph</h5>
 <div class="card-body h-100 d-flex flex-column">
     <div class="row">
@@ -11,7 +12,7 @@
             <button class="btn btn-primary" @onclick="OnDecrementNodeCount" @ondblclick="OnDecrementDoubleNodeCount">-</button>
             @_nodeCount
             <button class="btn btn-primary" @onclick="OnIncrementNodeCount" @ondblclick="OnIncrementDoubleNodeCount">+</button>
-        </div>  
+        </div>
         <div class="col-sm-3">
             Edge Probability:
             <button class="btn btn-primary" @onclick="OnDecrementEdgeProbability">-</button>
@@ -31,10 +32,13 @@
     <div class="row h-50">
         <div class="col-sm h-100">
             <GraphChart @ref="_graphChart"
+                        ContainerId="graphChartId"
                         GraphData="_graphData"
                         GraphOptions="_graphOptions" />
         </div>
         <div class="col-sm h-100">
+            <CanvasJsChart Config="_evolutionConfig"
+                           ContainerId="CanvasJsChart" />
         </div>
     </div>
     <div class="row h-50">
@@ -49,6 +53,7 @@
     private double _edgeProbability;
     private GraphData _graphData;
     private GraphOptions _graphOptions;
+    private CanvasJsConfig _evolutionConfig;
     private IMatrix _matrix;
     private GraphChart _graphChart;
     private IPopulation _population;
@@ -68,6 +73,7 @@
         _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, probability: _edgeProbability);
         _graphData = GraphChartService.GraphDataFromMatrix(_matrix);
         _graphOptions = GraphChartService.GetDefaultGraphOptions();
+        _evolutionConfig = CanvasJsChartService.GetDefaultGraphOptions();
         _population = PopulationService.Initialize(_matrix, _populationSize, _maxDiffBetweenNode);
         OnRender();
     }
