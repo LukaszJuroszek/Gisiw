@@ -24,14 +24,14 @@ namespace Graph.Core.Services
 
         public IEvolutionIterationResult RunIteration(IPopulationResult populationResult, IMatrix matrix, int maxDiffBetweenNode)
         {
-            var numberOfTournamentRounds = populationResult.Population.Members.Count();
+            var halfOfElementsCount = (int)Math.Floor(populationResult.Population.Members.Count() / 2.0d);
 
-            var bestChromosomesByEdgeCount = GetBestChromosomes(ChromosomePart.First, populationResult.Population, numberOfTournamentRounds);
+            var bestChromosomesByEdgeCount = GetBestChromosomes(ChromosomePart.First, populationResult.Population, halfOfElementsCount);
 
-            var bestChromosomesByConnectedEdge = GetBestChromosomes(ChromosomePart.Second, populationResult.Population, numberOfTournamentRounds);
+            var bestChromosomesByConnectedEdge = GetBestChromosomes(ChromosomePart.Second, populationResult.Population, halfOfElementsCount);
 
-            if (bestChromosomesByEdgeCount.Count() != numberOfTournamentRounds &&
-                bestChromosomesByConnectedEdge.Count() != numberOfTournamentRounds)
+            if (bestChromosomesByEdgeCount.Count() != halfOfElementsCount &&
+                bestChromosomesByConnectedEdge.Count() != halfOfElementsCount)
             {
                 throw new InvalidOperationException("Invalid best chromosome member count after turnament part");
             }
@@ -64,15 +64,13 @@ namespace Graph.Core.Services
 
         public IChromosome[] GetBestChromosomes(ChromosomePart chromosomePart, IPopulation population, int numberOfTournamentRounds)
         {
-            var halfOfElementsCount = (int)Math.Floor(numberOfTournamentRounds / 2.0d);
-
-            var result = new IChromosome[halfOfElementsCount];
+            var result = new IChromosome[numberOfTournamentRounds];
             switch (chromosomePart)
             {
                 case ChromosomePart.First:
                     for (var i = 0; i < numberOfTournamentRounds; i++)
                     {
-                        var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(0, halfOfElementsCount);
+                        var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(0, numberOfTournamentRounds);
                         var leftChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[left]);
                         var rigthChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[rigth]);
 
@@ -84,7 +82,7 @@ namespace Graph.Core.Services
                 case ChromosomePart.Second:
                     for (var i = 0; i < numberOfTournamentRounds; i++)
                     {
-                        var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(halfOfElementsCount, population.Members.Count());
+                        var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(numberOfTournamentRounds, population.Members.Count());
                         var leftChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[left]);
                         var rigthChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[rigth]);
 

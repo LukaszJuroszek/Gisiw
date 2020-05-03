@@ -39,7 +39,7 @@ namespace Graph.Core.Tests
 
         [Test]
         [Repeat(50)]
-        public void GetBestChromosomes_Should_Not_Throw_Any_Exception()
+        public void RunIteration_Should_Not_Throw_Any_Exception()
         {
             //Arange
             var matrix = _matrixService.GenerateMatrix(10, 0.5);
@@ -47,6 +47,29 @@ namespace Graph.Core.Tests
             //Act
             //Assert
             Assert.DoesNotThrow(() => { _sut.RunIteration(population, matrix, 3); });
+        }
+
+        [Test]
+        public void RunIteration_Should_Return_Member_Count()
+        {
+            //Arange
+            var matrix = _matrixService.GenerateMatrix(10, 0.5);
+            var population = _populationService.Initialize(matrix, 50, 3);
+            //Actb
+            var result = _sut.RunIteration(population,matrix, numberOfTournamentRounds).Population.Members.Count();
+            //Assert
+            Assert.That(result, Is.EqualTo(numberOfTournamentRounds));
+        }
+
+        public void RunIteration_Should_Pass()
+        {
+            //Arange
+            var matrix = _matrixService.GenerateMatrix(10, 0.5);
+            var population = _populationService.Initialize(matrix, 50, 3);
+            //Actb
+            var result = _sut.RunIteration(population, matrix, numberOfTournamentRounds);
+            //Assert
+            Assert.That(result, Is.EqualTo(numberOfTournamentRounds));
         }
     }
 }

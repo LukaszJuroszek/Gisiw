@@ -22,7 +22,7 @@
             <button class="btn btn-primary" @onclick="OnGraphRender">Render</button>
         </div>
         <div class="col-sm">
-            <button class="btn btn-primary" @onclick="OnNext">Next 10</button>
+            <button class="btn btn-primary" @onclick="OnNext"  @onclick:stopPropagation="true">Next 10</button>
         </div>
     </div>
     <div class="row h-50">

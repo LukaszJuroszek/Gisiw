@@ -48,7 +48,8 @@ namespace Graph.Core.Services
             return new Dictionary<ChromosomeFactor, int>
             {
                 [ChromosomeFactor.EdgeCount] = edgeCount,
-                [ChromosomeFactor.ConnectedEdgeWeigthSum] = edgeWeigthCount
+                [ChromosomeFactor.ConnectedEdgeWeigthSum] = edgeWeigthCount,
+                [ChromosomeFactor.ConnectedEdgeWeigthSum | ChromosomeFactor.EdgeCount] = edgeWeigthCount + edgeCount
             };
         }
 

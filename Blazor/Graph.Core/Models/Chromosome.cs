@@ -33,6 +33,6 @@ namespace Graph.Core.Models
         public Guid Id { get; set; }
         public Dictionary<int, ChromosomePart> Distribution { get; set; }
         public Dictionary<ChromosomeFactor, int> Factors { get; set; }
-        public int FactorsSum => Factors.Sum(x => x.Value);
+        public int FactorsSum => Factors.Where(x => x.Key == (ChromosomeFactor.ConnectedEdgeWeigthSum | ChromosomeFactor.EdgeCount)).Sum(x => x.Value);
     }
 }

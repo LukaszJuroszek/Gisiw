@@ -10,10 +10,10 @@ namespace Graph.Core.Services
     public interface ICanvasJsChartService
     {
         IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> AddToDataPoints(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints,
-            IDictionary<ChromosomeFactor, IList<ICanvasJSDataPoint>> toAdd);
+            IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> toAdd);
         ICanvasJsConfig GetBasicOptionsForEvolutionChart();
         IEnumerable<ICanvasJsData> GetEvolutionChartData(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints);
-        IDictionary<ChromosomeFactor, IList<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult);
+        IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult);
     }
 
     public class CanvasJsChartService : ICanvasJsChartService
@@ -54,9 +54,9 @@ namespace Graph.Core.Services
             };
         }
 
-        public IDictionary<ChromosomeFactor, IList<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult)
+        public IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult)
         {
-            return new Dictionary<ChromosomeFactor, IList<ICanvasJSDataPoint>>()
+            return new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>()
             {
                 [ChromosomeFactor.EdgeCount] = new List<ICanvasJSDataPoint>
                 {
@@ -75,13 +75,17 @@ namespace Graph.Core.Services
 
         public IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> AddToDataPoints(
             IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints,
-            IDictionary<ChromosomeFactor, IList<ICanvasJSDataPoint>> toAdd)
+            IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> toAdd)
         {
-            foreach (var key in dataPoints.Keys)
+            foreach (var key in toAdd.Keys)
             {
-                if (dataPoints[key] != null)
+                if (dataPoints.TryGetValue(key, out var value))
                 {
                     dataPoints[key].AddRange(toAdd[key]);
+                }
+                else
+                {
+                    dataPoints.Add(key, toAdd[key]);
                 }
             }
             return dataPoints;
@@ -89,32 +93,38 @@ namespace Graph.Core.Services
 
         public IEnumerable<ICanvasJsData> GetEvolutionChartData(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints)
         {
+            var edgeCountAndConnectedEdge = new CanvasJsData
+            {
+                Type = "line",
+                ShowLegend = true,
+                Name = "Edge Count and Connected Edge",
+                DataPoints = dataPoints[ChromosomeFactor.EdgeCount | ChromosomeFactor.ConnectedEdgeWeigthSum]
+            };
+
+            var edgeCount = new CanvasJsData
+            {
+                Type = "line",
+                AxisYType = "secondary",
+                ShowLegend = true,
+                Name = "Edge Count Sum",
+                DataPoints = dataPoints[ChromosomeFactor.EdgeCount]
+            };
+
+            var connectedEdge= new CanvasJsData
+            {
+                Type = "line",
+                AxisYType = "secondary",
+                AxisYIndex = 1,
+                ShowLegend = true,
+                Name = "Connected Edge Sum",
+                DataPoints = dataPoints[ChromosomeFactor.ConnectedEdgeWeigthSum]
+            };
+
             return new ICanvasJsData[3]
             {
-                new CanvasJsData
-                {
-                    Type = "line",
-                    ShowLegend = true,
-                    Name = "Edge Count and Connected Edge",
-                    DataPoints = dataPoints[ChromosomeFactor.EdgeCount | ChromosomeFactor.ConnectedEdgeWeigthSum]
-                },
-                new CanvasJsData
-                {
-                    Type = "line",
-                    AxisYType = "secondary",
-                    ShowLegend = true,
-                    Name = "Edge Count Sum",
-                    DataPoints = dataPoints[ChromosomeFactor.EdgeCount]
-                },
-                new CanvasJsData
-                {
-                    Type = "line",
-                    AxisYType = "secondary",
-                    AxisYIndex = 1,
-                    ShowLegend = true,
-                    Name = "Connected Edge Sum",
-                    DataPoints = dataPoints[ChromosomeFactor.ConnectedEdgeWeigthSum]
-                },
+               edgeCountAndConnectedEdge,
+               edgeCount,
+               connectedEdge
             };
         }
 
@@ -123,7 +133,7 @@ namespace Graph.Core.Services
             return new CanvasJSDataPoint
             {
                 X = populationResult.Iteration,
-                Y = populationResult.Population.Members.Sum(x => x.Factors.Where(y => y.Key.HasFlag(factor)).Sum(z => z.Value))
+                Y = populationResult.Population.Members.Sum(x => x.Factors.Where(y => y.Key == factor).Sum(z => z.Value))
             };
         }
     }
