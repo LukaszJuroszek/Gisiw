@@ -32,7 +32,7 @@ namespace Graph.Core.Tests
             var matrix = _matrixService.GenerateMatrix(10, 0.5);
             var population = _populationService.Initialize(matrix, 50, 3);
             //Act
-            var result = _sut.GetBestChromosomes(ChromosomePart.First, population, numberOfTournamentRounds).Count();
+            var result = _sut.GetBestChromosomes(ChromosomePart.First, population.Population, numberOfTournamentRounds).Count();
             //Assert
             Assert.That(result, Is.EqualTo(numberOfTournamentRounds));
         }
@@ -46,7 +46,7 @@ namespace Graph.Core.Tests
             var population = _populationService.Initialize(matrix, 50, 3);
             //Act
             //Assert
-            Assert.DoesNotThrow(() => { _sut.RunIteration(population, matrix, 0.5d, 3); });
+            Assert.DoesNotThrow(() => { _sut.RunIteration(population, matrix, 3); });
         }
     }
 }

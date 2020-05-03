@@ -8,8 +8,9 @@ namespace Graph.Core.Services
 {
     public interface IEvolutionService
     {
-        IPopulation RunIteration(IPopulation population, IMatrix matrix, double probability, int maxDiffBetweenNode);
         IChromosome[] GetBestChromosomes(ChromosomePart chromosomePart, IPopulation population, int numberOfTournamentRounds);
+        IChromosome[] MutateChromosomeByNodeFlipping(IChromosome[] chromosomesByEdgeCount, IChromosome[] chromosomesByConnectedEdge, IMatrix matrix, int maxDiffBetweenNode);
+        IEvolutionIterationResult RunIteration(IPopulationResult population, IMatrix matrix, int maxDiffBetweenNode);
     }
 
     public class EvolutionService : IEvolutionService
@@ -21,13 +22,13 @@ namespace Graph.Core.Services
             _chromosomeService = chromosomeService;
         }
 
-        public IPopulation RunIteration(IPopulation population, IMatrix matrix, double probability, int maxDiffBetweenNode)
+        public IEvolutionIterationResult RunIteration(IPopulationResult populationResult, IMatrix matrix, int maxDiffBetweenNode)
         {
-            var numberOfTournamentRounds = population.Members.Count();
+            var numberOfTournamentRounds = populationResult.Population.Members.Count();
 
-            var bestChromosomesByEdgeCount = GetBestChromosomes(ChromosomePart.First, population, numberOfTournamentRounds);
+            var bestChromosomesByEdgeCount = GetBestChromosomes(ChromosomePart.First, populationResult.Population, numberOfTournamentRounds);
 
-            var bestChromosomesByConnectedEdge = GetBestChromosomes(ChromosomePart.Second, population, numberOfTournamentRounds);
+            var bestChromosomesByConnectedEdge = GetBestChromosomes(ChromosomePart.Second, populationResult.Population, numberOfTournamentRounds);
 
             if (bestChromosomesByEdgeCount.Count() != numberOfTournamentRounds &&
                 bestChromosomesByConnectedEdge.Count() != numberOfTournamentRounds)
@@ -37,9 +38,9 @@ namespace Graph.Core.Services
 
             var mutatedChromosomes = MutateChromosomeByNodeFlipping(bestChromosomesByEdgeCount, bestChromosomesByConnectedEdge, matrix, maxDiffBetweenNode);
 
-            population.Members = mutatedChromosomes.OrderBy(x => new Random().Next()).ToArray();
+            var members = mutatedChromosomes.OrderBy(x => new Random().Next()).ToArray();
 
-            return population;
+            return new EvolutionIterationResult(new Population(members), (populationResult.Iteration + 1));
         }
 
         public IChromosome[] MutateChromosomeByNodeFlipping(IChromosome[] chromosomesByEdgeCount, IChromosome[] chromosomesByConnectedEdge, IMatrix matrix, int maxDiffBetweenNode)

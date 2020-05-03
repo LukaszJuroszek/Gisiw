@@ -1,17 +1,13 @@
 ﻿@page "/"
-@inject IMatrixService MatrixService
-@inject IGraphChartService GraphChartService
-@inject IGraphConsistentService GraphConsistentService
-@inject IPopulationService PopulationService
-@inject ICanvasJsChartService CanvasJsChartService
+
 <h5 class="card-header">Graph</h5>
 <div class="card-body h-100 d-flex flex-column">
     <div class="row">
         <div class="col-sm-3">
             Node count:
-            <button class="btn btn-primary" @onclick="OnDecrementNodeCount" @ondblclick="OnDecrementDoubleNodeCount">-</button>
+            <button class="btn btn-primary" @onclick="OnDecrementNodeCount">-</button>
             @_nodeCount
-            <button class="btn btn-primary" @onclick="OnIncrementNodeCount" @ondblclick="OnIncrementDoubleNodeCount">+</button>
+            <button class="btn btn-primary" @onclick="OnIncrementNodeCount">+</button>
         </div>
         <div class="col-sm-3">
             Edge Probability:
@@ -26,7 +22,7 @@
             <button class="btn btn-primary" @onclick="OnGraphRender">Render</button>
         </div>
         <div class="col-sm">
-            <button class="btn btn-primary" @onclick="OnStart">Start</button>
+            <button class="btn btn-primary" @onclick="OnNext">Next 10</button>
         </div>
     </div>
     <div class="row h-50">
@@ -37,64 +33,20 @@
                         GraphOptions="_graphOptions" />
         </div>
         <div class="col-sm h-100">
+        </div>
+    </div>
+    <div class="row h-50">
+        <div class="col-sm h-100">
             <CanvasJsChart @ref="_evolutionChart"
                            Config="_evolutionConfig"
                            ContainerId="CanvasJsChart" />
         </div>
     </div>
-    <div class="row h-50">
-        <div class="col-sm h-100">
-        </div>
-        <div class="col-sm h-100">
-        </div>
-    </div>
 </div>
-@code {
-    private GraphChart _graphChart;
-    private CanvasJsChart _evolutionChart;
-    private int _nodeCount;
-    private double _edgeProbability;
-    private GraphData _graphData;
-    private GraphOptions _graphOptions;
-    private ICanvasJsConfig _evolutionConfig;
-    private ICanvasJsData[] _evolutionData;
-    private IMatrix _matrix;
-    private IPopulation _population;
-    private int _populationSize = 100;
-    private int _maxDiffBetweenNode = 6;
-
-    protected override void OnInitialized()
-    {
-        _nodeCount = 10;
-        _edgeProbability = 0.55d;
-        OnGenerateGraph();
-    }
-
-    private void OnGenerateGraph()
-    {
-        _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, probability: _edgeProbability);
-        _graphData = GraphChartService.GraphDataFromMatrix(_matrix);
-        _graphOptions = GraphChartService.GetDefaultGraphOptions();
-        OnGraphRender();
-    }
-
-    private void OnStart()
-    {
-        _population = PopulationService.Initialize(_matrix, _populationSize, _maxDiffBetweenNode);
-        var defaultEvolutionChartOptions = CanvasJsChartService.GetBasicOptionsForEvolutionChart();
-        var dataPoints = CanvasJsChartService.GetEvolutionChartData(_population);
-        _evolutionConfig = CanvasJsChartService.GetDefaultCanvasJSConfigs(dataPoints, defaultEvolutionChartOptions);
-        OnEvolutionChartRender();
-    }
-
+@code{
     private void OnIncrementNodeCount()
     {
         _nodeCount++;
-    }
-
-    private void OnIncrementDoubleNodeCount()
-    {
-        _nodeCount += 10;
     }
 
     private void OnDecrementNodeCount()
@@ -102,10 +54,6 @@
         _nodeCount = _nodeCount - 1 <= 0 ? 1 : _nodeCount - 1;
     }
 
-    private void OnDecrementDoubleNodeCount()
-    {
-        _nodeCount = _nodeCount - 10 <= 0 ? 1 : _nodeCount - 10;
-    }
 
     private void OnIncrementEdgeProbability()
     {
@@ -115,26 +63,5 @@
     private void OnDecrementEdgeProbability()
     {
         _edgeProbability = Math.Round(_edgeProbability - 0.1d < 0d ? 0.1d : _edgeProbability - 0.1d, 1);
-    }
-
-    private async void OnRender()
-    {
-        await Task.Run(() =>
-        {
-            OnGraphRender();
-            OnEvolutionChartRender();
-        });
-
-    }
-
-    private async void OnGraphRender()
-    {
-        await Task.Run(() => _graphChart.Render());
-    }
-
-
-    private async void OnEvolutionChartRender()
-    {
-        await Task.Run(() => _evolutionChart.Render());
     }
 }

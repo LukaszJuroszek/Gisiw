@@ -8,7 +8,7 @@ namespace Graph.Core.Services
 {
     public interface IPopulationService
     {
-        IPopulation Initialize(IMatrix matrix, int populationSize, int maxDiffBetweenNode);
+        IInitializedPopulationResult Initialize(IMatrix matrix, int populationSize, int maxDiffBetweenNode);
         IChromosome GenerateChromosome(IMatrix matrix, int maxDiffBetweenNode);
         IChromosome GetBestChromosome(IPopulation population);
     }
@@ -22,7 +22,7 @@ namespace Graph.Core.Services
             _chromosomeService = chromosomeService;
         }
 
-        public IPopulation Initialize(IMatrix matrix, int populationSize, int maxDiffBetweenNode)
+        public IInitializedPopulationResult Initialize(IMatrix matrix, int populationSize, int maxDiffBetweenNode)
         {
             var result = new HashSet<IChromosome>();
             if (result.Count < populationSize)
@@ -34,7 +34,7 @@ namespace Graph.Core.Services
                 while (result.Count < populationSize);
             }
 
-            return new Population { Members = result };
+            return new InitializedPopulationResult(new Population(result));
         }
 
         public IChromosome GenerateChromosome(IMatrix matrix, int maxDiffBetweenNode)
