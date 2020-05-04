@@ -1,5 +1,6 @@
 ﻿using Graph.Core.Models;
 using Graph.Core.Utils;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,26 +15,32 @@ namespace Graph.Core.Services
     }
     public class PopulationService : IPopulationService
     {
+        private readonly MiniProfiler _profiler;
         private double _probability = 0.5d;
         private readonly IChromosomeService _chromosomeService;
 
         public PopulationService(IChromosomeService chromosomeService)
         {
+            _profiler = MiniProfiler.StartNew(nameof(PopulationService));
             _chromosomeService = chromosomeService;
         }
 
         public IInitializedPopulationResult Initialize(IMatrix matrix, int populationSize, int maxDiffBetweenNode)
         {
             var result = new HashSet<IChromosome>();
-            if (result.Count < populationSize)
+            using (_profiler.Step(nameof(Initialize)))
             {
-                do
+                if (result.Count < populationSize)
                 {
-                    result.Add(GenerateChromosome(matrix, maxDiffBetweenNode));
+                    do
+                    {
+                        result.Add(GenerateChromosome(matrix, maxDiffBetweenNode));
+                    }
+                    while (result.Count < populationSize);
                 }
-                while (result.Count < populationSize);
             }
-
+            _profiler.Stop();
+            Console.WriteLine(_profiler.RenderPlainText());
             return new InitializedPopulationResult(new Population(result));
         }
 

@@ -1,5 +1,6 @@
 ﻿using Graph.Core.Models;
 using Graph.Core.Utils;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +16,12 @@ namespace Graph.Core.Services
 
     public class EvolutionService : IEvolutionService
     {
+        private readonly MiniProfiler _profiler;
         private readonly IChromosomeService _chromosomeService;
 
         public EvolutionService(IChromosomeService chromosomeService)
         {
+            _profiler = MiniProfiler.StartNew(nameof(EvolutionService));
             _chromosomeService = chromosomeService;
         }
 
@@ -27,7 +30,6 @@ namespace Graph.Core.Services
             var halfOfElementsCount = (int)Math.Floor(populationResult.Population.Members.Count() / 2.0d);
 
             var bestChromosomesByEdgeCount = GetBestChromosomes(ChromosomePart.First, populationResult.Population, halfOfElementsCount);
-
             var bestChromosomesByConnectedEdge = GetBestChromosomes(ChromosomePart.Second, populationResult.Population, halfOfElementsCount);
 
             if (bestChromosomesByEdgeCount.Count() != halfOfElementsCount &&
@@ -39,22 +41,25 @@ namespace Graph.Core.Services
             var mutatedChromosomes = MutateChromosomeByNodeFlipping(bestChromosomesByEdgeCount, bestChromosomesByConnectedEdge, matrix, maxDiffBetweenNode);
 
             var members = mutatedChromosomes.OrderBy(x => new Random().Next()).ToArray();
-
+            _profiler.Stop();
+            Console.WriteLine(_profiler.RenderPlainText());
             return new EvolutionIterationResult(new Population(members), (populationResult.Iteration + 1));
         }
 
         public IChromosome[] MutateChromosomeByNodeFlipping(IChromosome[] chromosomesByEdgeCount, IChromosome[] chromosomesByConnectedEdge, IMatrix matrix, int maxDiffBetweenNode)
         {
-            var numberOfTimes = 10;
-
-            for (var i = 0; i < numberOfTimes; i++)
+            var numberOfTimes = (int)chromosomesByEdgeCount.Length / 3.0;
+            var random = new Random();
+            using (_profiler.Step(nameof(MutateChromosomeByNodeFlipping)))
             {
-                var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(0, chromosomesByEdgeCount.Length);
+                for (var i = 0; i < numberOfTimes; i++)
+                {
+                    var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(random,0, chromosomesByEdgeCount.Length);
 
-                chromosomesByEdgeCount[left] = _chromosomeService.FlipNodeOnChromosoe(chromosomesByEdgeCount[left], maxDiffBetweenNode, matrix);
-                chromosomesByConnectedEdge[rigth] = _chromosomeService.FlipNodeOnChromosoe(chromosomesByConnectedEdge[rigth], maxDiffBetweenNode, matrix);
+                    chromosomesByEdgeCount[left] = _chromosomeService.FlipNodeOnChromosoe(chromosomesByEdgeCount[left], maxDiffBetweenNode, matrix);
+                    chromosomesByConnectedEdge[rigth] = _chromosomeService.FlipNodeOnChromosoe(chromosomesByConnectedEdge[rigth], maxDiffBetweenNode, matrix);
+                }
             }
-
             var result = new List<IChromosome>();
             result.AddRange(chromosomesByEdgeCount);
             result.AddRange(chromosomesByConnectedEdge);
@@ -65,37 +70,40 @@ namespace Graph.Core.Services
         public IChromosome[] GetBestChromosomes(ChromosomePart chromosomePart, IPopulation population, int numberOfTournamentRounds)
         {
             var result = new IChromosome[numberOfTournamentRounds];
-            switch (chromosomePart)
+            var random = new Random();
+            using (_profiler.Step($"{nameof(GetBestChromosomes)}{chromosomePart}"))
             {
-                case ChromosomePart.First:
-                    for (var i = 0; i < numberOfTournamentRounds; i++)
-                    {
-                        var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(0, numberOfTournamentRounds);
-                        var leftChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[left]);
-                        var rigthChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[rigth]);
+                switch (chromosomePart)
+                {
+                    case ChromosomePart.First:
+                        for (var i = 0; i < numberOfTournamentRounds; i++)
+                        {
+                            var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(random, 0, numberOfTournamentRounds);
+                            var leftChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[left]);
+                            var rigthChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[rigth]);
 
-                        IChromosome bestOne = GetBestChromosomeBy(leftChromosome, rigthChromosome, keyComparer: ChromosomeFactor.EdgeCount);
+                            IChromosome bestOne = GetBestChromosomeBy(leftChromosome, rigthChromosome, keyComparer: ChromosomeFactor.EdgeCount);
 
-                        result[i] = bestOne;
-                    }
-                    break;
-                case ChromosomePart.Second:
-                    for (var i = 0; i < numberOfTournamentRounds; i++)
-                    {
-                        var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(numberOfTournamentRounds, population.Members.Count());
-                        var leftChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[left]);
-                        var rigthChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[rigth]);
+                            result[i] = bestOne;
+                        }
+                        break;
+                    case ChromosomePart.Second:
+                        for (var i = 0; i < numberOfTournamentRounds; i++)
+                        {
+                            var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(random, numberOfTournamentRounds, population.Members.Count());
+                            var leftChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[left]);
+                            var rigthChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[rigth]);
 
-                        IChromosome bestOne = GetBestChromosomeBy(leftChromosome, rigthChromosome, keyComparer: ChromosomeFactor.ConnectedEdgeWeigthSum);
+                            IChromosome bestOne = GetBestChromosomeBy(leftChromosome, rigthChromosome, keyComparer: ChromosomeFactor.ConnectedEdgeWeigthSum);
 
-                        result[i] = bestOne;
-                    }
-                    break;
-                case ChromosomePart.Unknown:
-                default:
-                    break;
+                            result[i] = bestOne;
+                        }
+                        break;
+                    case ChromosomePart.Unknown:
+                    default:
+                        break;
+                }
             }
-
             return result;
         }
 

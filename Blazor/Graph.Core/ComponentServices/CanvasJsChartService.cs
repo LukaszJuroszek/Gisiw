@@ -2,6 +2,7 @@
 using Graph.Component.Models.CanvasJs.Data;
 using Graph.Component.Models.CanvasJs.Options;
 using Graph.Core.Models;
+using StackExchange.Profiling;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,6 +19,13 @@ namespace Graph.Core.Services
 
     public class CanvasJsChartService : ICanvasJsChartService
     {
+        private readonly MiniProfiler _profiler;
+
+        public CanvasJsChartService()
+        {
+            _profiler = MiniProfiler.StartNew(nameof(CanvasJsChartService));
+        }
+
         public ICanvasJsConfig GetBasicOptionsForEvolutionChart()
         {
             return new CanvasJsConfig

@@ -7,7 +7,6 @@ using Graph.Core.Models;
 using Graph.Core.Services;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Graph.Pages
@@ -52,25 +51,22 @@ namespace Graph.Pages
 
         private void OnNext()
         {
-            for (int i = 0; i < 10; i++)
+            _evolutionConfig = CanvasJsChartService.GetBasicOptionsForEvolutionChart();
+            if (evolutionChartData == null)
             {
-                if (evolutionChartData == null)
-                {
-                    evolutionChartData = new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>();
-                    System.Console.WriteLine("xxxx");
-                }
+                evolutionChartData = new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>();
+            }
+            for (int i = 0; i < 1; i++)
+            {
 
                 var iterationResult = EvolutionService.RunIteration(_populationHistory[_iteration], _matrix, _maxDiffBetweenNode);
                 _iteration++;
                 _populationHistory.Add(_iteration, iterationResult);
-                var dataPoints = CanvasJsChartService.MapPopulationToDataPoints(iterationResult);
+                var dataPoints = CanvasJsChartService.MapPopulationToDataPoints(_populationHistory[_iteration]);
                 evolutionChartData = CanvasJsChartService.AddToDataPoints(evolutionChartData, dataPoints);
-                var chartData = CanvasJsChartService.GetEvolutionChartData(evolutionChartData);
-                var defaultEvolutionChartOptions = CanvasJsChartService.GetBasicOptionsForEvolutionChart();
-
-                defaultEvolutionChartOptions.Data = chartData;
-                _evolutionConfig = defaultEvolutionChartOptions;
             }
+
+            _evolutionConfig.Data = CanvasJsChartService.GetEvolutionChartData(evolutionChartData);
             OnEvolutionChartRender();
         }
 

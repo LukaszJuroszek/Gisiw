@@ -1,5 +1,6 @@
 ﻿using Graph.Core.Models;
 using Graph.Core.Utils;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,13 @@ namespace Graph.Core.Services
 
     public class ChromosomeService : IChromosomeService
     {
+        private readonly MiniProfiler _profiler;
+
+        public ChromosomeService()
+        {
+            _profiler = MiniProfiler.StartNew(nameof(MiniProfiler));
+        }
+
         public bool IsNodeCountValid(Dictionary<int, ChromosomePart> distribution, int maxDiffBetweenNode)
         {
             var nodeSum = distribution.Count(x => x.Value == ChromosomePart.First);
@@ -61,6 +69,7 @@ namespace Graph.Core.Services
                 Factors = chromosome.Factors,
                 Id = chromosome.Id
             };
+            var random = new Random();
             var maxIteration = 20;
             var currentIteration = 0;
             do
@@ -69,7 +78,7 @@ namespace Graph.Core.Services
                 int rigth;
                 do
                 {
-                    (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(0, chromosome.Distribution.Count());
+                    (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(random, 0, chromosome.Distribution.Count());
 
                 } while ((chromosome.Distribution[left] == ChromosomePart.First && chromosome.Distribution[rigth] == ChromosomePart.Second) == false);
 
@@ -98,7 +107,6 @@ namespace Graph.Core.Services
             } while (IsNodeCountValid(chromosome.Distribution, maxDiffBetweenNode) == false);
 
             chromosome.Factors = GetChromosomeFactors(chromosome.Distribution, matrix);
-
             return chromosome;
         }
     }

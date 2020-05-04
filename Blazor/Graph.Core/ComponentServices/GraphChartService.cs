@@ -1,6 +1,8 @@
 ﻿using Graph.Component.Models.Graph.Data;
 using Graph.Component.Models.Graph.Options;
 using Graph.Core.Models;
+using StackExchange.Profiling;
+using System;
 using System.Collections.Generic;
 
 namespace Graph.Core.Services
@@ -16,10 +18,13 @@ namespace Graph.Core.Services
     public class GraphChartService : IGraphChartService
     {
         private readonly IGraphConsistentService _graphConsistentService;
+        private readonly MiniProfiler _profiler;
 
         public GraphChartService(IGraphConsistentService graphConsistentService)
         {
             _graphConsistentService = graphConsistentService;
+            _profiler = MiniProfiler.StartNew(nameof(GraphChartService));
+
         }
 
         public GraphData GraphDataFromMatrix(IMatrix matrix)
@@ -29,6 +34,7 @@ namespace Graph.Core.Services
                 Edges = GraphEdgesFromMatrix(matrix),
                 Nodes = GraphNodesFromMatrix(matrix)
             };
+
         }
 
         public IList<GraphEdges> GraphEdgesFromMatrix(IMatrix matrix)
@@ -36,25 +42,29 @@ namespace Graph.Core.Services
             var nodeNeighbors = _graphConsistentService.GetNodeNeighbors(matrix);
 
             var result = new List<GraphEdges>();
-
-            for (var i = 0; i < nodeNeighbors.Count; i++)
+            using (_profiler.Step(nameof(GraphEdgesFromMatrix)))
             {
-                for (var j = 0; j < nodeNeighbors[i].Neighbors.Length; j++)
+                for (var i = 0; i < nodeNeighbors.Count; i++)
                 {
-                    result.Add(new GraphEdges
+                    for (var j = 0; j < nodeNeighbors[i].Neighbors.Length; j++)
                     {
-                        From = nodeNeighbors[i].Id.ToString(),
-                        To = nodeNeighbors[i].Neighbors[j].NeighborNumber.ToString(),
-                        Label = nodeNeighbors[i].Neighbors[j].EdgeValue.ToString(),
-                        Font = new Font { Align = "top" }
-                    });
-                    result.Add(new GraphEdges
-                    {
-                        From = nodeNeighbors[i].Neighbors[j].NeighborNumber.ToString(),
-                        To = nodeNeighbors[i].Id.ToString(),
-                    });
+                        result.Add(new GraphEdges
+                        {
+                            From = nodeNeighbors[i].Id.ToString(),
+                            To = nodeNeighbors[i].Neighbors[j].NeighborNumber.ToString(),
+                            Label = nodeNeighbors[i].Neighbors[j].EdgeValue.ToString(),
+                            Font = new Font { Align = "top" }
+                        });
+                        result.Add(new GraphEdges
+                        {
+                            From = nodeNeighbors[i].Neighbors[j].NeighborNumber.ToString(),
+                            To = nodeNeighbors[i].Id.ToString(),
+                        });
+                    }
                 }
             }
+            _profiler.Stop();
+            Console.WriteLine(_profiler.RenderPlainText());
             return result;
         }
 

@@ -1,7 +1,8 @@
 ﻿using Graph.Core.Models;
 using Graph.Core.Utils;
+using StackExchange.Profiling;
+using StackExchange.Profiling.Data;
 using System;
-using System.Collections.Generic;
 
 namespace Graph.Core.Services
 {
@@ -12,6 +13,7 @@ namespace Graph.Core.Services
 
     public class MatrixService : IMatrixService
     {
+        private readonly MiniProfiler _profiler;
         private readonly IGraphConsistentService _graphConsistentService;
         private readonly int _weigthIfHasNotEdge = 0;
         private readonly int _weigthIfHasEdge = 1;
@@ -19,6 +21,7 @@ namespace Graph.Core.Services
 
         public MatrixService(IGraphConsistentService graphConsistentService)
         {
+            _profiler = MiniProfiler.StartNew(nameof(MatrixService));
             _graphConsistentService = graphConsistentService;
         }
 
@@ -27,33 +30,38 @@ namespace Graph.Core.Services
             var tryCount = 0;
             int[][] result;
             var random = new Random();
-            do
+
+            using (_profiler.Step(nameof(GenerateMatrix)))
             {
-                result = new int[nodeCount][];
-                probability = ProbabilityUtils.AdaptProbability(probability, tryCount);
-
-                for (var i = 0; i < nodeCount; i++)
+                do
                 {
-                    result[i] = new int[nodeCount];
-                    for (var j = 0; j < nodeCount; j++)
+                    result = new int[nodeCount][];
+                    probability = ProbabilityUtils.AdaptProbability(probability, tryCount);
+
+                    for (var i = 0; i < nodeCount; i++)
                     {
-                        result[i][j] = _weigthIfHasNotEdge;
+                        result[i] = new int[nodeCount];
+                        for (var j = 0; j < nodeCount; j++)
+                        {
+                            result[i][j] = _weigthIfHasNotEdge;
+                        }
                     }
-                }
-                for (var i = 0; i < nodeCount; i++)
-                {
-                    for (var j = (i + 1); j < nodeCount; j++)
+                    for (var i = 0; i < nodeCount; i++)
                     {
-                        var hasEdge = random.NextDouble() < probability;
-                        result[i][j] = hasEdge ? (int)Math.Floor((random.NextDouble() * _maxEdgeWeigth) + _weigthIfHasEdge) : _weigthIfHasNotEdge;
-                        result[j][i] = _weigthIfHasNotEdge;
+                        for (var j = (i + 1); j < nodeCount; j++)
+                        {
+                            var hasEdge = random.NextDouble() < probability;
+                            result[i][j] = hasEdge ? (int)Math.Floor((random.NextDouble() * _maxEdgeWeigth) + _weigthIfHasEdge) : _weigthIfHasNotEdge;
+                            result[j][i] = _weigthIfHasNotEdge;
+                        }
                     }
-                }
 
-                tryCount++;
+                    tryCount++;
 
-            } while (_graphConsistentService.IsConsistent(result) == false);
-
+                } while (_graphConsistentService.IsConsistent(result) == false);
+            }
+            _profiler.Stop();
+            Console.WriteLine(_profiler.RenderPlainText());
             return new Matrix(result);
         }
     }
