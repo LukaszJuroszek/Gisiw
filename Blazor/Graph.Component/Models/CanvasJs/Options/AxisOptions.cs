@@ -6,6 +6,7 @@
         string GridColor { get; set; }
         int GridThickness { get; set; }
         int Interval { get; set; }
+        string Title { get; set; }
     }
 
     public class AxisOptions : IAxisOptions
@@ -14,5 +15,6 @@
         public string GridColor { get; set; }
         public int GridThickness { get; set; }
         public int Interval { get; set; }
+        public string Title { get; set; }
     }
 }

@@ -33,19 +33,30 @@ namespace Graph.Core.Services
                 AnimationEnabled = true,
                 ZoomEnabled = true,
                 ExportEnabled = true,
-                AxisY = new AxisOptions
+
+                AxisY = new IAxisOptions[]
                 {
-                    IncludeZero = true
+                    new AxisOptions
+                    {
+                        IncludeZero = false,
+                        Title = "Edge Count and Connected Edge",
+                        GridColor = "black",
+                        GridThickness = 1,
+                    },
                 },
                 AxisY2 = new IAxisOptions[]
                 {
                     new AxisOptions
                     {
-                        IncludeZero = true
+                        IncludeZero = false,
+                        Title = "Edge Count",
+                        GridColor = "black",
                     },
                      new AxisOptions
                     {
-                        IncludeZero = true
+                        IncludeZero = false,
+                        Title = "Connected Edge",
+                        GridColor = "black",
                     },
                 },
                 Legend = new LegendOptions
@@ -104,7 +115,7 @@ namespace Graph.Core.Services
             var edgeCountAndConnectedEdge = new CanvasJsData
             {
                 Type = "line",
-                ShowLegend = true,
+                ShowInLegend = true,
                 Name = "Edge Count and Connected Edge",
                 DataPoints = dataPoints[ChromosomeFactor.EdgeCount | ChromosomeFactor.ConnectedEdgeWeigthSum]
             };
@@ -112,19 +123,20 @@ namespace Graph.Core.Services
             var edgeCount = new CanvasJsData
             {
                 Type = "line",
+                ShowInLegend = true,
+                Name = "Edge Count",
+                AxisYIndex = 0,
                 AxisYType = "secondary",
-                ShowLegend = true,
-                Name = "Edge Count Sum",
                 DataPoints = dataPoints[ChromosomeFactor.EdgeCount]
             };
 
-            var connectedEdge= new CanvasJsData
+            var connectedEdge = new CanvasJsData
             {
                 Type = "line",
-                AxisYType = "secondary",
                 AxisYIndex = 1,
-                ShowLegend = true,
-                Name = "Connected Edge Sum",
+                AxisYType = "secondary",
+                ShowInLegend = true,
+                Name = "Connected Edge",
                 DataPoints = dataPoints[ChromosomeFactor.ConnectedEdgeWeigthSum]
             };
 

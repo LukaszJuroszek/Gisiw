@@ -1,7 +1,6 @@
 ﻿@page "/"
 
-<h5 class="card-header">Graph</h5>
-<div class="card-body h-100 d-flex flex-column">
+<div class="h-100 d-flex flex-column">
     <div class="row">
         <div class="col-sm-3">
             Node count:
@@ -22,7 +21,7 @@
             <button class="btn btn-primary" @onclick="OnGraphRender">Render</button>
         </div>
         <div class="col-sm">
-            <button class="btn btn-primary" @onclick="OnNext"  @onclick:stopPropagation="true">Next 10</button>
+            <button class="btn btn-primary" @onclick="OnNext" @onclick:stopPropagation="true">Run 100 iteration</button>
         </div>
     </div>
     <div class="row h-50">

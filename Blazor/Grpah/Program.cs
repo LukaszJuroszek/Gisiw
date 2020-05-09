@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Graph.Core.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Graph
 {

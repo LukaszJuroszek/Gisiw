@@ -6,7 +6,9 @@ using Graph.Component.Models.Graph.Options;
 using Graph.Core.Models;
 using Graph.Core.Services;
 using Microsoft.AspNetCore.Components;
+using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Graph.Pages
@@ -37,6 +39,28 @@ namespace Graph.Pages
         protected override void OnInitialized()
         {
             OnGenerateGraph();
+            if (evolutionChartData == null)
+            {
+                evolutionChartData = new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>();
+            }
+
+            _evolutionConfig = CanvasJsChartService.GetBasicOptionsForEvolutionChart();
+            var sampleDictionary = new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>
+            {
+                [ChromosomeFactor.ConnectedEdgeWeigthSum] = new List<ICanvasJSDataPoint>
+                {
+                },
+                [ChromosomeFactor.EdgeCount] = new List<ICanvasJSDataPoint>
+                {
+                },
+                [ChromosomeFactor.ConnectedEdgeWeigthSum | ChromosomeFactor.EdgeCount] = new List<ICanvasJSDataPoint>
+                {
+                }
+            };
+
+            _evolutionConfig.Data = CanvasJsChartService.GetEvolutionChartData(sampleDictionary);
+          
+            OnEvolutionChartRender();
         }
 
         private void OnGenerateGraph()
@@ -52,13 +76,9 @@ namespace Graph.Pages
         private void OnNext()
         {
             _evolutionConfig = CanvasJsChartService.GetBasicOptionsForEvolutionChart();
-            if (evolutionChartData == null)
-            {
-                evolutionChartData = new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>();
-            }
-            for (int i = 0; i < 1; i++)
-            {
 
+            for (var i = 0; i < 10; i++)
+            {
                 var iterationResult = EvolutionService.RunIteration(_populationHistory[_iteration], _matrix, _maxDiffBetweenNode);
                 _iteration++;
                 _populationHistory.Add(_iteration, iterationResult);
@@ -67,17 +87,12 @@ namespace Graph.Pages
             }
 
             _evolutionConfig.Data = CanvasJsChartService.GetEvolutionChartData(evolutionChartData);
-            OnEvolutionChartRender();
-        }
-
-        private async void OnRender()
-        {
-            await Task.Run(() =>
+            System.Console.WriteLine(JsonSerializer.Serialize(_evolutionConfig, new JsonSerializerOptions
             {
-                OnGraphRender();
-                OnEvolutionChartRender();
-            });
-
+                IgnoreNullValues = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            }));
+            OnEvolutionChartRender();
         }
 
         private async void OnGraphRender()
@@ -87,6 +102,11 @@ namespace Graph.Pages
 
         private async void OnEvolutionChartRender()
         {
+            Console.WriteLine(JsonSerializer.Serialize(_evolutionConfig, new JsonSerializerOptions
+            {
+                IgnoreNullValues = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            }));
             await Task.Run(() => _evolutionChart.Render());
         }
     }

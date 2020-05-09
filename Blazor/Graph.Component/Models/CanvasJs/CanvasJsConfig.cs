@@ -7,7 +7,7 @@ namespace Graph.Component.Models.CanvasJs
     public interface ICanvasJsConfig
     {
         bool AnimationEnabled { get; set; }
-        IAxisOptions AxisY { get; set; }
+        IAxisOptions[] AxisY { get; set; }
         IAxisOptions[] AxisY2 { get; set; }
         IEnumerable<ICanvasJsData> Data { get; set; }
         bool ExportEnabled { get; set; }
@@ -22,7 +22,7 @@ namespace Graph.Component.Models.CanvasJs
         public bool AnimationEnabled { get; set; }
         public bool ZoomEnabled { get; set; }
         public bool ExportEnabled { get; set; }
-        public IAxisOptions AxisY { get; set; }
+        public IAxisOptions[] AxisY { get; set; }
         public IAxisOptions[] AxisY2 { get; set; }
         public ILegendOptions Legend { get; set; }
         public IToolTipOptions ToolTip { get; set; }
