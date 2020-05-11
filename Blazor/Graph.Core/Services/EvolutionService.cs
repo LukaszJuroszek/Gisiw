@@ -12,6 +12,7 @@ namespace Graph.Core.Services
         IChromosome[] GetBestChromosomes(ChromosomePart chromosomePart, IPopulation population, int numberOfTournamentRounds);
         IChromosome[] MutateChromosomeByNodeFlipping(IChromosome[] chromosomesByEdgeCount, IChromosome[] chromosomesByConnectedEdge, IMatrix matrix, int maxDiffBetweenNode);
         IEvolutionIterationResult RunIteration(IPopulationResult population, IMatrix matrix, int maxDiffBetweenNode);
+        IChromosome GetCurrentBestChromosomeFromPopulation(IPopulationResult population, IChromosome toCompare = null);
     }
 
     public class EvolutionService : IEvolutionService
@@ -41,9 +42,9 @@ namespace Graph.Core.Services
             var mutatedChromosomes = MutateChromosomeByNodeFlipping(bestChromosomesByEdgeCount, bestChromosomesByConnectedEdge, matrix, maxDiffBetweenNode);
 
             var members = mutatedChromosomes.OrderBy(x => new Random().Next()).ToArray();
-            _profiler.Stop();
-            Console.WriteLine(_profiler.RenderPlainText());
-            return new EvolutionIterationResult(new Population(members), (populationResult.Iteration + 1));
+            //_profiler.Stop();
+            //Console.WriteLine(_profiler.RenderPlainText());
+            return new EvolutionIterationResult(new Population(members), populationResult.Iteration + 1);
         }
 
         public IChromosome[] MutateChromosomeByNodeFlipping(IChromosome[] chromosomesByEdgeCount, IChromosome[] chromosomesByConnectedEdge, IMatrix matrix, int maxDiffBetweenNode)
@@ -54,7 +55,7 @@ namespace Graph.Core.Services
             {
                 for (var i = 0; i < numberOfTimes; i++)
                 {
-                    var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(random,0, chromosomesByEdgeCount.Length);
+                    var (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(random, 0, chromosomesByEdgeCount.Length);
 
                     chromosomesByEdgeCount[left] = _chromosomeService.FlipNodeOnChromosoe(chromosomesByEdgeCount[left], maxDiffBetweenNode, matrix);
                     chromosomesByConnectedEdge[rigth] = _chromosomeService.FlipNodeOnChromosoe(chromosomesByConnectedEdge[rigth], maxDiffBetweenNode, matrix);
@@ -110,6 +111,17 @@ namespace Graph.Core.Services
         private IChromosome GetBestChromosomeBy(IChromosome leftChromosome, IChromosome rigthChromosome, ChromosomeFactor keyComparer)
         {
             return leftChromosome.Factors[keyComparer] > rigthChromosome.Factors[keyComparer] ? leftChromosome : rigthChromosome;
+        }
+
+        public IChromosome GetCurrentBestChromosomeFromPopulation(IPopulationResult populationResult, IChromosome toCompare = null)
+        {
+            if (toCompare != null)
+            {
+                var bestFromPopulation = populationResult.Population.Members.OrderByDescending(x => x.FactorsSum).FirstOrDefault();
+                return bestFromPopulation.FactorsSum < toCompare.FactorsSum ? bestFromPopulation : toCompare;
+            }
+
+            return populationResult.Population.Members.OrderByDescending(x => x.FactorsSum).FirstOrDefault();
         }
     }
 }

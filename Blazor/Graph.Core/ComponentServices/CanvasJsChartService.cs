@@ -13,8 +13,10 @@ namespace Graph.Core.Services
         IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> AddToDataPoints(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints,
             IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> toAdd);
         ICanvasJsConfig GetBasicOptionsForEvolutionChart();
-        IEnumerable<ICanvasJsData> GetEvolutionChartData(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints);
+        IEnumerable<ICanvasJsData> GetEvolutionChartData(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints,
+            List<ICanvasJSDataPoint> bestChromosomeDataPoints);
         IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult);
+        ICanvasJSDataPoint MapChromosomeToDataPoint(IChromosome chromosome, int iteration);
     }
 
     public class CanvasJsChartService : ICanvasJsChartService
@@ -39,7 +41,7 @@ namespace Graph.Core.Services
                     new AxisOptions
                     {
                         IncludeZero = false,
-                        Title = "Edge Count and Connected Edge",
+                        Title = "Best Chromosome",
                         GridColor = "black",
                         GridThickness = 1,
                     },
@@ -63,7 +65,8 @@ namespace Graph.Core.Services
                 {
                     Cursor = "pointer",
                     VerticalAlign = "top",
-                    FontSize = 22,
+                    HorizontalAlign = "center",
+                    FontSize = 18,
                     FontColor = "black",
                 },
                 ToolTip = new ToolTipOptions
@@ -92,6 +95,11 @@ namespace Graph.Core.Services
             };
         }
 
+        public ICanvasJSDataPoint MapChromosomeToDataPoint(IChromosome chromosome, int iteration)
+        {
+            return new CanvasJSDataPoint { X = iteration, Y = chromosome.FactorsSum };
+        }
+
         public IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> AddToDataPoints(
             IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints,
             IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> toAdd)
@@ -110,14 +118,14 @@ namespace Graph.Core.Services
             return dataPoints;
         }
 
-        public IEnumerable<ICanvasJsData> GetEvolutionChartData(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints)
+        public IEnumerable<ICanvasJsData> GetEvolutionChartData(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints, List<ICanvasJSDataPoint> bestChromosomeDataPoints )
         {
-            var edgeCountAndConnectedEdge = new CanvasJsData
+            var bestChromosome = new CanvasJsData
             {
                 Type = "line",
                 ShowInLegend = true,
-                Name = "Edge Count and Connected Edge",
-                DataPoints = dataPoints[ChromosomeFactor.EdgeCount | ChromosomeFactor.ConnectedEdgeWeigthSum]
+                Name = "Best Chromosome",
+                DataPoints = bestChromosomeDataPoints
             };
 
             var edgeCount = new CanvasJsData
@@ -142,7 +150,7 @@ namespace Graph.Core.Services
 
             return new ICanvasJsData[3]
             {
-               edgeCountAndConnectedEdge,
+               bestChromosome,
                edgeCount,
                connectedEdge
             };

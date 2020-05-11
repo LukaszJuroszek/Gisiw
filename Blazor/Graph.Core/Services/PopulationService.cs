@@ -39,8 +39,8 @@ namespace Graph.Core.Services
                     while (result.Count < populationSize);
                 }
             }
-            _profiler.Stop();
-            Console.WriteLine(_profiler.RenderPlainText());
+            //_profiler.Stop();
+            //Console.WriteLine(_profiler.RenderPlainText());
             return new InitializedPopulationResult(new Population(result));
         }
 

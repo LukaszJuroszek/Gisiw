@@ -32,7 +32,7 @@ namespace Graph.Core.Models
     public class InitializedPopulationResult : IInitializedPopulationResult
     {
         public IPopulation Population { get; }
-        public int Iteration => 1;
+        public int Iteration => 0;
 
         public InitializedPopulationResult(IPopulation population)
         {

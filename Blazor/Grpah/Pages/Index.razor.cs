@@ -6,9 +6,7 @@ using Graph.Component.Models.Graph.Options;
 using Graph.Core.Models;
 using Graph.Core.Services;
 using Microsoft.AspNetCore.Components;
-using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Graph.Pages
@@ -21,14 +19,14 @@ namespace Graph.Pages
         private double _edgeProbability = 0.55d;
         private int _populationSize = 100;
         private int _maxDiffBetweenNode = 6;
-        private int _iteration = 1;
         private GraphData _graphData;
         private GraphOptions _graphOptions;
         private ICanvasJsConfig _evolutionConfig;
         private IMatrix _matrix;
-        private IPopulationResult _initializedPopulation;
-        private IDictionary<int, IPopulationResult> _populationHistory;
-        private IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> evolutionChartData;
+        private IChromosome _currentBestChromosome;
+        private IPopulationResult _currentPopulation;
+        private IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> _evolutionChartData = new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>();
+        private List<ICanvasJSDataPoint> _evolutionBestChromosomeChartData = new List<ICanvasJSDataPoint>();
 
         [Inject] IMatrixService MatrixService { get; set; }
         [Inject] IGraphChartService GraphChartService { get; set; }
@@ -39,27 +37,24 @@ namespace Graph.Pages
         protected override void OnInitialized()
         {
             OnGenerateGraph();
-            if (evolutionChartData == null)
-            {
-                evolutionChartData = new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>();
-            }
-
             _evolutionConfig = CanvasJsChartService.GetBasicOptionsForEvolutionChart();
             var sampleDictionary = new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>
             {
                 [ChromosomeFactor.ConnectedEdgeWeigthSum] = new List<ICanvasJSDataPoint>
                 {
+                    new CanvasJSDataPoint{X = 0, Y = 0},
                 },
                 [ChromosomeFactor.EdgeCount] = new List<ICanvasJSDataPoint>
                 {
+                    new CanvasJSDataPoint{X = 0, Y = 0},
                 },
                 [ChromosomeFactor.ConnectedEdgeWeigthSum | ChromosomeFactor.EdgeCount] = new List<ICanvasJSDataPoint>
                 {
+                    new CanvasJSDataPoint{X = 0, Y = 0},
                 }
             };
-
-            _evolutionConfig.Data = CanvasJsChartService.GetEvolutionChartData(sampleDictionary);
-          
+            var sampleBest = new List<ICanvasJSDataPoint> { new CanvasJSDataPoint { X = 0, Y = 0 } };
+            _evolutionConfig.Data = CanvasJsChartService.GetEvolutionChartData(sampleDictionary, sampleBest);
             OnEvolutionChartRender();
         }
 
@@ -68,8 +63,8 @@ namespace Graph.Pages
             _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, probability: _edgeProbability);
             _graphData = GraphChartService.GraphDataFromMatrix(_matrix);
             _graphOptions = GraphChartService.GetDefaultGraphOptions();
-            _initializedPopulation = PopulationService.Initialize(_matrix, _populationSize, _maxDiffBetweenNode);
-            _populationHistory = new Dictionary<int, IPopulationResult> { [_iteration] = _initializedPopulation };
+            _currentPopulation = PopulationService.Initialize(_matrix, _populationSize, _maxDiffBetweenNode);
+            _currentBestChromosome = EvolutionService.GetCurrentBestChromosomeFromPopulation(_currentPopulation);
             OnGraphRender();
         }
 
@@ -79,19 +74,14 @@ namespace Graph.Pages
 
             for (var i = 0; i < 10; i++)
             {
-                var iterationResult = EvolutionService.RunIteration(_populationHistory[_iteration], _matrix, _maxDiffBetweenNode);
-                _iteration++;
-                _populationHistory.Add(_iteration, iterationResult);
-                var dataPoints = CanvasJsChartService.MapPopulationToDataPoints(_populationHistory[_iteration]);
-                evolutionChartData = CanvasJsChartService.AddToDataPoints(evolutionChartData, dataPoints);
+                _currentPopulation = EvolutionService.RunIteration(_currentPopulation, _matrix, _maxDiffBetweenNode);
+                var dataPoints = CanvasJsChartService.MapPopulationToDataPoints(_currentPopulation);
+                _currentBestChromosome = EvolutionService.GetCurrentBestChromosomeFromPopulation(_currentPopulation, _currentBestChromosome);
+                _evolutionBestChromosomeChartData.Add(CanvasJsChartService.MapChromosomeToDataPoint(_currentBestChromosome, _currentPopulation.Iteration));
+                _evolutionChartData = CanvasJsChartService.AddToDataPoints(_evolutionChartData, dataPoints);
             }
+            _evolutionConfig.Data = CanvasJsChartService.GetEvolutionChartData(_evolutionChartData, _evolutionBestChromosomeChartData);
 
-            _evolutionConfig.Data = CanvasJsChartService.GetEvolutionChartData(evolutionChartData);
-            System.Console.WriteLine(JsonSerializer.Serialize(_evolutionConfig, new JsonSerializerOptions
-            {
-                IgnoreNullValues = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            }));
             OnEvolutionChartRender();
         }
 
@@ -102,11 +92,6 @@ namespace Graph.Pages
 
         private async void OnEvolutionChartRender()
         {
-            Console.WriteLine(JsonSerializer.Serialize(_evolutionConfig, new JsonSerializerOptions
-            {
-                IgnoreNullValues = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            }));
             await Task.Run(() => _evolutionChart.Render());
         }
     }

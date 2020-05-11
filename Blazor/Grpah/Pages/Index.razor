@@ -1,47 +1,45 @@
 ﻿@page "/"
 
-<div class="h-100 d-flex flex-column">
-    <div class="row">
-        <div class="col-sm-3">
-            Node count:
-            <button class="btn btn-primary" @onclick="OnDecrementNodeCount">-</button>
-            @_nodeCount
-            <button class="btn btn-primary" @onclick="OnIncrementNodeCount">+</button>
+    <div class="vh-100">
+        <div class="row h-50">
+            <div class="col-md-6 h-100">
+                <div class="col-sm-3">
+                    Node count:
+                    <button class="btn btn-primary" @onclick="OnDecrementNodeCount">-</button>
+                    @_nodeCount
+                    <button class="btn btn-primary" @onclick="OnIncrementNodeCount">+</button>
+                </div>
+                <div class="col-sm-3">
+                    Edge Probability:
+                    <button class="btn btn-primary" @onclick="OnDecrementEdgeProbability">-</button>
+                    @_edgeProbability
+                    <button class="btn btn-primary" @onclick="OnIncrementEdgeProbability">+</button>
+                </div>
+                <div class="col-sm">
+                    <button class="btn btn-primary" @onclick="OnGenerateGraph">Generate Graph</button>
+                </div>
+                <div class="col-sm">
+                    <button class="btn btn-primary" @onclick="OnGraphRender">Render</button>
+                </div>
+                <div class="col-sm">
+                    <button class="btn btn-primary" @onclick="OnNext" @onclick:stopPropagation="true">Run 100 iteration</button>
+                </div>
+            </div>
+            <div class="col-md-6 h-100">
+                <GraphChart @ref="_graphChart"
+                            ContainerId="graphChartId"
+                            GraphData="_graphData"
+                            GraphOptions="_graphOptions" />
+            </div>
         </div>
-        <div class="col-sm-3">
-            Edge Probability:
-            <button class="btn btn-primary" @onclick="OnDecrementEdgeProbability">-</button>
-            @_edgeProbability
-            <button class="btn btn-primary" @onclick="OnIncrementEdgeProbability">+</button>
-        </div>
-        <div class="col-sm">
-            <button class="btn btn-primary" @onclick="OnGenerateGraph">Generate Graph</button>
-        </div>
-        <div class="col-sm">
-            <button class="btn btn-primary" @onclick="OnGraphRender">Render</button>
-        </div>
-        <div class="col-sm">
-            <button class="btn btn-primary" @onclick="OnNext" @onclick:stopPropagation="true">Run 100 iteration</button>
+        <div class="row h-50">
+            <div class="col-md-12 vh-50">
+                <CanvasJsChart @ref="_evolutionChart"
+                               Config="_evolutionConfig"
+                               ContainerId="CanvasJsChart" />
+            </div>
         </div>
     </div>
-    <div class="row h-50">
-        <div class="col-sm h-100">
-            <GraphChart @ref="_graphChart"
-                        ContainerId="graphChartId"
-                        GraphData="_graphData"
-                        GraphOptions="_graphOptions" />
-        </div>
-        <div class="col-sm h-100">
-        </div>
-    </div>
-    <div class="row h-50">
-        <div class="col-sm h-100">
-            <CanvasJsChart @ref="_evolutionChart"
-                           Config="_evolutionConfig"
-                           ContainerId="CanvasJsChart" />
-        </div>
-    </div>
-</div>
 @code{
     private void OnIncrementNodeCount()
     {
