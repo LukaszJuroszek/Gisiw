@@ -7,13 +7,9 @@ namespace Graph.Component.JsInterop
 {
     public class GraphChartJsInterop
     {
-        public static ValueTask<string> CreateGraph(IJSRuntime jsRuntime, string containerId, GraphData data, IGraphOptions options)
+        public async static ValueTask<string> CreateGraphAsync(IJSRuntime jsRuntime, string containerId, IGraphData data, IGraphOptions options)
         {
-            return jsRuntime.InvokeAsync<string>(
-                "graphComponents.createGraph",
-                containerId,
-                data,
-                options);
+            return await jsRuntime.InvokeAsync<string>("graphComponents.createGraph", containerId, data, options);
         }
     }
 }

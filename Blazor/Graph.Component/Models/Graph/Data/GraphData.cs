@@ -2,7 +2,13 @@
 
 namespace Graph.Component.Models.Graph.Data
 {
-    public class GraphData
+    public interface IGraphData
+    {
+        IEnumerable<GraphEdges> Edges { get; set; }
+        IEnumerable<GraphNodes> Nodes { get; set; }
+    }
+
+    public class GraphData : IGraphData
     {
         public IEnumerable<GraphNodes> Nodes { get; set; }
         public IEnumerable<GraphEdges> Edges { get; set; }

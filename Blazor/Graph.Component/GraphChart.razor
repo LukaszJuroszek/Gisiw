@@ -5,12 +5,8 @@
 @code {
     [Parameter] public string ContainerId { get; set; }
 
-    [Parameter] public GraphData GraphData { get; set; }
-
-    [Parameter] public IGraphOptions GraphOptions { get; set; }
-
-    public async void Render()
+    public async void RenderAsync(IGraphData data, IGraphOptions options)
     {
-        await GraphChartJsInterop.CreateGraph(jsRuntime: JSRuntime, containerId: ContainerId, data: GraphData, options: GraphOptions);
+        await GraphChartJsInterop.CreateGraphAsync(jsRuntime: JSRuntime, containerId: ContainerId, data: data, options: options);
     }
 }

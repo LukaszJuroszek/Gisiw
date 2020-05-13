@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Graph.Core.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Graph

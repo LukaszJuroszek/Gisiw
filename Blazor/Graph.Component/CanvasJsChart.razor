@@ -5,10 +5,8 @@
 @code {
     [Parameter] public string ContainerId { get; set; }
 
-    [Parameter] public ICanvasJsConfig Config { get; set; }
-
-    public async void Render()
+    public async void RenderAsync(ICanvasJsConfig config)
     {
-        await CanvasJsChartJsInterop.CreateChart(jsRuntime: JSRuntime, containerId: ContainerId, config: Config);
+        await CanvasJsChartJsInterop.CreateChartAsync(jsRuntime: JSRuntime, containerId: ContainerId, config: config);
     }
 }

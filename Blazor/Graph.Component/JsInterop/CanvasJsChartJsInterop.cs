@@ -6,12 +6,9 @@ namespace Graph.Component.JsInterop
 {
     public class CanvasJsChartJsInterop
     {
-        public static ValueTask<string> CreateChart(IJSRuntime jsRuntime, string containerId, ICanvasJsConfig config)
+        public async static ValueTask<string> CreateChartAsync(IJSRuntime jsRuntime, string containerId, ICanvasJsConfig config)
         {
-            return jsRuntime.InvokeAsync<string>(
-                "graphComponents.createCanvasJsChart",
-                containerId, 
-                config);
+            return await jsRuntime.InvokeAsync<string>("graphComponents.createCanvasJsChart", containerId, config);
         }
     }
 }

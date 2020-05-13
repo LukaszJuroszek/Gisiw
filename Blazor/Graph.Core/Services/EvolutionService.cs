@@ -12,6 +12,7 @@ namespace Graph.Core.Services
         IChromosome[] GetBestChromosomes(ChromosomePart chromosomePart, IPopulation population, int numberOfTournamentRounds);
         IChromosome[] MutateChromosomeByNodeFlipping(IChromosome[] chromosomesByEdgeCount, IChromosome[] chromosomesByConnectedEdge, IMatrix matrix, int maxDiffBetweenNode);
         IEvolutionIterationResult RunIteration(IPopulationResult population, IMatrix matrix, int maxDiffBetweenNode);
+        IEvolutionIterationResult[] RunIterations(int iterations, int maxDiffBetweenNode, IPopulationResult population, IMatrix matrix);
     }
 
     public class EvolutionService : IEvolutionService
@@ -23,6 +24,20 @@ namespace Graph.Core.Services
         {
             _profiler = MiniProfiler.StartNew(nameof(EvolutionService));
             _chromosomeService = chromosomeService;
+        }
+
+        public IEvolutionIterationResult[] RunIterations(int iterations, int maxDiffBetweenNode, IPopulationResult population, IMatrix matrix)
+        {
+            var result = new IEvolutionIterationResult[iterations];
+
+            result[0] = RunIteration(population, matrix, maxDiffBetweenNode);
+
+            for (var i = 1; i < iterations; i++)
+            {
+                result[i] = RunIteration(result[i - 1], matrix, maxDiffBetweenNode); ;
+            }
+
+            return result;
         }
 
         public IEvolutionIterationResult RunIteration(IPopulationResult populationResult, IMatrix matrix, int maxDiffBetweenNode)
@@ -41,8 +56,7 @@ namespace Graph.Core.Services
             var mutatedChromosomes = MutateChromosomeByNodeFlipping(bestChromosomesByEdgeCount, bestChromosomesByConnectedEdge, matrix, maxDiffBetweenNode);
 
             var members = mutatedChromosomes.OrderBy(x => new Random().Next()).ToArray();
-            //_profiler.Stop();
-            //Console.WriteLine(_profiler.RenderPlainText());
+
             return new EvolutionIterationResult(new Population(members), populationResult.Iteration + 1);
         }
 
