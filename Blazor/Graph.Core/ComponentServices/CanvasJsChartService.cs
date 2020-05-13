@@ -16,7 +16,7 @@ namespace Graph.Core.Services
         IEnumerable<ICanvasJsData> GetEvolutionChartData(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints,
             List<ICanvasJSDataPoint> bestChromosomeDataPoints);
         IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult);
-        ICanvasJSDataPoint MapChromosomeToDataPoint(IChromosome chromosome, int iteration);
+        ICanvasJSDataPoint MapToDataPoint(int bestFactorSum, int iteration);
     }
 
     public class CanvasJsChartService : ICanvasJsChartService
@@ -95,9 +95,9 @@ namespace Graph.Core.Services
             };
         }
 
-        public ICanvasJSDataPoint MapChromosomeToDataPoint(IChromosome chromosome, int iteration)
+        public ICanvasJSDataPoint MapToDataPoint(int bestFactorSum, int iteration)
         {
-            return new CanvasJSDataPoint { X = iteration, Y = chromosome.FactorsSum };
+            return new CanvasJSDataPoint { X = iteration, Y = bestFactorSum };
         }
 
         public IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> AddToDataPoints(

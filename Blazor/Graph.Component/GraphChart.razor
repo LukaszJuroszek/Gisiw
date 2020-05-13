@@ -7,7 +7,7 @@
 
     [Parameter] public GraphData GraphData { get; set; }
 
-    [Parameter] public GraphOptions GraphOptions { get; set; }
+    [Parameter] public IGraphOptions GraphOptions { get; set; }
 
     public async void Render()
     {

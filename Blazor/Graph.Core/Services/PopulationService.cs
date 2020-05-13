@@ -3,7 +3,6 @@ using Graph.Core.Utils;
 using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Graph.Core.Services
 {
@@ -11,7 +10,6 @@ namespace Graph.Core.Services
     {
         IInitializedPopulationResult Initialize(IMatrix matrix, int populationSize, int maxDiffBetweenNode);
         IChromosome GenerateChromosome(IMatrix matrix, int maxDiffBetweenNode);
-        IChromosome GetBestChromosome(IPopulation population);
     }
     public class PopulationService : IPopulationService
     {
@@ -69,11 +67,6 @@ namespace Graph.Core.Services
                 Distribution = distribution,
                 Factors = _chromosomeService.GetChromosomeFactors(distribution, matrix)
             };
-        }
-
-        public IChromosome GetBestChromosome(IPopulation population)
-        {
-            return population.Members.Aggregate((current, next) => current.FactorsSum > next.FactorsSum ? current : next);
         }
     }
 }

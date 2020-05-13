@@ -10,7 +10,7 @@ namespace Graph.Component.JsInterop
         {
             return jsRuntime.InvokeAsync<string>(
                 "graphComponents.createCanvasJsChart",
-                containerId,
+                containerId, 
                 config);
         }
     }

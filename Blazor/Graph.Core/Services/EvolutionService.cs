@@ -12,7 +12,6 @@ namespace Graph.Core.Services
         IChromosome[] GetBestChromosomes(ChromosomePart chromosomePart, IPopulation population, int numberOfTournamentRounds);
         IChromosome[] MutateChromosomeByNodeFlipping(IChromosome[] chromosomesByEdgeCount, IChromosome[] chromosomesByConnectedEdge, IMatrix matrix, int maxDiffBetweenNode);
         IEvolutionIterationResult RunIteration(IPopulationResult population, IMatrix matrix, int maxDiffBetweenNode);
-        IChromosome GetCurrentBestChromosomeFromPopulation(IPopulationResult population, IChromosome toCompare = null);
     }
 
     public class EvolutionService : IEvolutionService
@@ -111,17 +110,6 @@ namespace Graph.Core.Services
         private IChromosome GetBestChromosomeBy(IChromosome leftChromosome, IChromosome rigthChromosome, ChromosomeFactor keyComparer)
         {
             return leftChromosome.Factors[keyComparer] > rigthChromosome.Factors[keyComparer] ? leftChromosome : rigthChromosome;
-        }
-
-        public IChromosome GetCurrentBestChromosomeFromPopulation(IPopulationResult populationResult, IChromosome toCompare = null)
-        {
-            if (toCompare != null)
-            {
-                var bestFromPopulation = populationResult.Population.Members.OrderByDescending(x => x.FactorsSum).FirstOrDefault();
-                return bestFromPopulation.FactorsSum < toCompare.FactorsSum ? bestFromPopulation : toCompare;
-            }
-
-            return populationResult.Population.Members.OrderByDescending(x => x.FactorsSum).FirstOrDefault();
         }
     }
 }
