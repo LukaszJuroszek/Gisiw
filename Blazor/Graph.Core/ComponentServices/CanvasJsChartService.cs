@@ -12,11 +12,20 @@ namespace Graph.Core.Services
     {
         IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> AddToDataPoints(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints,
             IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> toAdd);
+
         ICanvasJsConfig GetBasicOptionsForEvolutionChart();
+        ICanvasJsConfig GetBasicOptionsForParetoChart();
+
         IEnumerable<ICanvasJsData> GetEvolutionChartData(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints,
             List<ICanvasJSDataPoint> bestChromosomeDataPoints);
+
+        IEnumerable<ICanvasJsData> GetParetoChartData(List<ICanvasJSDataPoint> paretochartDataPoints);
+
         IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult);
-        ICanvasJSDataPoint MapToDataPoint(int bestFactorSum, int iteration);
+
+        ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null);
+
+        ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome);
     }
 
     public class CanvasJsChartService : ICanvasJsChartService
@@ -26,6 +35,100 @@ namespace Graph.Core.Services
         public CanvasJsChartService()
         {
             _profiler = MiniProfiler.StartNew(nameof(CanvasJsChartService));
+        }
+
+        public IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult)
+        {
+            return new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>()
+            {
+                [ChromosomeFactor.EdgeCount] = new List<ICanvasJSDataPoint>
+                {
+                    MapToCanvasJsDataPoint(populationResult, ChromosomeFactor.EdgeCount)
+                },
+                [ChromosomeFactor.ConnectedEdgeWeigthSum] = new List<ICanvasJSDataPoint>
+                {
+                    MapToCanvasJsDataPoint(populationResult, ChromosomeFactor.ConnectedEdgeWeigthSum)
+                },
+            };
+        }
+
+        public ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null)
+        {
+            return new CanvasJSDataPoint { X = x, Y = y, Color = color };
+        }
+
+        public IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> AddToDataPoints(
+            IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints,
+            IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> toAdd)
+        {
+            foreach (var key in toAdd.Keys)
+            {
+                if (dataPoints.TryGetValue(key, out var value))
+                {
+                    dataPoints[key].AddRange(toAdd[key]);
+                }
+                else
+                {
+                    dataPoints.Add(key, toAdd[key]);
+                }
+            }
+            return dataPoints;
+        }
+
+        public IEnumerable<ICanvasJsData> GetEvolutionChartData(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints, List<ICanvasJSDataPoint> bestChromosomeDataPoints)
+        {
+            var bestChromosome = new CanvasJsData
+            {
+                Type = "line",
+                ShowInLegend = true,
+                Name = "Best Chromosome",
+                DataPoints = bestChromosomeDataPoints
+            };
+
+            var edgeCount = new CanvasJsData
+            {
+                Type = "line",
+                ShowInLegend = true,
+                Name = "Edge Count",
+                AxisYIndex = 0,
+                AxisYType = "secondary",
+                DataPoints = dataPoints[ChromosomeFactor.EdgeCount]
+            };
+
+            var connectedEdge = new CanvasJsData
+            {
+                Type = "line",
+                AxisYIndex = 1,
+                AxisYType = "secondary",
+                ShowInLegend = true,
+                Name = "Connected Edge",
+                DataPoints = dataPoints[ChromosomeFactor.ConnectedEdgeWeigthSum]
+            };
+
+            return new ICanvasJsData[3]
+            {
+               bestChromosome,
+               edgeCount,
+               connectedEdge
+            };
+        }
+
+        private ICanvasJSDataPoint MapToCanvasJsDataPoint(IPopulationResult populationResult, ChromosomeFactor factor)
+        {
+            return new CanvasJSDataPoint
+            {
+                X = populationResult.Iteration,
+                Y = populationResult.Population.Members.Sum(x => x.Factors.Where(y => y.Key == factor).Sum(z => z.Value))
+            };
+        }
+
+        public ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome)
+        {
+            return new CanvasJSDataPoint
+            {
+                Y = chromosome.Factors.Where(y => y.Key == ChromosomeFactor.EdgeCount).Sum(z => z.Value),
+                X = chromosome.Factors.Where(y => y.Key == ChromosomeFactor.ConnectedEdgeWeigthSum).Sum(z => z.Value)
+            };
         }
 
         public ICanvasJsConfig GetBasicOptionsForEvolutionChart()
@@ -76,92 +179,44 @@ namespace Graph.Core.Services
             };
         }
 
-        public IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult)
+        public ICanvasJsConfig GetBasicOptionsForParetoChart()
         {
-            return new Dictionary<ChromosomeFactor, List<ICanvasJSDataPoint>>()
+            return new CanvasJsConfig
             {
-                [ChromosomeFactor.EdgeCount] = new List<ICanvasJSDataPoint>
-                {
-                    MapToCanvasJsDataPoint(populationResult, ChromosomeFactor.EdgeCount)
-                },
-                [ChromosomeFactor.ConnectedEdgeWeigthSum] = new List<ICanvasJSDataPoint>
-                {
-                    MapToCanvasJsDataPoint(populationResult, ChromosomeFactor.ConnectedEdgeWeigthSum)
-                },
-                [ChromosomeFactor.ConnectedEdgeWeigthSum | ChromosomeFactor.EdgeCount] = new List<ICanvasJSDataPoint>
-                {
-                    MapToCanvasJsDataPoint(populationResult, ChromosomeFactor.ConnectedEdgeWeigthSum | ChromosomeFactor.EdgeCount)
-                },
+                AnimationEnabled = true,
+                ExportEnabled = true,
+                ZoomEnabled = true,
+                Theme = "ligth2",
+                AxisX = new IAxisOptions[]
+                 {
+                    new AxisOptions
+                    {
+                        IncludeZero = true,
+                        GridColor = "black",
+                        GridThickness = 1,
+                    },
+                 },
+                AxisY = new IAxisOptions[]
+                 {
+                    new AxisOptions
+                    {
+                        IncludeZero = false,
+                        GridColor = "black",
+                        GridThickness = 1,
+                    },
+                 },
             };
         }
 
-        public ICanvasJSDataPoint MapToDataPoint(int bestFactorSum, int iteration)
+        public IEnumerable<ICanvasJsData> GetParetoChartData(List<ICanvasJSDataPoint> paretochartDataPoints)
         {
-            return new CanvasJSDataPoint { X = iteration, Y = bestFactorSum };
-        }
-
-        public IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> AddToDataPoints(
-            IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints,
-            IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> toAdd)
-        {
-            foreach (var key in toAdd.Keys)
+            return new ICanvasJsData[1]
             {
-                if (dataPoints.TryGetValue(key, out var value))
+                new CanvasJsData
                 {
-                    dataPoints[key].AddRange(toAdd[key]);
+                    Type = "scatter",
+                    DataPoints = paretochartDataPoints
                 }
-                else
-                {
-                    dataPoints.Add(key, toAdd[key]);
-                }
-            }
-            return dataPoints;
-        }
-
-        public IEnumerable<ICanvasJsData> GetEvolutionChartData(IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> dataPoints, List<ICanvasJSDataPoint> bestChromosomeDataPoints )
-        {
-            var bestChromosome = new CanvasJsData
-            {
-                Type = "line",
-                ShowInLegend = true,
-                Name = "Best Chromosome",
-                DataPoints = bestChromosomeDataPoints
-            };
-
-            var edgeCount = new CanvasJsData
-            {
-                Type = "line",
-                ShowInLegend = true,
-                Name = "Edge Count",
-                AxisYIndex = 0,
-                AxisYType = "secondary",
-                DataPoints = dataPoints[ChromosomeFactor.EdgeCount]
-            };
-
-            var connectedEdge = new CanvasJsData
-            {
-                Type = "line",
-                AxisYIndex = 1,
-                AxisYType = "secondary",
-                ShowInLegend = true,
-                Name = "Connected Edge",
-                DataPoints = dataPoints[ChromosomeFactor.ConnectedEdgeWeigthSum]
-            };
-
-            return new ICanvasJsData[3]
-            {
-               bestChromosome,
-               edgeCount,
-               connectedEdge
-            };
-        }
-
-        private ICanvasJSDataPoint MapToCanvasJsDataPoint(IPopulationResult populationResult, ChromosomeFactor factor)
-        {
-            return new CanvasJSDataPoint
-            {
-                X = populationResult.Iteration,
-                Y = populationResult.Population.Members.Sum(x => x.Factors.Where(y => y.Key == factor).Sum(z => z.Value))
             };
         }
     }

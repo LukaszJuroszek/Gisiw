@@ -24,7 +24,7 @@ namespace Graph.Core.Models
     {
         public IPopulation Population { get; }
         public int Iteration { get; }
-        public IChromosome BestChromosome => Population.Members.OrderByDescending(x => x.FactorsSum).FirstOrDefault();
+        public IChromosome BestChromosome => Population.Members.OrderBy(x => x.FactorsSum).FirstOrDefault();
 
         public EvolutionIterationResult(IPopulation population, int iteration)
         {
@@ -37,7 +37,7 @@ namespace Graph.Core.Models
     {
         public IPopulation Population { get; }
         public int Iteration => 0;
-        public IChromosome BestChromosome => Population.Members.OrderByDescending(x => x.FactorsSum).FirstOrDefault();
+        public IChromosome BestChromosome => Population.Members.OrderBy(x => x.FactorsSum).FirstOrDefault();
 
         public InitializedPopulationResult(IPopulation population)
         {

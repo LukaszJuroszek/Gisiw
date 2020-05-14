@@ -34,7 +34,7 @@ namespace Graph.Core.Services
 
             for (var i = 1; i < iterations; i++)
             {
-                result[i] = RunIteration(result[i - 1], matrix, maxDiffBetweenNode); ;
+                result[i] = RunIteration(result[i - 1], matrix, maxDiffBetweenNode);
             }
 
             return result;
@@ -75,8 +75,14 @@ namespace Graph.Core.Services
                 }
             }
             var result = new List<IChromosome>();
-            result.AddRange(chromosomesByEdgeCount);
-            result.AddRange(chromosomesByConnectedEdge);
+            foreach (var chromosome in chromosomesByEdgeCount)
+            {
+                result.Add(chromosome.DeepCopy());
+            }
+            foreach (var chromosome in chromosomesByConnectedEdge)
+            {
+                result.Add(chromosome.DeepCopy());
+            }
 
             return result.ToArray();
         }

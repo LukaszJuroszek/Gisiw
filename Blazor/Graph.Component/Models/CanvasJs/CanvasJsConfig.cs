@@ -22,6 +22,7 @@ namespace Graph.Component.Models.CanvasJs
         public bool AnimationEnabled { get; set; }
         public bool ZoomEnabled { get; set; }
         public bool ExportEnabled { get; set; }
+        public IAxisOptions[] AxisX { get; set; }
         public IAxisOptions[] AxisY { get; set; }
         public IAxisOptions[] AxisY2 { get; set; }
         public ILegendOptions Legend { get; set; }
