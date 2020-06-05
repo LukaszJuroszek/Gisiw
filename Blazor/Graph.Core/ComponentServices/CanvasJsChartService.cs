@@ -25,7 +25,7 @@ namespace Graph.Core.Services
 
         ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null);
 
-        ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome);
+        ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome, string color = null);
     }
 
     public class CanvasJsChartService : ICanvasJsChartService
@@ -122,12 +122,13 @@ namespace Graph.Core.Services
             };
         }
 
-        public ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome)
+        public ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome, string color)
         {
             return new CanvasJSDataPoint
             {
                 Y = chromosome.Factors.Where(y => y.Key == ChromosomeFactor.EdgeCount).Sum(z => z.Value),
-                X = chromosome.Factors.Where(y => y.Key == ChromosomeFactor.ConnectedEdgeWeigthSum).Sum(z => z.Value)
+                X = chromosome.Factors.Where(y => y.Key == ChromosomeFactor.ConnectedEdgeWeigthSum).Sum(z => z.Value),
+                Color = color
             };
         }
 

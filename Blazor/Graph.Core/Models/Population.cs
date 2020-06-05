@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Graph.Core.Models
 {
-    public interface IPopulation
+    public interface IPopulation : IDeepCopy<IPopulation>
     {
         IEnumerable<IChromosome> Members { get; }
         Guid[] GuidMap { get; }
@@ -18,6 +18,18 @@ namespace Graph.Core.Models
         public Population(IEnumerable<IChromosome> members)
         {
             Members = members;
+        }
+
+        public IPopulation DeepCopy()
+        {
+            var list = new List<IChromosome>();
+
+            foreach (var member in Members)
+            {
+                list.Add(member.DeepCopy());
+            }
+
+            return new Population(list);
         }
     }
 }

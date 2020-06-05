@@ -66,51 +66,32 @@ namespace Graph.Core.Services
 
         public IChromosome FlipNodeOnChromosoe(IChromosome chromosome, int maxDiffBetweenNode, IMatrix matrix)
         {
-            var temp = new Chromosome
-            {
-                Distribution = chromosome.Distribution,
-                Factors = chromosome.Factors,
-                Id = chromosome.Id
-            };
-            var random = new Random();
             var maxIteration = 20;
             var currentIteration = 0;
+            IChromosome temp;
             do
             {
-                int left;
-                int rigth;
-                do
-                {
-                    (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(random, 0, chromosome.Distribution.Count());
+                temp = chromosome.DeepCopy();
 
-                } while ((chromosome.Distribution[left] == ChromosomePart.First && chromosome.Distribution[rigth] == ChromosomePart.Second) == false);
+                var (left, rigth) = GetLeftAndRigthUniqueNodeNumbers(temp);
 
-                chromosome.Distribution[left] = ChromosomePart.Second;
-                chromosome.Distribution[rigth] = ChromosomePart.First;
-
-                chromosome.Factors = GetChromosomeFactors(chromosome.Distribution, matrix);
+                temp = FlipNodeAndRecalculateFactors(matrix, temp, left, rigth);
 
                 currentIteration++;
 
-                if (IsNodeCountValid(chromosome.Distribution, maxDiffBetweenNode) == false)
+                if (IsNodeCountValid(temp.Distribution, maxDiffBetweenNode) == true)
                 {
-                    chromosome = temp;
-                }
-                else
-                {
-                    break;
+                    return temp.DeepCopy();
                 }
 
                 if (currentIteration > maxIteration)
                 {
-                    chromosome = temp;
-                    throw new Exception("Max iteration reach after flipping nodes, consider change max Diff Between Nodes");
+                    return chromosome.DeepCopy();
                 }
 
-            } while (IsNodeCountValid(chromosome.Distribution, maxDiffBetweenNode) == false);
+            } while (IsNodeCountValid(temp.Distribution, maxDiffBetweenNode) == false);
 
-            chromosome.Factors = GetChromosomeFactors(chromosome.Distribution, matrix);
-            return chromosome;
+            return chromosome.DeepCopy();
         }
 
         public IChromosome GenerateChromosome(IMatrix matrix, int maxDiffBetweenNode)
@@ -138,6 +119,29 @@ namespace Graph.Core.Services
                 Distribution = distribution,
                 Factors = GetChromosomeFactors(distribution, matrix)
             };
+        }
+
+        private (int left, int rigth) GetLeftAndRigthUniqueNodeNumbers(IChromosome chromosome)
+        {
+            var random = new Random();
+            int left, rigth;
+            do
+            {
+                (left, rigth) = RandomNumberGeneratorUtils.GenerateTwoRandomNumbers(random, 0, chromosome.Distribution.Count());
+
+            } while ((chromosome.Distribution[left] == ChromosomePart.First && chromosome.Distribution[rigth] == ChromosomePart.Second) == false);
+
+            return (left, rigth);
+        }
+
+        private IChromosome FlipNodeAndRecalculateFactors(IMatrix matrix, IChromosome temp, int left, int rigth)
+        {
+            temp.Distribution[left] = ChromosomePart.Second;
+            temp.Distribution[rigth] = ChromosomePart.First;
+
+            temp.Factors = GetChromosomeFactors(temp.Distribution, matrix);
+
+            return temp.DeepCopy();
         }
     }
 }

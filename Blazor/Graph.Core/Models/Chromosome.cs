@@ -4,13 +4,12 @@ using System.Linq;
 
 namespace Graph.Core.Models
 {
-    public interface IChromosome
+    public interface IChromosome : IDeepCopy<IChromosome>
     {
         public Guid Id { get; set; }
         Dictionary<int, ChromosomePart> Distribution { get; set; }
         Dictionary<ChromosomeFactor, int> Factors { get; set; }
         int FactorsSum { get; }
-        IChromosome DeepCopy();
     }
 
     [Flags]
@@ -47,8 +46,8 @@ namespace Graph.Core.Models
         new Chromosome
         {
             Id = Id,
-            Distribution = Distribution,
-            Factors = Factors
+            Distribution = new Dictionary<int, ChromosomePart>(Distribution),
+            Factors = new Dictionary<ChromosomeFactor, int>(Factors)
         };
     }
 }

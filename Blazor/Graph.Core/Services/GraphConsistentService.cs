@@ -19,30 +19,33 @@ namespace Graph.Core.Services
 
         public List<INodeNeighbors> GetNodeNeighbors(int[][] elements)
         {
+            var elementsCopy = (int[][])elements.Clone();
             var result = new List<INodeNeighbors>();
+
             //Copy matrix by diagonal (DFS need two way graph for searching)
-            for (var i = 0; i < elements.Length; i++)
+            for (var i = 0; i < elementsCopy.Length; i++)
             {
-                for (var j = (i + 1); j < elements.Length; j++)
+                for (var j = i + 1; j < elementsCopy.Length; j++)
                 {
-                    elements[j][i] = elements[i][j];
+                    elementsCopy[j][i] = elementsCopy[i][j];
                 }
             }
 
-            for (var i = 0; i < elements.Length; i++)
+            for (var i = 0; i < elementsCopy.Length; i++)
             {
                 var tmp = new List<INodeNeighbor>();
-                for (var j = 0; j < elements[i].Length; j++)
+                for (var j = 0; j < elementsCopy[i].Length; j++)
                 {
-                    if (elements[i][j] >= 1)
+                    if (elementsCopy[i][j] >= 1)
                     {
-                        tmp.Add(new NodeNeighbor { NeighborNumber = j, EdgeValue = elements[i][j] });
+                        tmp.Add(new NodeNeighbor(neighborNumber: j, edgeValue: elementsCopy[i][j]));
                     }
                 }
                 tmp.Sort((a, b) => b.NeighborNumber - a.NeighborNumber);
 
-                result.Add(new NodeNeighbors { Id = i, Neighbors = tmp.ToArray() });
+                result.Add(new NodeNeighbors(id: i, neighbors: tmp.ToArray()));
             }
+
             return result;
         }
 

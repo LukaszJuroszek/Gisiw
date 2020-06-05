@@ -1,6 +1,6 @@
 ﻿namespace Graph.Core.Models
 {
-    public interface IMatrix
+    public interface IMatrix : IDeepCopy<IMatrix>
     {
         int[][] Elements { get; }
     }
@@ -13,5 +13,7 @@
         {
             Elements = elements;
         }
+
+        public IMatrix DeepCopy() => new Matrix((int[][])Elements.Clone());
     }
 }

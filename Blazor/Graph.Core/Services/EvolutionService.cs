@@ -59,7 +59,7 @@ namespace Graph.Core.Services
 
             var mutatedChromosomes = MutateChromosomeByNodeFlipping(bestChromosomesByEdgeCount, bestChromosomesByConnectedEdge, matrix, maxDiffBetweenNode);
 
-            var members = mutatedChromosomes.OrderBy(x => new Random().Next()).ToArray();
+            var members = mutatedChromosomes.OrderBy(x => Guid.NewGuid()).ToArray();
 
             return new EvolutionIterationResult(new Population(members), populationResult.Iteration + 1);
         }
@@ -78,7 +78,9 @@ namespace Graph.Core.Services
                     chromosomesByConnectedEdge[rigth] = _chromosomeService.FlipNodeOnChromosoe(chromosomesByConnectedEdge[rigth], maxDiffBetweenNode, matrix);
                 }
             }
+
             var result = new List<IChromosome>();
+
             foreach (var chromosome in chromosomesByEdgeCount)
             {
                 result.Add(chromosome.DeepCopy());
@@ -106,9 +108,7 @@ namespace Graph.Core.Services
                             var leftChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[left]);
                             var rigthChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[rigth]);
 
-                            IChromosome bestOne = GetBestChromosomeBy(leftChromosome, rigthChromosome, keyComparer: ChromosomeFactor.EdgeCount);
-
-                            result[i] = bestOne;
+                            result[i] = GetBestChromosomeBy(leftChromosome, rigthChromosome, keyComparer: ChromosomeFactor.EdgeCount).DeepCopy();
                         }
                         break;
                     case ChromosomePart.Second:
@@ -118,9 +118,7 @@ namespace Graph.Core.Services
                             var leftChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[left]);
                             var rigthChromosome = population.Members.FirstOrDefault(x => x.Id == population.GuidMap[rigth]);
 
-                            IChromosome bestOne = GetBestChromosomeBy(leftChromosome, rigthChromosome, keyComparer: ChromosomeFactor.ConnectedEdgeWeigthSum);
-
-                            result[i] = bestOne;
+                            result[i] = GetBestChromosomeBy(leftChromosome, rigthChromosome, keyComparer: ChromosomeFactor.ConnectedEdgeWeigthSum).DeepCopy();
                         }
                         break;
                     case ChromosomePart.Unknown:
