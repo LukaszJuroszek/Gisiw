@@ -44,7 +44,8 @@ namespace Graph.Pages
             _paretoConfig = CanvasJsChartService.GetBasicOptionsForParetoChart();
             _matrix = MatrixService.GenerateMatrix(nodeCount: _nodeCount, probability: _edgeProbability);
 
-            var startPopulation = PopulationService.Initialize(_matrix, populationSize: _populationSize, maxDiffBetweenNode: _maxDiffBetweenNode);
+            var startPopulation = PopulationService.Initialize(_matrix, populationSize: _populationSize,
+                maxDiffBetweenNode: _maxDiffBetweenNode);
             _populationHistory = new List<IPopulationResult> { startPopulation };
 
             _graphData = GraphChartService.GraphDataFromMatrix(_matrix);

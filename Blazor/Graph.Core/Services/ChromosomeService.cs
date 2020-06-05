@@ -10,13 +10,16 @@ namespace Graph.Core.Services
     public interface IChromosomeService
     {
         bool IsNodeCountValid(Dictionary<int, ChromosomePart> distribution, int maxDiffBetweenNode);
-        Dictionary<ChromosomeFactor, int> GetChromosomeFactors(Dictionary<int, ChromosomePart> distribution, IMatrix matrix);
+        Dictionary<ChromosomeFactor, int> GetChromosomeFactors(Dictionary<int, ChromosomePart> distribution,
+            IMatrix matrix);
         IChromosome FlipNodeOnChromosoe(IChromosome chromosome, int maxDiffBetweenNode, IMatrix matrix);
+        IChromosome GenerateChromosome(IMatrix matrix, int maxDiffBetweenNode);
     }
 
     public class ChromosomeService : IChromosomeService
     {
         private readonly MiniProfiler _profiler;
+        private double _probability = 0.5d;
 
         public ChromosomeService()
         {
@@ -108,6 +111,33 @@ namespace Graph.Core.Services
 
             chromosome.Factors = GetChromosomeFactors(chromosome.Distribution, matrix);
             return chromosome;
+        }
+
+        public IChromosome GenerateChromosome(IMatrix matrix, int maxDiffBetweenNode)
+        {
+            var tryCount = 0;
+            var distribution = new Dictionary<int, ChromosomePart>();
+            var random = new Random();
+            do
+            {
+                _probability = ProbabilityUtils.AdaptProbability(_probability, tryCount);
+                distribution.Clear();
+
+                for (var i = 0; i < matrix.Elements.Length; i++)
+                {
+                    distribution.Add(i, random.NextDouble() < _probability ? ChromosomePart.First : ChromosomePart.Second);
+                }
+
+                tryCount++;
+
+            } while (IsNodeCountValid(distribution, maxDiffBetweenNode) == false);
+
+            return new Chromosome
+            {
+                Id = Guid.NewGuid(),
+                Distribution = distribution,
+                Factors = GetChromosomeFactors(distribution, matrix)
+            };
         }
     }
 }

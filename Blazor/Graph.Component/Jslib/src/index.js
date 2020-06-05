@@ -11,3 +11,6 @@ export function createCanvasJsChart(continerId, config) {
     var iterationChart = new CanvasJS.Chart(continerId, config);
     iterationChart.render();
 }
+
+
+

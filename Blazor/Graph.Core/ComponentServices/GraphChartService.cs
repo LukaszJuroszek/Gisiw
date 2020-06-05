@@ -107,7 +107,7 @@ namespace Graph.Core.Services
                     Hierarchical = new HierarchicalOption
                     {
                         Enabled = true,
-                        LevelSeparation = 500,
+                        LevelSeparation = 300,
                         BlockShifting = false,
                         ParentCentralization = false,
                         Direction = "DU",

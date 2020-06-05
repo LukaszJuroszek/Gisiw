@@ -1,7 +1,6 @@
 ﻿using Graph.Core.Models;
 using Graph.Core.Utils;
 using StackExchange.Profiling;
-using StackExchange.Profiling.Data;
 using System;
 
 namespace Graph.Core.Services

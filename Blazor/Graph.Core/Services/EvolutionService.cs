@@ -9,10 +9,14 @@ namespace Graph.Core.Services
 {
     public interface IEvolutionService
     {
-        IChromosome[] GetBestChromosomes(ChromosomePart chromosomePart, IPopulation population, int numberOfTournamentRounds);
-        IChromosome[] MutateChromosomeByNodeFlipping(IChromosome[] chromosomesByEdgeCount, IChromosome[] chromosomesByConnectedEdge, IMatrix matrix, int maxDiffBetweenNode);
-        IEvolutionIterationResult RunIteration(IPopulationResult population, IMatrix matrix, int maxDiffBetweenNode);
-        IEvolutionIterationResult[] RunIterations(int iterations, int maxDiffBetweenNode, IPopulationResult population, IMatrix matrix);
+        IChromosome[] GetBestChromosomes(ChromosomePart chromosomePart, IPopulation population,
+            int numberOfTournamentRounds);
+        IChromosome[] MutateChromosomeByNodeFlipping(IChromosome[] chromosomesByEdgeCount,
+            IChromosome[] chromosomesByConnectedEdge, IMatrix matrix, int maxDiffBetweenNode);
+        IEvolutionIterationResult RunIteration(IPopulationResult population, IMatrix matrix
+            , int maxDiffBetweenNode);
+        IEvolutionIterationResult[] RunIterations(int iterations, int maxDiffBetweenNode,
+            IPopulationResult population, IMatrix matrix);
     }
 
     public class EvolutionService : IEvolutionService
