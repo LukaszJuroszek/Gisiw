@@ -21,7 +21,7 @@ namespace Graph.Pages
         private List<ICanvasJSDataPoint> _bestChromosomeChartData;
 
         private IMatrix _matrix;
-        private new Dictionary<int, IPopulationResult> _populationHistory;
+        private Dictionary<int, IPopulationResult> _populationHistory;
 
         private List<ICanvasJSDataPoint> _paretoChartData;
 
