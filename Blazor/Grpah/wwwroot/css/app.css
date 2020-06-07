@@ -1,9 +1,5 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
-html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
 app {
     position: relative;
     display: flex;
@@ -21,14 +17,34 @@ app {
 .validation-message {
     color: red;
 }
+
 html, body, app {
+    height: 100%;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+#evolution {
+    min-height: 40%;
+    max-height: 45%
+}
+
+#graphAndPareto {
+    min-height: 50%;
+    max-height: 50%;
+}
+
+#paretoChartId {
     height: 100%;
 }
 
-.container-fluid {
+#evolutionChartId {
     height: 100%;
-    /*overflow-y: hidden;*/ /* don't show content that exceeds my height */
 }
+
+#graphChartId {
+    height: 100%;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -47,37 +63,3 @@ html, body, app {
         right: 0.75rem;
         top: 0.5rem;
     }
-
-@media (max-width: 767.98px) {
-    .main .top-row:not(.auth) {
-        display: none;
-    }
-
-    .main .top-row.auth {
-        justify-content: space-between;
-    }
-
-    .main .top-row a, .main .top-row .btn-link {
-        margin-left: 0;
-    }
-}
-
-@media (min-width: 768px) {
-    app {
-        flex-direction: row;
-    }
-
-    .main .top-row {
-        position: sticky;
-        top: 0;
-    }
-
-    .main > div {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
-
-    .navbar-toggler {
-        display: none;
-    }
-}
