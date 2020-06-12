@@ -107,14 +107,14 @@ namespace Graph.Core.Services
                     Hierarchical = new HierarchicalOption
                     {
                         Enabled = true,
-                        LevelSeparation = 300,
+                        LevelSeparation = 350,
                         BlockShifting = false,
                         ParentCentralization = false,
                         Direction = "DU",
                         SortMethod = "directed"
                     }
                 },
-                AutoResize = true,
+                AutoResize = false,
                 Height = "100%",
                 Width = "100%",
                 ClickToUse = false,
@@ -159,7 +159,7 @@ namespace Graph.Core.Services
         {
             return new DefaultGraphOptions
             {
-                AutoResize = true,
+                AutoResize = false,
                 Height = "100%",
                 Width = "100%",
                 ClickToUse = false,
@@ -181,9 +181,9 @@ namespace Graph.Core.Services
                     {
                         GravitationalConstant = -50,
                         CentralGravity = 0.01d,
-                        SpringLength = 50,
+                        SpringLength = 30,
                         SpringConstant = 0d,
-                        Damping = 0.4d
+                        Damping = 0.7d
                     },
                     MaxVelocity = 50,
                     MinVelocity = 0.7d,

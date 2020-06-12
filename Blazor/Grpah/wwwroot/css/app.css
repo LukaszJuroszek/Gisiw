@@ -31,6 +31,7 @@ html, body, app {
 #graphAndPareto {
     min-height: 50%;
     max-height: 50%;
+    height: 100%;
 }
 
 #paretoChartId {
