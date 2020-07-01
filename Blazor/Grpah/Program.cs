@@ -24,6 +24,7 @@ namespace Graph
             builder.Services.AddSingleton<IMatrixService, MatrixService>();
             builder.Services.AddSingleton<IPopulationService, PopulationService>();
             builder.Services.AddSingleton<ICanvasJsChartService, CanvasJsChartService>();
+            builder.Services.AddSingleton<IParetoService, ParetoService>();
             
             await builder.Build().RunAsync();
         }

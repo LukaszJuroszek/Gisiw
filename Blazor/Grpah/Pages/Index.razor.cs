@@ -2,9 +2,9 @@
 using Graph.Core.Models;
 using Graph.Core.Services;
 using Microsoft.AspNetCore.Components;
+using StackExchange.Profiling;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,16 +24,23 @@ namespace Graph.Pages
         private Dictionary<int, IPopulationResult> _populationHistory;
 
         private List<ICanvasJSDataPoint> _paretoChartData;
+        private MiniProfiler _profiler;
 
         [Inject] IEvolutionService EvolutionService { get; set; }
         [Inject] IMatrixService MatrixService { get; set; }
         [Inject] IPopulationService PopulationService { get; set; }
         [Inject] ICanvasJsChartService CanvasJsChartService { get; set; }
         [Inject] IGraphChartService GraphChartService { get; set; }
+        [Inject] IParetoService ParetoService { get; set; }
 
         protected async override Task OnInitializedAsync()
         {
-            await StartAsync();
+            _profiler = MiniProfiler.StartNew(nameof(OnInitializedAsync));
+            using (_profiler.Step(nameof(StartAsync)))
+            {
+                await StartAsync();
+            }
+            Console.WriteLine(_profiler.RenderPlainText());
         }
 
         public async Task StartAsync()
@@ -84,58 +91,51 @@ namespace Graph.Pages
 
         public async Task OnIterationAsync(int iterations)
         {
-            var lastPopulationKey = _populationHistory.Max(x => x.Key);
-
-            var newPopulationHistory = EvolutionService.RunIterations(iterations: iterations,
-                                                                      maxDiffBetweenNode: _maxDiffBetweenNode,
-                                                                      population: _populationHistory[lastPopulationKey],
-                                                                      matrix: _matrix);
-
-            var bestChromosomeFromHistory = _populationHistory.Select(x => x.Value.BestChromosome)
-                                                              .OrderBy(x => x.FactorsSum)
-                                                              .FirstOrDefault()
-                                                              .DeepCopy();
-
-            foreach (var populationHistory in newPopulationHistory)
+            using (_profiler.Step(nameof(OnIterationAsync)))
             {
-                _populationHistory.Add(populationHistory.Iteration, populationHistory);
+                var lastPopulationKey = _populationHistory.Max(x => x.Key);
+
+                var newPopulationHistory = EvolutionService.RunIterations(iterations: iterations,
+                                                                          maxDiffBetweenNode: _maxDiffBetweenNode,
+                                                                          population: _populationHistory[lastPopulationKey],
+                                                                          matrix: _matrix);
+
+                var bestChromosomeFromHistory = _populationHistory.Select(x => x.Value.BestChromosome)
+                                                                  .OrderBy(x => x.FactorsSum)
+                                                                  .FirstOrDefault()
+                                                                  .DeepCopy();
+
+                foreach (var populationHistory in newPopulationHistory)
+                {
+                    _populationHistory.Add(populationHistory.Iteration, populationHistory);
+                }
+
+                for (int populationKey = lastPopulationKey + 1; populationKey < _populationHistory.Max(x => x.Key); populationKey++)
+                {
+                    bestChromosomeFromHistory = bestChromosomeFromHistory.FactorsSum < _populationHistory[populationKey].BestChromosome.FactorsSum ?
+                        bestChromosomeFromHistory.DeepCopy() : _populationHistory[populationKey].BestChromosome.DeepCopy();
+
+                    _bestChromosomeChartData.Add(CanvasJsChartService.MapToDataPoint(bestChromosomeFromHistory.FactorsSum, _populationHistory[populationKey].Iteration));
+
+                    var dataPoints = CanvasJsChartService.MapPopulationToDataPoints(_populationHistory[populationKey]);
+                    _evolutionChartData = CanvasJsChartService.AddToDataPoints(_evolutionChartData, dataPoints);
+                }
+
+                _paretoChartData = ParetoService.GetParetoFrontier(_populationHistory).ToList();
+
+                _paretoConfig.Data = CanvasJsChartService.GetParetoChartData(_paretoChartData);
+
+                _evolutionConfig.Data = CanvasJsChartService.GetEvolutionChartData(_evolutionChartData, _bestChromosomeChartData);
+
+                _graphData = GraphChartService.GraphDataFromChromosome(bestChromosomeFromHistory, _matrix);
+                _graphOptions = GraphChartService.GetBestChromosomeGraphOptions();
+
+                await Task.Run(() => { _graphChart.RenderAsync(_graphData, _graphOptions); });
+                await Task.Run(() => { _evolutionChart.RenderAsync(_evolutionConfig); });
+                await Task.Run(() => { _paretoChart.RenderAsync(_paretoConfig); });
             }
-
-            for (int populationKey = lastPopulationKey + 1; populationKey < _populationHistory.Max(x => x.Key); populationKey++)
-            {
-                bestChromosomeFromHistory = bestChromosomeFromHistory.FactorsSum < _populationHistory[populationKey].BestChromosome.FactorsSum ?
-                    bestChromosomeFromHistory.DeepCopy() : _populationHistory[populationKey].BestChromosome.DeepCopy();
-
-                _bestChromosomeChartData.Add(CanvasJsChartService.MapToDataPoint(bestChromosomeFromHistory.FactorsSum, _populationHistory[populationKey].Iteration));
-
-                var dataPoints = CanvasJsChartService.MapPopulationToDataPoints(_populationHistory[populationKey]);
-                _evolutionChartData = CanvasJsChartService.AddToDataPoints(_evolutionChartData, dataPoints);
-
-                var color = GetColor(_populationHistory[populationKey].Iteration);
-
-                _paretoChartData.AddRange(_populationHistory[populationKey].Population.Members.Select(x => CanvasJsChartService.MapToDataPoint(x, color)));
-            }
-
-            _paretoConfig.Data = CanvasJsChartService.GetParetoChartData(_paretoChartData);
-
-            _evolutionConfig.Data = CanvasJsChartService.GetEvolutionChartData(_evolutionChartData, _bestChromosomeChartData);
-
-            _graphData = GraphChartService.GraphDataFromChromosome(bestChromosomeFromHistory, _matrix);
-            _graphOptions = GraphChartService.GetBestChromosomeGraphOptions();
-
-            await Task.Run(() => { _graphChart.RenderAsync(_graphData, _graphOptions); });
-            await Task.Run(() => { _evolutionChart.RenderAsync(_evolutionConfig); });
-            await Task.Run(() => { _paretoChart.RenderAsync(_paretoConfig); });
+            Console.WriteLine(_profiler.RenderPlainText());
             GC.Collect();
-        }
-
-        private string GetColor(int iteration)
-        {
-            var baseColor = iteration < 100 ? 1 : iteration / 100;
-
-            var color = Color.FromArgb(255, baseColor, 255 - iteration / baseColor, 0);
-
-            return $"rgb({color.R},{color.G},{color.B})";
         }
     }
 }

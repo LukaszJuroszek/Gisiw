@@ -23,7 +23,7 @@ namespace Graph.Core.Services
 
         public ChromosomeService()
         {
-            _profiler = MiniProfiler.StartNew(nameof(MiniProfiler));
+            _profiler = MiniProfiler.StartNew(nameof(ChromosomeService));
         }
 
         public bool IsNodeCountValid(Dictionary<int, ChromosomePart> distribution, int maxDiffBetweenNode)

@@ -8,9 +8,9 @@
             Population Size: <input type="number" @bind="_populationSize" min="2" max="100" step="10">
             Max Diff Between Node: <input type="number" @bind="_maxDiffBetweenNode" min="1" max="_nodeCount" step="1">
             <button type="button" class="btn btn-primary btn-sm" @onclick=" async ()=> { await  StartAsync(); }">Generate new Graph</button>
-            <button type="button" class="btn btn-primary btn-sm" @onclick="async ()=> { await  OnIterationAsync(5); }">Run 5 iteration</button>
-            <button type="button" class="btn btn-primary btn-sm" @onclick="async ()=> { await  OnIterationAsync(10); }">Run 10 iteration</button>
-            <button type="button" class="btn btn-primary btn-sm" @onclick="async ()=> { await  OnIterationAsync(50); }">Run 50 iteration</button>
+            <button type="button" class="btn btn-primary btn-sm" @onclick="async ()=> { await  OnIterationAsync(5); }">Run 1 iteration</button>
+            <button type="button" class="btn btn-primary btn-sm" @onclick="async ()=> { await  OnIterationAsync(100); }">Run 100 iteration</button>
+            <button type="button" class="btn btn-primary btn-sm" @onclick="async ()=> { await  OnIterationAsync(500); }">Run 500 iteration</button>
         </div>
     </div>
     <div id="graphAndPareto" class="row">

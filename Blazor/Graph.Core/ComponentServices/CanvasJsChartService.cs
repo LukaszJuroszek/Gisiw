@@ -23,9 +23,9 @@ namespace Graph.Core.Services
 
         IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult);
 
-        ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null);
+        ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null, bool hasCustomMarker = false);
 
-        ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome, string color = null);
+        ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome, string color = null, bool hasCustomMarker = false);
     }
 
     public class CanvasJsChartService : ICanvasJsChartService
@@ -52,9 +52,16 @@ namespace Graph.Core.Services
             };
         }
 
-        public ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null)
+        public ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null, bool hasCustomMarker = false)
         {
-            return new CanvasJSDataPoint { X = x, Y = y, Color = color };
+            return new CanvasJSDataPoint
+            {
+                X = x,
+                Y = y,
+                MarkerType = hasCustomMarker ? "triangle" : "circle",
+                MarkerSize = 10,
+                Color = color,
+            };
         }
 
         public IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> AddToDataPoints(
@@ -118,17 +125,19 @@ namespace Graph.Core.Services
             return new CanvasJSDataPoint
             {
                 X = populationResult.Iteration,
-                Y = populationResult.Population.Members.Sum(x => x.Factors.Where(y => y.Key == factor).Sum(z => z.Value))
+                Y = populationResult.Population.Members.Sum(x => x.Factors.Where(y => y.Key == factor).Sum(z => z.Value)),
             };
         }
 
-        public ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome, string color)
+        public ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome, string color, bool hasCustomMarker = false)
         {
             return new CanvasJSDataPoint
             {
                 Y = chromosome.Factors.Where(y => y.Key == ChromosomeFactor.EdgeCount).Sum(z => z.Value),
                 X = chromosome.Factors.Where(y => y.Key == ChromosomeFactor.ConnectedEdgeWeigthSum).Sum(z => z.Value),
-                Color = color
+                Color = color,
+                MarkerType = hasCustomMarker ? "triangle" : "circle",
+                MarkerSize = 10
             };
         }
 
