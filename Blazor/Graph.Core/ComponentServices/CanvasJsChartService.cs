@@ -5,6 +5,7 @@ using Graph.Core.Models;
 using StackExchange.Profiling;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Graph.Core.Services
 {
@@ -23,9 +24,9 @@ namespace Graph.Core.Services
 
         IDictionary<ChromosomeFactor, List<ICanvasJSDataPoint>> MapPopulationToDataPoints(IPopulationResult populationResult);
 
-        ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null, bool hasCustomMarker = false);
+        ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null);
 
-        ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome, string color = null, bool hasCustomMarker = false);
+        ICanvasJSDataPoint MapToDataPoint(ColoredData coloredData, int size = 15);
     }
 
     public class CanvasJsChartService : ICanvasJsChartService
@@ -52,15 +53,12 @@ namespace Graph.Core.Services
             };
         }
 
-        public ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null, bool hasCustomMarker = false)
+        public ICanvasJSDataPoint MapToDataPoint(int y, int x, string color = null)
         {
             return new CanvasJSDataPoint
             {
                 X = x,
                 Y = y,
-                MarkerType = hasCustomMarker ? "triangle" : "circle",
-                MarkerSize = 10,
-                Color = color,
             };
         }
 
@@ -129,15 +127,15 @@ namespace Graph.Core.Services
             };
         }
 
-        public ICanvasJSDataPoint MapToDataPoint(IChromosome chromosome, string color, bool hasCustomMarker = false)
+        public ICanvasJSDataPoint MapToDataPoint(ColoredData coloredData, int size = 15)
         {
             return new CanvasJSDataPoint
             {
-                Y = chromosome.Factors.Where(y => y.Key == ChromosomeFactor.EdgeCount).Sum(z => z.Value),
-                X = chromosome.Factors.Where(y => y.Key == ChromosomeFactor.ConnectedEdgeWeigthSum).Sum(z => z.Value),
-                Color = color,
-                MarkerType = hasCustomMarker ? "triangle" : "circle",
-                MarkerSize = 10
+                Y = coloredData.Y,
+                X = coloredData.X,
+                Color = coloredData.Color,
+                MarkerType = coloredData.IsInParetoFront ? "circle" : "triangle",
+                MarkerSize = 15
             };
         }
 

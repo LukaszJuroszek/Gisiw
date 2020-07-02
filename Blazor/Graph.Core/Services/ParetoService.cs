@@ -14,7 +14,7 @@ namespace Graph.Core.Services
         IEnumerable<ICanvasJSDataPoint> GetParetoFrontier(Dictionary<int, IPopulationResult> populationHistory);
     }
 
-    internal class ColoredData
+    public class ColoredData
     {
         public Guid Id { get; set; }
         public int X { get; set; }
@@ -51,31 +51,36 @@ namespace Graph.Core.Services
                 }));
             }
 
-            coloredData = coloredData.GroupBy(x => new { x.Y, x.X, }, x => x)
-                                     .Select(x => x.OrderByDescending(y => y.Iteration).FirstOrDefault()).ToList();
+            var groupedColoredData = coloredData.GroupBy(x => new { x.Y, x.X, }, x => x)
+                                             .Select(x => new
+                                             {
+                                                 ColoredData = x.OrderByDescending(y => y.Iteration).FirstOrDefault(),
+                                                 Count = x.Count() < 10 ? 10 : x.Count()
+                                             }).ToList();
 
-            foreach (var data in coloredData)
+            foreach (var data in groupedColoredData)
             {
-                var s = coloredData.Any(p => data.X > p.X);
-                var z = coloredData.Any(p => data.Y > p.Y);
+                var s = coloredData.Any(p => data.ColoredData.X > p.X);
+                var z = coloredData.Any(p => data.ColoredData.Y > p.Y);
                 if (s && z)
                 {
-                    data.IsInParetoFront = true;
+                    data.ColoredData.IsInParetoFront = true;
                 }
                 else
                 {
-                    data.IsInParetoFront = false;
+                    data.ColoredData.IsInParetoFront = false;
                 }
+                Console.WriteLine(data.Count);
             }
+            return groupedColoredData.Select(x => _canvasJsChartService.MapToDataPoint(x.ColoredData, x.Count));
 
-            return coloredData.Select(x => _canvasJsChartService.MapToDataPoint(x.X, x.Y, x.Color, x.IsInParetoFront));
         }
 
         private string GetColor(int iteration)
         {
             var baseColor = iteration < 100 ? 1 : iteration / 100;
 
-            var color = Color.FromArgb(255, baseColor, 255 - iteration / baseColor, 0);
+            var color = Color.FromArgb(255, baseColor, 255 - iteration / baseColor, 125);
 
             return $"rgb({color.R},{color.G},{color.B})";
         }

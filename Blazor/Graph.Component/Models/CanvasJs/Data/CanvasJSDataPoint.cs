@@ -6,7 +6,7 @@
         int X { get; set; }
         int Y { get; set; }
         string MarkerType { get; set; }
-        int MarkerSize { get; set; }
+        int? MarkerSize { get; set; }
     }
 
     public class CanvasJSDataPoint : ICanvasJSDataPoint
@@ -15,6 +15,6 @@
         public int Y { get; set; }
         public string Color { get; set; }
         public string MarkerType { get; set; }
-        public int MarkerSize { get; set; }
+        public int? MarkerSize { get; set; }
     }
 }
