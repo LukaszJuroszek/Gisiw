@@ -12,7 +12,7 @@
   "dependencies": {
     "vis": "^4.21.0-EOL",
     "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.12"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
